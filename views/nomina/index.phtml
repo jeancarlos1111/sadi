@@ -1,0 +1,56 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($_GET['success'])): ?>
+    <div style="background-color: #d4edda; color: #155724; padding: 15px; border: 1px solid #c3e6cb; margin-bottom: 20px; border-radius: 4px;">
+        <strong>¡Éxito!</strong> <?= htmlspecialchars($_GET['success']) ?>
+    </div>
+<?php endif; ?>
+
+<?php if (isset($error)): ?>
+    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
+        <?= htmlspecialchars($error) ?>
+    </div>
+<?php endif; ?>
+
+<div style="margin-bottom: 20px; text-align: right;">
+    <a href="?route=nomina/emitir" style="background-color: #007bff; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+        + Procesar Nueva Nómina en Lote
+    </a>
+</div>
+
+<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+    <thead style="background-color: #0056b3; color: white;">
+        <tr>
+            <th>Nº Planilla</th>
+            <th>Tipo de Nómina</th>
+            <th>Período Pago</th>
+            <th>Fecha Emisión</th>
+            <th>Total Asignaciones</th>
+            <th>Total Deducciones</th>
+            <th>Neto Total a Pagar</th>
+            <th>Estado Tesorería</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (empty($planillas)): ?>
+            <tr>
+                <td colspan="8" style="text-align: center;">No hay históricos de planillas procesadas.</td>
+            </tr>
+        <?php else: ?>
+            <?php foreach ($planillas as $p): ?>
+                <tr>
+                    <td><?= htmlspecialchars((string)$p['id_planilla']) ?></td>
+                    <td><?= htmlspecialchars($p['nombre_nomina']) ?></td>
+                    <td><strong><?= htmlspecialchars($p['periodo']) ?></strong></td>
+                    <td><?= htmlspecialchars($p['fecha_emision']) ?></td>
+                    <td style="text-align: right; color: green;">Bs <?= number_format((float)$p['monto_total_asignaciones'], 2, ',', '.') ?></td>
+                    <td style="text-align: right; color: red;">Bs <?= number_format((float)$p['monto_total_deducciones'], 2, ',', '.') ?></td>
+                    <td style="text-align: right; font-weight: bold;">Bs <?= number_format((float)$p['monto_total_neto'], 2, ',', '.') ?></td>
+                    <td style="font-weight: bold; color: <?= $p['contabilizada'] ? 'green' : 'orange' ?>;">
+                        <?= $p['contabilizada'] ? '✔ Pagada' : 'Pendiente' ?>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </tbody>
+</table>

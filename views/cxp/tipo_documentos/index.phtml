@@ -1,0 +1,42 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($_GET['success'])): ?>
+    <div style="color:green; padding:10px; border:1px solid green; margin-bottom:15px; border-radius:4px; background:#f0fff0;">
+        ✔ <?= htmlspecialchars($_GET['success']) ?>
+    </div>
+<?php endif; ?>
+
+<div style="margin-bottom:20px; display:flex; justify-content:flex-end;">
+    <a href="?route=tipo_documentos/form" style="background-color:#28a745; color:white; padding:10px 15px; text-decoration:none; border-radius:4px;">+ Nuevo Tipo</a>
+</div>
+
+<table border="1" cellpadding="8" cellspacing="0" style="width:100%; border-collapse:collapse;">
+    <thead style="background-color:#0056b3; color:white;">
+        <tr>
+            <th>ID</th>
+            <th>Denominación</th>
+            <th>Siglas</th>
+            <th>Afecta Presupuesto</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (empty($items)): ?>
+            <tr><td colspan="5" style="text-align:center;">No hay tipos de documento.</td></tr>
+        <?php else: foreach ($items as $item): ?>
+            <tr>
+                <td><?= $item->id ?></td>
+                <td><?= htmlspecialchars($item->denominacion) ?></td>
+                <td><?= htmlspecialchars($item->siglas ?? '') ?></td>
+                <td><?= $item->afectaPresupuesto ? '✔ Sí' : 'No' ?></td>
+                <td>
+                    <a href="?route=tipo_documentos/form&id=<?= $item->id ?>" style="margin-right:8px;">Editar</a>
+                    <form method="POST" action="?route=tipo_documentos/eliminar" onsubmit="return confirm('¿Eliminar?');" style="display:inline;">
+                        <input type="hidden" name="id" value="<?= $item->id ?>">
+                        <button type="submit" style="color:red; border:none; background:none; cursor:pointer;">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+        <?php endforeach; endif; ?>
+    </tbody>
+</table>

@@ -1,0 +1,50 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($_GET['success'])): ?>
+    <div style="color:green; padding:10px; border:1px solid green; margin-bottom:15px; border-radius:4px; background:#f0fff0;">
+        ✔ <?= htmlspecialchars($_GET['success']) ?>
+    </div>
+<?php endif; ?>
+
+<?php if (isset($error)): ?><div style="color:red; padding:10px; border:1px solid red; margin-bottom:15px;"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+
+<div style="margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
+    <form method="GET" action="" style="margin:0; display:flex; gap:8px; align-items:center;">
+        <input type="hidden" name="route" value="requisiciones_servicios/index">
+        <input type="text" name="search" placeholder="Buscar..." value="<?= htmlspecialchars($search) ?>" style="padding:5px; width:220px;">
+        <select name="mes" style="padding:5px;">
+            <option value="">Todos los Meses</option>
+            <?php for($i=1; $i<=12; $i++): $m = str_pad((string)$i, 2, '0', STR_PAD_LEFT); ?>
+                <option value="<?= $m ?>" <?= ($mes === $m) ? 'selected' : '' ?>>Mes <?= $m ?></option>
+            <?php endfor; ?>
+        </select>
+        <button type="submit" style="padding:5px 10px;">Buscar</button>
+        <a href="?route=requisiciones_servicios/index">Limpiar</a>
+    </form>
+    <a href="?route=requisiciones_servicios/form" style="background-color:#28a745; color:white; padding:10px 15px; text-decoration:none; border-radius:4px;">+ Nueva Requisición</a>
+</div>
+
+<table border="1" cellpadding="8" cellspacing="0" style="width:100%; border-collapse:collapse;">
+    <thead style="background-color:#0056b3; color:white;">
+        <tr><th>Nro.</th><th>Fecha</th><th>Concepto</th><th>Acciones</th></tr>
+    </thead>
+    <tbody>
+        <?php if (empty($requisiciones)): ?>
+            <tr><td colspan="4" style="text-align:center;">No hay requisiciones de servicios.</td></tr>
+        <?php else: foreach ($requisiciones as $rs): ?>
+            <tr>
+                <td><?= $rs['id_requisicion_servicios'] ?></td>
+                <td><?= htmlspecialchars($rs['fecha_rs']) ?></td>
+                <td><?= htmlspecialchars($rs['concepto_rs']) ?></td>
+                <td>
+                    <a href="?route=documental/requisicionServicios&id=<?= $rs['id_requisicion_servicios'] ?>" target="_blank" style="margin-right:8px; color:#198754; font-weight:bold;">[ PDF ]</a>
+                    <a href="?route=requisiciones_servicios/form&id=<?= $rs['id_requisicion_servicios'] ?>" style="margin-right:8px;">Editar</a>
+                    <form method="POST" action="?route=requisiciones_servicios/eliminar" onsubmit="return confirm('¿Eliminar?');" style="display:inline;">
+                        <input type="hidden" name="id" value="<?= $rs['id_requisicion_servicios'] ?>">
+                        <button type="submit" style="color:red; border:none; background:none; cursor:pointer;">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+        <?php endforeach; endif; ?>
+    </tbody>
+</table>

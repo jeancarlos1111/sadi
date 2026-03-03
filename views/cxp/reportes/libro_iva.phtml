@@ -1,0 +1,101 @@
+<div style="margin-bottom: 20px;">
+    <h2><?= htmlspecialchars($titulo) ?></h2>
+    <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e1e4e8;">
+        <form method="GET" action="" style="display: flex; gap: 15px; align-items: flex-end;">
+            <input type="hidden" name="route" value="reportes_cxp/libroIva">
+            <div>
+                <label style="display: block; font-weight: bold; margin-bottom: 5px;">Mes:</label>
+                <select name="mes" class="form-control" style="padding: 8px;">
+                    <?php for($m=1; $m<=12; $m++): $mm = str_pad($m, 2, '0', STR_PAD_LEFT); ?>
+                        <option value="<?= $mm ?>" <?= ($mes == $mm) ? 'selected' : '' ?>><?= date('F', mktime(0, 0, 0, $m, 1)) ?></option>
+                    <?php endfor; ?>
+                </select>
+            </div>
+            <div>
+                <label style="display: block; font-weight: bold; margin-bottom: 5px;">Año:</label>
+                <input type="number" name="anio" value="<?= $anio ?>" style="padding: 8px; width: 100px;">
+            </div>
+            <button type="submit" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
+                Consultar Libro
+            </button>
+            <a href="?route=reportes_cxp/libroIva&mes=<?= $mes ?>&anio=<?= $anio ?>&pdf=1" target="_blank" style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 4px; text-decoration: none; font-size: 0.9em;">
+                Ver PDF
+            </a>
+        </form>
+    </div>
+</div>
+
+<?php if (isset($error)): ?>
+    <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 4px; margin-bottom: 20px; border: 1px solid #f5c6cb;">
+        <?= htmlspecialchars($error) ?>
+    </div>
+<?php endif; ?>
+
+<div style="overflow-x: auto;">
+    <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse; background: white; font-size: 0.85em;">
+        <thead style="background-color: #343a40; color: white;">
+            <tr>
+                <th>Fecha</th>
+                <th>RIF</th>
+                <th>Nombre o Razón Social</th>
+                <th>Nro Factura</th>
+                <th>Nro Control</th>
+                <th>Total Compras (Bs)</th>
+                <th>Base Imponible</th>
+                <th>Monto IVA</th>
+                <th>Nro Comprobante</th>
+                <th>IVA Retenido</th>
+                <th>% Ret.</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php if (empty($registros)): ?>
+                <tr>
+                    <td colspan="11" style="text-align: center; padding: 20px;">No se encontraron facturas con IVA para este período.</td>
+                </tr>
+            <?php else: ?>
+                <?php 
+                    $tTotal = 0; $tBase = 0; $tIva = 0; $tRet = 0;
+                    foreach ($registros as $r): 
+                        $tTotal += $r['monto_total'];
+                        $tBase += $r['monto_base'];
+                        $tIva += $r['monto_impuesto'];
+                        $tRet += ($r['iva_retenido'] ?? 0);
+                ?>
+                    <tr>
+                        <td nowrap><?= date('d/m/Y', strtotime($r['fecha_factura'])) ?></td>
+                        <td><?= htmlspecialchars($r['rif_proveedor']) ?></td>
+                        <td><?= htmlspecialchars($r['compania_proveedor']) ?></td>
+                        <td><?= htmlspecialchars($r['numero_factura']) ?></td>
+                        <td><?= htmlspecialchars($r['nro_control_d']) ?></td>
+                        <td style="text-align: right; font-weight: bold;"><?= number_format($r['monto_total'], 2, ',', '.') ?></td>
+                        <td style="text-align: right;"><?= number_format($r['monto_base'], 2, ',', '.') ?></td>
+                        <td style="text-align: right;"><?= number_format($r['monto_impuesto'], 2, ',', '.') ?></td>
+                        <td><?= htmlspecialchars($r['nro_retencion'] ?? 'N/A') ?></td>
+                        <td style="text-align: right; color: #dc3545; font-weight: bold;">
+                            <?= ($r['iva_retenido']) ? number_format($r['iva_retenido'], 2, ',', '.') : '0,00' ?>
+                        </td>
+                        <td style="text-align: center;"><?= ($r['pct_retencion']) ? number_format($r['pct_retencion'], 0) . '%' : '-' ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </tbody>
+        <?php if (!empty($registros)): ?>
+            <tfoot style="background: #f8f9fa; font-weight: bold;">
+                <tr>
+                    <td colspan="5" style="text-align: right;">TOTALES:</td>
+                    <td style="text-align: right; border-top: 2px solid black;"><?= number_format($tTotal, 2, ',', '.') ?></td>
+                    <td style="text-align: right; border-top: 2px solid black;"><?= number_format($tBase, 2, ',', '.') ?></td>
+                    <td style="text-align: right; border-top: 2px solid black;"><?= number_format($tIva, 2, ',', '.') ?></td>
+                    <td></td>
+                    <td style="text-align: right; border-top: 2px solid black; color: #dc3545;"><?= number_format($tRet, 2, ',', '.') ?></td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        <?php endif; ?>
+    </table>
+</div>
+
+<p style="font-size: 0.8em; color: #6c757d; margin-top: 15px;">
+    * Este reporte cumple con los requisitos del SENIAT para el Libro de Ventas y Compras (Compras en este caso).
+</p>

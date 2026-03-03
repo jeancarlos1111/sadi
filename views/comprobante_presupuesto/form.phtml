@@ -1,0 +1,209 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($error)): ?>
+    <div style="color:red; padding:10px; border:1px solid red; margin-bottom:15px;"><?= htmlspecialchars($error) ?></div>
+<?php endif; ?>
+
+<form method="POST" action="?route=comprobante_presupuesto/guardar" id="form-comprobante">
+    <?php if (isset($item) && $item->id_comprobante): ?>
+        <input type="hidden" name="id_comprobante" value="<?= htmlspecialchars((string)$item->id_comprobante) ?>">
+    <?php endif; ?>
+    <input type="hidden" name="acronimo_c" value="<?= htmlspecialchars($tipo) ?>">
+
+    <fieldset style="margin-bottom:15px; padding:15px; border:1px solid #ccc;">
+        <legend style="font-weight:bold;">Datos del Comprobante (<?= htmlspecialchars($tipo) ?>)</legend>
+
+        <div style="display:flex; gap:15px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:150px; margin-bottom:10px;">
+                <label>Fecha (*):</label><br>
+                <input type="date" name="fecha_c" value="<?= htmlspecialchars($item->fecha_c ?? date('Y-m-d')) ?>" required style="width:100%; padding:5px;">
+            </div>
+            <div style="flex:3; min-width:250px; margin-bottom:10px;">
+                <label>Denominación (*):</label><br>
+                <input type="text" name="denominacion_c" value="<?= htmlspecialchars($item->denominacion_c ?? '') ?>" required maxlength="255" style="width:100%; padding:5px;">
+            </div>
+            <div style="flex:2; min-width:200px; margin-bottom:10px;">
+                <label>N° Referencia:</label><br>
+                <input type="text" name="referencia_c" value="<?= htmlspecialchars($item->referencia_c ?? '') ?>" maxlength="100" style="width:100%; padding:5px;">
+            </div>
+        </div>
+
+        <?php if ($tipo === 'CG'): ?>
+        <div style="margin-bottom:10px;">
+            <label>Beneficiario (Cédula/RIF):</label><br>
+            <select name="beneficiario_cedula" style="width:100%; padding:5px;">
+                <option value="">-- Sin Beneficiario --</option>
+                <?php foreach ($beneficiarios as $b): ?>
+                    <option value="<?= htmlspecialchars($b->cedula) ?>"
+                        <?= (isset($item) && $item->beneficiario_cedula === $b->cedula) ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($b->cedula . ' – ' . $b->nombres . ' ' . $b->apellidos) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <?php endif; ?>
+    </fieldset>
+
+    <fieldset style="margin-bottom:15px; padding:15px; border:1px solid #0056b3;">
+        <legend style="font-weight:bold; color:#0056b3;">Líneas de Detalle</legend>
+
+        <?php
+        // Leyenda de comportamiento del tipo de operación
+        $leyendas = [
+            'CG' => '⬇ REDUCEN el disponible: los gastos causados o comprometidos.',
+            'CA' => '⬆ AUMENTAN el disponible: ingresos por crédito adicional al presupuesto.',
+            'TR' => '⬇ REDUCEN el disponible en la cuenta seleccionada (Traspaso de salida).',
+        ];
+        ?>
+        <p style="color:#555; font-style:italic; margin-top:0;">
+            <?= htmlspecialchars($leyendas[$tipo] ?? '') ?>
+            <small style="margin-left:10px;">
+                <a href="#" onclick="consultarDisponible(event)">📊 Consultar disponible</a>
+            </small>
+        </p>
+
+        <table border="1" cellpadding="5" cellspacing="0" style="width:100%; border-collapse:collapse;" id="tabla-lineas">
+            <thead style="background-color:#f4f4f4;">
+                <tr>
+                    <th>Estructura Presupuestaria</th>
+                    <th>Partida / Cuenta</th>
+                    <th>Monto (Bs.)</th>
+                    <th>Descripción Línea</th>
+                    <th style="width:40px;">Quitar</th>
+                </tr>
+            </thead>
+            <tbody id="cuerpo-lineas">
+                <?php if (!empty($lineas)): ?>
+                    <?php foreach ($lineas as $idx => $linea): ?>
+                    <tr class="linea-detalle">
+                        <td>
+                            <select name="id_estruc[]" style="width:100%; padding:4px;" required>
+                                <option value="">-- EP --</option>
+                                <?php foreach ($estructuras as $ep): ?>
+                                    <option value="<?= htmlspecialchars((string)$ep->id) ?>"
+                                        <?= ($ep->id === $linea->id_estruc_presupuestaria) ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($ep->descripcion) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </td>
+                        <td>
+                            <select name="id_cuenta[]" style="width:100%; padding:4px;" required>
+                                <option value="">-- Cuenta --</option>
+                                <?php foreach ($planCuentas as $cpu): ?>
+                                    <option value="<?= htmlspecialchars((string)$cpu->id) ?>"
+                                        <?= ($cpu->id === $linea->id_codigo_plan_unico) ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($cpu->codigo . ' – ' . $cpu->denominacion) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </td>
+                        <td><input type="number" name="monto[]" step="0.01" min="0.01" value="<?= htmlspecialchars((string)$linea->monto_mp) ?>" required style="width:100%; padding:4px; text-align:right;"></td>
+                        <td><input type="text" name="descripcion_linea[]" value="<?= htmlspecialchars($linea->descripcion_mp ?? '') ?>" maxlength="255" style="width:100%; padding:4px;"></td>
+                        <td style="text-align:center;"><button type="button" onclick="quitarLinea(this)" style="color:red; border:none; background:none; cursor:pointer; font-size:16px;">✕</button></td>
+                    </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <!-- Fila vacía inicial -->
+                    <tr class="linea-detalle">
+                        <td>
+                            <select name="id_estruc[]" style="width:100%; padding:4px;" required>
+                                <option value="">-- EP --</option>
+                                <?php foreach ($estructuras as $ep): ?>
+                                    <option value="<?= htmlspecialchars((string)$ep->id) ?>"><?= htmlspecialchars($ep->descripcion) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </td>
+                        <td>
+                            <select name="id_cuenta[]" style="width:100%; padding:4px;" required>
+                                <option value="">-- Cuenta --</option>
+                                <?php foreach ($planCuentas as $cpu): ?>
+                                    <option value="<?= htmlspecialchars((string)$cpu->id) ?>"><?= htmlspecialchars($cpu->codigo . ' – ' . $cpu->denominacion) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </td>
+                        <td><input type="number" name="monto[]" step="0.01" min="0.01" value="" required style="width:100%; padding:4px; text-align:right;" placeholder="0.00"></td>
+                        <td><input type="text" name="descripcion_linea[]" maxlength="255" style="width:100%; padding:4px;" placeholder="Descripción opcional"></td>
+                        <td style="text-align:center;"><button type="button" onclick="quitarLinea(this)" style="color:red; border:none; background:none; cursor:pointer; font-size:16px;">✕</button></td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+
+        <div style="margin-top:8px;">
+            <button type="button" onclick="agregarLinea()" style="padding:5px 12px; background-color:#0056b3; color:white; border:none; cursor:pointer;">+ Agregar Línea</button>
+        </div>
+    </fieldset>
+
+    <div id="disponibilidad-resultado" style="display:none; margin-bottom:10px; padding:8px; border:1px solid #0056b3; background:#eef4ff;"></div>
+
+    <div style="margin-top:15px;">
+        <button type="submit" style="padding:10px 20px; background-color:#28a745; color:white; border:none; cursor:pointer;">Guardar <?= htmlspecialchars($tipo) ?></button>
+        <a href="?route=comprobante_presupuesto/index" style="margin-left:10px; color:#dc3545; text-decoration:underline;">Cancelar</a>
+    </div>
+</form>
+
+<script>
+// Plantilla HTML de una fila nueva (datos del servidor serializados)
+const estructurasOpts = <?= json_encode(array_map(fn($ep) => ['id' => $ep->id, 'desc' => $ep->descripcion], $estructuras)) ?>;
+const cuentasOpts     = <?= json_encode(array_map(fn($cpu) => ['id' => $cpu->id, 'label' => $cpu->codigo . ' – ' . $cpu->denominacion], $planCuentas)) ?>;
+
+function buildSelect(name, opts, labelKey) {
+    let s = `<select name="${name}[]" style="width:100%; padding:4px;" required><option value="">-- seleccione --</option>`;
+    opts.forEach(o => { s += `<option value="${o.id}">${o[labelKey]}</option>`; });
+    s += '</select>';
+    return s;
+}
+
+function agregarLinea() {
+    const tbody = document.getElementById('cuerpo-lineas');
+    const tr = document.createElement('tr');
+    tr.className = 'linea-detalle';
+    tr.innerHTML = `
+        <td>${buildSelect('id_estruc', estructurasOpts, 'desc')}</td>
+        <td>${buildSelect('id_cuenta', cuentasOpts, 'label')}</td>
+        <td><input type="number" name="monto[]" step="0.01" min="0.01" style="width:100%; padding:4px; text-align:right;" placeholder="0.00" required></td>
+        <td><input type="text" name="descripcion_linea[]" maxlength="255" style="width:100%; padding:4px;" placeholder="Descripción opcional"></td>
+        <td style="text-align:center;"><button type="button" onclick="quitarLinea(this)" style="color:red; border:none; background:none; cursor:pointer; font-size:16px;">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+}
+
+function quitarLinea(btn) {
+    const tbody = document.getElementById('cuerpo-lineas');
+    if (tbody.querySelectorAll('tr.linea-detalle').length > 1) {
+        btn.closest('tr').remove();
+    } else {
+        alert('Debe haber al menos una línea de detalle.');
+    }
+}
+
+function consultarDisponible(e) {
+    e.preventDefault();
+    const filas = document.querySelectorAll('#cuerpo-lineas tr.linea-detalle');
+    const resultDiv = document.getElementById('disponibilidad-resultado');
+    let html = '<strong>Disponibilidad presupuestaria consultada:</strong><ul style="margin:4px 0;">';
+    let promesas = [];
+    filas.forEach(fila => {
+        const ep    = fila.querySelector('select[name="id_estruc[]"]').value;
+        const cpu   = fila.querySelector('select[name="id_cuenta[]"]').value;
+        if (ep && cpu) {
+            promesas.push(
+                fetch(`?route=comprobante_presupuesto/disponibilidad&id_estruc=${ep}&id_cuenta=${cpu}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        const epLabel  = fila.querySelector('select[name="id_estruc[]"] option:checked').text;
+                        const cpuLabel = fila.querySelector('select[name="id_cuenta[]"] option:checked').text;
+                        const color = data.disponible >= 0 ? 'green' : 'red';
+                        html += `<li>${epLabel} / ${cpuLabel}: <strong style="color:${color}">Bs. ${parseFloat(data.disponible).toLocaleString('es-VE', {minimumFractionDigits:2})}</strong></li>`;
+                    })
+            );
+        }
+    });
+    Promise.all(promesas).then(() => {
+        html += '</ul>';
+        resultDiv.innerHTML = html;
+        resultDiv.style.display = 'block';
+    });
+}
+</script>

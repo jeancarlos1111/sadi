@@ -1,0 +1,60 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($error)): ?>
+    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
+        <?= htmlspecialchars($error) ?>
+    </div>
+<?php endif; ?>
+
+<div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+    <form method="GET" action="" style="margin: 0;">
+        <input type="hidden" name="route" value="retenciones/index">
+        <input type="text" name="search" placeholder="Nro de Comprobante, Factura o RIF..." value="<?= htmlspecialchars($search) ?>" style="padding: 5px; width: 350px;">
+        <button type="submit" style="padding: 5px;">Buscar</button>
+        <a href="?route=retenciones/index" style="margin-left: 10px;">Limpiar</a>
+    </form>
+    <div>
+        <a href="?route=retenciones/form" style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px; margin-right: 10px;">+ Emitir Comprobante</a>
+        <a href="?route=retenciones/declarar" style="background-color: #17a2b8; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">Declaración Seniat</a>
+    </div>
+</div>
+
+<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+    <thead style="background-color: #0056b3; color: white;">
+        <tr>
+            <th>Fecha</th>
+            <th>Tipo</th>
+            <th>Nº Comprobante</th>
+            <th>Factura Origen</th>
+            <th>Proveedor</th>
+            <th>%</th>
+            <th>Monto Retenido</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (empty($comprobantes)): ?>
+            <tr>
+                <td colspan="8" style="text-align: center;">No hay comprobantes de retención.</td>
+            </tr>
+        <?php else: ?>
+            <?php foreach ($comprobantes as $data): ?>
+                <?php $comp = $data['entity']; ?>
+                <tr>
+                    <td><?= htmlspecialchars($comp->fechaEmision) ?></td>
+                    <td style="font-weight: bold;"><?= htmlspecialchars($comp->tipoRetencion) ?></td>
+                    <td><?= htmlspecialchars($comp->numeroComprobante) ?></td>
+                    <td><?= htmlspecialchars($data['factura_str']) ?><br><small>Mto: <?= number_format($data['factura_monto'], 2, ',', '.') ?></small></td>
+                    <td><?= htmlspecialchars($data['proveedor']) ?></td>
+                    <td><?= number_format($comp->porcentaje, 2, ',', '.') ?>%</td>
+                    <td style="font-weight: bold; color: red;">
+                        <?= number_format($comp->montoRetenido, 2, ',', '.') ?>
+                    </td>
+                    <td>
+                        <a href="?route=documental/comprobanteRetencion&id=<?= $comp->id ?>" target="_blank" style="color: #198754; font-weight: bold; text-decoration: none;">[ PDF ]</a>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </tbody>
+</table>

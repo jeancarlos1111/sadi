@@ -1,0 +1,60 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($error)): ?>
+    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
+        <?= htmlspecialchars($error) ?>
+    </div>
+<?php endif; ?>
+
+<div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+    <form method="GET" action="" style="margin: 0;">
+        <input type="hidden" name="route" value="proveedores/index">
+        <input type="text" name="search" placeholder="Buscar Proveedor..." value="<?= htmlspecialchars($search) ?>" style="padding: 5px; width: 300px;">
+        <button type="submit" style="padding: 5px;">Buscar</button>
+        <a href="?route=proveedores/index" style="margin-left: 10px;">Limpiar</a>
+    </form>
+    <a href="?route=proveedores/form" style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">+ Nuevo Proveedor</a>
+</div>
+
+<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+    <thead style="background-color: #0056b3; color: white;">
+        <tr>
+            <th>RIF</th>
+            <th>NIT</th>
+            <th>Compañía</th>
+            <th>Tipo Organización</th>
+            <th>Dirección</th>
+            <th>Teléfono</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (empty($proveedores)): ?>
+            <tr>
+                <td colspan="7" style="text-align: center;">No se encontraron proveedores.</td>
+            </tr>
+        <?php else: ?>
+            <?php foreach ($proveedores as $data): ?>
+                <?php 
+                    $p = $data['entity']; 
+                    $tipoOrg = $data['nombre_tipo_organizacion'];
+                ?>
+                <tr>
+                    <td><?= htmlspecialchars($p->rif) ?></td>
+                    <td><?= htmlspecialchars($p->nit ?? '') ?></td>
+                    <td><?= htmlspecialchars($p->compania) ?></td>
+                    <td><?= htmlspecialchars($tipoOrg ?? 'N/A') ?></td>
+                    <td><?= htmlspecialchars($p->direccion) ?></td>
+                    <td><?= htmlspecialchars($p->telefono) ?></td>
+                    <td>
+                        <a href="?route=proveedores/form&id=<?= urlencode((string)$p->id) ?>" style="margin-right: 10px;">Editar</a>
+                        <form method="POST" action="?route=proveedores/eliminar" onsubmit="return confirm('¿Seguro de eliminar este proveedor?');" style="display:inline;">
+                            <input type="hidden" name="id" value="<?= htmlspecialchars((string)$p->id) ?>">
+                            <button type="submit" style="color: red; border:none; background:none; cursor:pointer;">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </tbody>
+</table>

@@ -1,0 +1,54 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+        <a href="?route=reportes_cxp/saldosProveedores&pdf=1" target="_blank" style="background-color: #dc3545; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">Exportar PDF</a>
+        <span style="font-size: 0.9em; color: #666; margin-left: 10px;">Información sincronizada con Presupuesto y Tesorería</span>
+    </div>
+    <a href="?route=cuentas_por_pagar/index" style="background-color: #6c757d; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">Volver a CxP</a>
+</div>
+
+<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+    <thead style="background-color: #343a40; color: white;">
+        <tr>
+            <th>Referencia / RIF</th>
+            <th>Proveedor Beneficiario</th>
+            <th style="text-align: center;">Volumen Facturas</th>
+            <th style="text-align: right;">Base Imponible</th>
+            <th style="text-align: right;">Impuestos (IVA)</th>
+            <th style="text-align: right;">Deuda Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (empty($saldos)): ?>
+            <tr>
+                <td colspan="6" style="text-align: center;">No hay facturas pendientes de pago registradas por el momento. ¡Todo al día!</td>
+            </tr>
+        <?php else: ?>
+            <?php 
+            $grandTotal = 0;
+            foreach ($saldos as $s): 
+                $grandTotal += $s['total_deuda'];
+            ?>
+                <tr>
+                    <td><strong><?= htmlspecialchars($s['rif_proveedor']) ?></strong></td>
+                    <td><?= htmlspecialchars($s['compania_proveedor']) ?></td>
+                    <td style="text-align: center;"><?= $s['cantidad_facturas'] ?></td>
+                    <td style="text-align: right;"><?= number_format($s['total_base'], 2, ',', '.') ?></td>
+                    <td style="text-align: right;"><?= number_format($s['total_iva'], 2, ',', '.') ?></td>
+                    <td style="text-align: right; font-weight: bold; color: red;">
+                        <?= number_format($s['total_deuda'], 2, ',', '.') ?> Bs.
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </tbody>
+    <tfoot>
+        <tr style="background-color: #f8f9fa;">
+            <td colspan="5" style="text-align: right; font-weight: bold;">TOTAL CARTERA PENDIENTE:</td>
+            <td style="text-align: right; font-weight: bold; font-size: 1.2em; color: darkred;">
+                <?= number_format($grandTotal ?? 0, 2, ',', '.') ?> Bs.
+            </td>
+        </tr>
+    </tfoot>
+</table>

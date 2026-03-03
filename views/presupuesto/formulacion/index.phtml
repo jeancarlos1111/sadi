@@ -1,0 +1,79 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($error)): ?>
+    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px; border-radius: 4px;">
+        <?= htmlspecialchars($error) ?>
+    </div>
+<?php endif; ?>
+
+<div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+    <form method="GET" action="" style="margin: 0;">
+        <input type="hidden" name="route" value="presupuesto/formulacion">
+        <input type="text" name="search" placeholder="Buscar partida o estructura..." value="<?= htmlspecialchars($search) ?>" style="padding: 6px; width: 280px;">
+        <button type="submit" style="padding: 6px 12px;">Buscar</button>
+        <a href="?route=presupuesto/formulacion" style="margin-left: 8px; color: gray;">Limpiar</a>
+    </form>
+    <a href="?route=presupuesto/form" style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">+ Nueva Partida</a>
+</div>
+
+<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+    <thead style="background-color: #0056b3; color: white;">
+        <tr>
+            <th>Estructura Presupuestaria</th>
+            <th>Código Partida</th>
+            <th>Denominación</th>
+            <th style="text-align: right;">Monto Asignado (Bs)</th>
+            <th style="text-align: right;">Comprometido (Bs)</th>
+            <th style="text-align: right;">Causado (Bs)</th>
+            <th style="text-align: right;">Disponible (Bs)</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (empty($partidas)): ?>
+            <tr>
+                <td colspan="8" style="text-align: center; padding: 20px; color: gray;">No hay partidas presupuestarias formuladas.</td>
+            </tr>
+        <?php else: ?>
+            <?php
+            $totalAsignado = 0;
+            $totalComprometido = 0;
+            $totalDisponible = 0;
+            foreach ($partidas as $data):
+                $pg = $data['entity'];
+                $disponible = $data['disponibilidad'];
+                $totalAsignado += $pg->montoAsignado;
+                $totalComprometido += $pg->montoComprometido;
+                $totalDisponible += $disponible;
+                $colorDisp = $disponible < 0 ? 'red' : ($disponible < ($pg->montoAsignado * 0.10) ? 'orange' : 'green');
+            ?>
+            <tr>
+                <td><?= htmlspecialchars($data['estructura_desc']) ?></td>
+                <td><code><?= htmlspecialchars($data['partida_codigo']) ?></code></td>
+                <td><?= htmlspecialchars($data['partida_desc']) ?></td>
+                <td style="text-align: right;"><?= number_format($pg->montoAsignado, 2, ',', '.') ?></td>
+                <td style="text-align: right; color: orange;"><?= number_format($pg->montoComprometido, 2, ',', '.') ?></td>
+                <td style="text-align: right; color: #dc3545;"><?= number_format($pg->montoCausado, 2, ',', '.') ?></td>
+                <td style="text-align: right; font-weight: bold; color: <?= $colorDisp ?>;">
+                    <?= number_format($disponible, 2, ',', '.') ?>
+                </td>
+                <td>
+                    <a href="?route=presupuesto/form&id=<?= $pg->id ?>" style="margin-right: 8px;">Editar</a>
+                    <form method="POST" action="?route=presupuesto/eliminar" onsubmit="return confirm('¿Eliminar esta partida presupuestaria?');" style="display:inline;">
+                        <input type="hidden" name="id" value="<?= $pg->id ?>">
+                        <button type="submit" style="color: red; border:none; background:none; cursor:pointer;">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            <?php endforeach; ?>
+            <tr style="background-color: #e9ecef; font-weight: bold; border-top: 3px solid #0056b3;">
+                <td colspan="3" style="text-align: right;">TOTALES:</td>
+                <td style="text-align: right;"><?= number_format($totalAsignado, 2, ',', '.') ?></td>
+                <td style="text-align: right; color: orange;"><?= number_format($totalComprometido, 2, ',', '.') ?></td>
+                <td style="text-align: right;"></td>
+                <td style="text-align: right; color: green;"><?= number_format($totalDisponible, 2, ',', '.') ?></td>
+                <td></td>
+            </tr>
+        <?php endif; ?>
+    </tbody>
+</table>

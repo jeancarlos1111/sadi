@@ -1,0 +1,101 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<div style="margin-bottom: 20px;">
+    <form method="GET" action="" style="display: flex; gap: 15px; align-items: flex-end;">
+        <input type="hidden" name="route" value="banco/estadoCuenta">
+        
+        <div>
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Seleccione Cuenta</label>
+            <select name="id_cta_bancaria" required style="padding: 6px; min-width: 250px;">
+                <option value="">--- Seleccione una cuenta ---</option>
+                <?php foreach ($cuentas as $cta): ?>
+                    <option value="<?= $cta['id_cta_bancaria'] ?>" <?= ($idCuenta == $cta['id_cta_bancaria']) ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($cta['nombre_banco']) ?> - <?= htmlspecialchars($cta['numero_cta_bancaria']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
+        <div>
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Desde</label>
+            <input type="date" name="desde" value="<?= htmlspecialchars($desde) ?>" style="padding: 5px;">
+        </div>
+
+        <div>
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Hasta</label>
+            <input type="date" name="hasta" value="<?= htmlspecialchars($hasta) ?>" style="padding: 5px;">
+        </div>
+
+        <div>
+            <button type="submit" style="padding: 6px 15px; cursor: pointer;">Consultar</button>
+        </div>
+    </form>
+</div>
+
+<?php if ($idCuenta && $cuentaSel): ?>
+    <div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
+        <div>
+            <strong style="font-size: 1.1em;">Movimientos de: <?= htmlspecialchars($cuentaSel->nombreBanco) ?> | <?= htmlspecialchars($cuentaSel->numeroCuenta) ?></strong>
+        </div>
+        <a href="?route=banco/estadoCuenta&id_cta_bancaria=<?= $idCuenta ?>&desde=<?= $desde ?>&hasta=<?= $hasta ?>&pdf=1" 
+           target="_blank" style="background-color: #dc3545; color: white; padding: 8px 15px; text-decoration: none; border-radius: 4px;">
+            Exportar PDF
+        </a>
+    </div>
+
+    <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+        <thead style="background-color: #f1f1f1;">
+            <tr>
+                <th>Fecha</th>
+                <th>Referencia</th>
+                <th>Tipo / Concepto</th>
+                <th style="text-align: right;">Monto (Bs)</th>
+                <th style="text-align: right;">Saldo (Bs)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Saldo Anterior -->
+            <tr style="background-color: #e9ecef;">
+                <td colspan="3" style="font-weight: bold; text-align: right;">Saldo Anterior al <?= date('d/m/Y', strtotime($desde)) ?></td>
+                <td style="text-align: right;">---</td>
+                <td style="text-align: right; font-weight: bold; color: <?= $saldoAnterior < 0 ? 'red' : 'green' ?>;">
+                    <?= number_format($saldoAnterior, 2, ',', '.') ?>
+                </td>
+            </tr>
+
+            <?php 
+            $runningSaldo = $saldoAnterior;
+            if (empty($movimientos)): ?>
+                <tr>
+                    <td colspan="5" style="text-align: center;">No hay movimientos en este periodo.</td>
+                </tr>
+            <?php else: ?>
+                <?php foreach ($movimientos as $m): 
+                    $runningSaldo += (float)$m['monto'];
+                ?>
+                    <tr>
+                        <td><?= date('d/m/Y', strtotime($m['fecha'])) ?></td>
+                        <td><?= htmlspecialchars($m['referencia']) ?></td>
+                        <td>
+                            <strong><?= $m['acronimo_tipo_operacion_bancaria'] ?></strong> - <?= htmlspecialchars($m['nombre_tipo_operacion_bancaria']) ?>
+                        </td>
+                        <td style="text-align: right; color: <?= $m['monto'] < 0 ? 'red' : 'blue' ?>;">
+                            <?= number_format($m['monto'], 2, ',', '.') ?>
+                        </td>
+                        <td style="text-align: right; font-weight: bold;">
+                            <?= number_format($runningSaldo, 2, ',', '.') ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </tbody>
+        <tfoot>
+            <tr style="background-color: #343a40; color: white;">
+                <td colspan="4" style="text-align: right; font-weight: bold; font-size: 1.1em;">Saldo Disponible Final al <?= date('d/m/Y', strtotime($hasta)) ?>:</td>
+                <td style="text-align: right; font-weight: bold; font-size: 1.1em;">
+                    <?= number_format($runningSaldo, 2, ',', '.') ?> Bs.
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+<?php endif; ?>

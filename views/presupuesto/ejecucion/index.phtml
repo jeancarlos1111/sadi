@@ -1,0 +1,53 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($error)): ?>
+    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
+        <?= htmlspecialchars($error) ?>
+    </div>
+<?php endif; ?>
+
+<div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+    <form method="GET" action="" style="margin: 0;">
+        <input type="hidden" name="route" value="presupuesto/index">
+        <input type="text" name="search" placeholder="Buscar Partida o Estructura..." value="<?= htmlspecialchars($search) ?>" style="padding: 5px; width: 300px;">
+        <button type="submit" style="padding: 5px;">Buscar</button>
+        <a href="?route=presupuesto/index" style="margin-left: 10px;">Limpiar</a>
+    </form>
+    <a href="?route=presupuesto/form" style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">+ Ajustes</a>
+</div>
+
+<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+    <thead style="background-color: #0056b3; color: white;">
+        <tr>
+            <th>Estructura</th>
+            <th>Partida (Plan de Cuentas)</th>
+            <th>Monto Asignado</th>
+            <th>Comprometido</th>
+            <th>Causado</th>
+            <th>Pagado</th>
+            <th>Disponibilidad</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (empty($partidas)): ?>
+            <tr>
+                <td colspan="7" style="text-align: center;">No se encontraron partidas.</td>
+            </tr>
+        <?php else: ?>
+            <?php foreach ($partidas as $data): ?>
+                <?php $pg = $data['entity']; ?>
+                <tr>
+                    <td><?= htmlspecialchars($data['estructura_desc']) ?></td>
+                    <td><strong><?= htmlspecialchars($data['partida_codigo']) ?></strong> - <?= htmlspecialchars($data['partida_desc']) ?></td>
+                    <td><?= number_format($pg->montoAsignado, 2, ',', '.') ?></td>
+                    <td><?= number_format($pg->montoComprometido, 2, ',', '.') ?></td>
+                    <td><?= number_format($pg->montoCausado, 2, ',', '.') ?></td>
+                    <td><?= number_format($pg->montoPagado, 2, ',', '.') ?></td>
+                    <td style="font-weight: bold; color: <?= $data['disponibilidad'] > 0 ? 'green' : 'red' ?>;">
+                        <?= number_format($data['disponibilidad'], 2, ',', '.') ?>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </tbody>
+</table>

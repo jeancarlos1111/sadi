@@ -1,0 +1,94 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<div style="background-color: #f8f9fa; padding: 20px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 20px; text-align: center;">
+    <form method="GET" action="index.php">
+        <input type="hidden" name="route" value="reportes/balanceGeneral">
+        <label style="font-weight: bold; margin-right: 10px;">Saldos Acumulados Hasta:</label>
+        <input type="date" name="hasta_fecha" value="<?= htmlspecialchars($hastaFecha) ?>" style="padding: 5px; width: 150px;">
+        <button type="submit" style="background-color: #0d6efd; color: white; border: none; padding: 6px 15px; border-radius: 3px; cursor: pointer; margin-left: 10px;">Procesar Consolidación</button>
+    </form>
+</div>
+
+<div style="background-color: white; border: 1px solid #ced4da; padding: 30px; margin: 0 auto; max-width: 1000px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <h3 style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 30px;">BALANCE GENERAL REPUBLICA</h3>
+    <p style="text-align: center; color: #666; margin-top: -20px; margin-bottom: 30px;">Al <?= date('d/m/Y', strtotime($hastaFecha)) ?></p>
+
+    <div style="display: flex; gap: 40px;">
+        
+        <!-- LADO IZQUIERDO: ACTIVOS -->
+        <div style="flex: 1;">
+            <h4 style="color: #0d6efd; border-bottom: 2px solid #0d6efd; padding-bottom: 5px;">ACTIVO</h4>
+            <table width="100%" cellpadding="6" style="margin-bottom: 20px; font-size: 0.9em;">
+                <?php foreach ($filas as $f): if($f['tipo_cuenta'] === 'ACTIVO' && $f['saldo'] != 0): ?>
+                    <tr>
+                        <td width="20%" style="color: #666;"><?= $f['codigo_cuenta'] ?></td>
+                        <td width="50%"><?= htmlspecialchars($f['denominacion_cuenta']) ?></td>
+                        <td width="30%" align="right">Bs <?= number_format($f['saldo'], 2, ',', '.') ?></td>
+                    </tr>
+                <?php endif; endforeach; ?>
+            </table>
+            
+            <div style="background-color: #e9ecef; padding: 15px; text-align: right; font-weight: bold; font-size: 1.1em; border-top: 2px solid #333;">
+                TOTAL ACTIVO: Bs <?= number_format($totalActivo, 2, ',', '.') ?>
+            </div>
+        </div>
+
+        <!-- LADO DERECHO: PASIVOS Y PATRIMONIO -->
+        <div style="flex: 1;">
+            
+            <!-- PASIVOS -->
+            <h4 style="color: #dc3545; border-bottom: 2px solid #dc3545; padding-bottom: 5px;">PASIVO</h4>
+            <table width="100%" cellpadding="6" style="margin-bottom: 20px; font-size: 0.9em;">
+                <?php foreach ($filas as $f): if($f['tipo_cuenta'] === 'PASIVO' && $f['saldo'] != 0): ?>
+                    <tr>
+                        <td width="20%" style="color: #666;"><?= $f['codigo_cuenta'] ?></td>
+                        <td width="50%"><?= htmlspecialchars($f['denominacion_cuenta']) ?></td>
+                        <td width="30%" align="right">Bs <?= number_format($f['saldo'], 2, ',', '.') ?></td>
+                    </tr>
+                <?php endif; endforeach; ?>
+                <tr>
+                    <td colspan="2" align="right" style="font-weight: bold; color: #555;">Subtotal Pasivo:</td>
+                    <td align="right" style="font-weight: bold;">Bs <?= number_format($totalPasivo, 2, ',', '.') ?></td>
+                </tr>
+            </table>
+
+            <!-- PATRIMONIO -->
+            <h4 style="color: #198754; border-bottom: 2px solid #198754; padding-bottom: 5px; margin-top: 30px;">PATRIMONIO</h4>
+            <table width="100%" cellpadding="6" style="margin-bottom: 20px; font-size: 0.9em;">
+                <?php foreach ($filas as $f): if($f['tipo_cuenta'] === 'PATRIMONIO' && $f['saldo'] != 0): ?>
+                    <tr>
+                        <td width="20%" style="color: #666;"><?= $f['codigo_cuenta'] ?></td>
+                        <td width="50%"><?= htmlspecialchars($f['denominacion_cuenta']) ?></td>
+                        <td width="30%" align="right">Bs <?= number_format($f['saldo'], 2, ',', '.') ?></td>
+                    </tr>
+                <?php endif; endforeach; ?>
+                <tr>
+                    <td colspan="2" style="font-style: italic; color: #0d6efd;">Utilidad/Déficit del Ejercicio Ajustado:</td>
+                    <td align="right" style="font-style: italic; color: #0d6efd;">Bs <?= number_format($utilidadEjercicio, 2, ',', '.') ?></td>
+                </tr>
+                <tr>
+                    <td colspan="2" align="right" style="font-weight: bold; color: #555;">Subtotal Patrimonio:</td>
+                    <td align="right" style="font-weight: bold;">Bs <?= number_format($totalPatrimonioReal, 2, ',', '.') ?></td>
+                </tr>
+            </table>
+            
+            <div style="background-color: #e9ecef; padding: 15px; text-align: right; font-weight: bold; font-size: 1.1em; border-top: 2px solid #333;">
+                TOTAL PASIVO + PATRIMONIO: Bs <?= number_format($totalPasivoPatrimonio, 2, ',', '.') ?>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ECUACIÓN PATRIMONIAL CHECK -->
+    <div style="margin-top: 40px; text-align: center;">
+        <?php if ($cuadrado): ?>
+            <div style="display: inline-block; background-color: #d4edda; color: #155724; padding: 10px 30px; border-radius: 20px; font-weight: bold; border: 1px solid #c3e6cb;">
+                ✅ Balance Cuadrado: Ecuación Patrimonial Perfecta (Activo = Pasivo + Patrimonio)
+            </div>
+        <?php else: ?>
+            <div style="display: inline-block; background-color: #f8d7da; color: #721c24; padding: 10px 30px; border-radius: 20px; font-weight: bold; border: 1px solid #f5c6cb;">
+                ⚠️ DESCUADRE DETECTADO: Diferencia de Bs <?= number_format(abs($totalActivo - $totalPasivoPatrimonio), 2, ',', '.') ?>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>

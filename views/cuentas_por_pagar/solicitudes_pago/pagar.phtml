@@ -1,0 +1,57 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<div style="border: 1px solid #ccc; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
+    <h3>Datos de la Solicitud de Pago #<?= htmlspecialchars((string)$solicitud->id) ?></h3>
+    <p><strong>Concepto:</strong> <?= htmlspecialchars($solicitud->concepto) ?></p>
+    <p><strong>Fecha Solicitud:</strong> <?= htmlspecialchars($solicitud->fecha) ?></p>
+    <p><strong>Monto Total a Pagar:</strong> <span style="font-size: 1.2em; font-weight: bold; color: #28a745;">Bs <?= number_format($solicitud->montoPagar, 2, ',', '.') ?></span></p>
+</div>
+
+<form method="POST" action="?route=solicitudes_pago/guardarPago" style="border: 1px solid #0056b3; padding: 20px; border-radius: 5px; background-color: #f8f9fa;" onsubmit="return confirm('¿Está seguro de emitir el pago? Esta acción debitará fondos del banco y afectará el presupuesto pagado. No se puede deshacer.');">
+    
+    <input type="hidden" name="id_solicitud_pago" value="<?= htmlspecialchars((string)$solicitud->id) ?>">
+    
+    <h3 style="color: #0056b3; margin-top: 0;">Ejecución del Pago (Tesorería)</h3>
+    
+    <div style="margin-bottom: 15px;">
+        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Cuenta Bancaria Emisora:</label>
+        <select name="id_cta_bancaria" required style="width: 100%; padding: 8px;">
+            <option value="">-- Seleccione una Cuenta --</option>
+            <?php foreach ($cuentas as $cta): ?>
+                <option value="<?= $cta->id ?>">
+                    <?= htmlspecialchars($cta->nombreBanco) ?> - <?= htmlspecialchars($cta->numeroCuenta) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
+    <div style="margin-bottom: 15px;">
+        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Tipo de Operación:</label>
+        <select name="id_tipo_operacion_bancaria" required style="width: 100%; padding: 8px;">
+            <option value="">-- Seleccione Tipo Operación --</option>
+            <?php foreach ($operaciones as $op): ?>
+                <option value="<?= $op['id_tipo_operacion_bancaria'] ?>">
+                    <?= htmlspecialchars($op['nombre_tipo_operacion_bancaria']) ?> (<?= htmlspecialchars($op['acronimo_tipo_operacion_bancaria']) ?>)
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
+    <div style="margin-bottom: 15px;">
+        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Número de Referencia / Cheque:</label>
+        <input type="text" name="referencia" required style="width: 100%; padding: 8px;" placeholder="Ej: 000123456789">
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Fecha de Pago:</label>
+        <input type="date" name="fecha_pago" value="<?= date('Y-m-d') ?>" required style="width: 100%; padding: 8px;">
+    </div>
+
+    <div style="text-align: right;">
+        <a href="?route=solicitudes_pago/index" style="padding: 10px 15px; text-decoration: none; color: #6c757d; margin-right: 15px;">Cancelar</a>
+        <button type="submit" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+            ✔ Emitir Orden de Pago y Contabilizar
+        </button>
+    </div>
+
+</form>

@@ -1,0 +1,110 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($error)): ?>
+    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
+        <?= htmlspecialchars($error) ?>
+    </div>
+<?php endif; ?>
+<?php if (isset($success)): ?>
+    <div style="color: green; padding: 10px; border: 1px solid green; margin-bottom: 20px; font-weight: bold;">
+        <?= htmlspecialchars($success) ?>
+    </div>
+<?php endif; ?>
+
+<div style="border: 1px solid #ccc; padding: 15px; border-radius: 5px; margin-bottom: 20px; background-color: #f8f9fa;">
+    <h3>1. Seleccionar Orden de Compra Aprobada</h3>
+    <form method="GET" action="index.php" style="display: flex; gap: 10px; align-items: center;">
+        <input type="hidden" name="route" value="inventario/entradas">
+        
+        <select name="id_orden" required style="padding: 8px; width: 400px; font-size: 1.1em;">
+            <option value="">-- Buscar y Seleccionar --</option>
+            <?php foreach ($ordenes as $o): ?>
+                <?php $oc = $o['entity']; ?>
+                <option value="<?= $oc->id ?>" <?= (isset($_GET['id_orden']) && $_GET['id_orden'] == $oc->id) ? 'selected' : '' ?>>
+                    Orden #<?= $oc->id ?> | <?= htmlspecialchars($o['proveedor']) ?> | Total: <?= number_format($oc->montoTotal, 2) ?> | Fecha: <?= date('d/m/Y', strtotime($oc->fecha)) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+
+        <button type="submit" style="padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            Cargar Detalles
+        </button>
+        <a href="?route=inventario/entradas" style="padding: 8px 15px; color: #6c757d; text-decoration: none;">Limpiar</a>
+    </form>
+</div>
+
+<?php if (isset($ordenSeleccionada) && isset($detalles)): ?>
+    <div style="border: 1px solid #28a745; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+        <h3 style="color: #28a745; margin-top: 0;">2. Procesar Recepción en Almacén</h3>
+        <p><strong>Proveedor:</strong> <?= htmlspecialchars($ordenSeleccionada['proveedor']) ?></p>
+        <p><strong>Concepto OC:</strong> <?= htmlspecialchars($ordenSeleccionada['entity']->concepto) ?></p>
+        <hr>
+
+        <?php if (empty($detalles)): ?>
+            <p>No hay artículos asociados a esta Orden de Compra.</p>
+        <?php else: ?>
+            <form method="POST" action="?route=inventario/procesarRecepcion" onsubmit="return confirm('¿Está seguro de procesar esta recepción? Esto afectará los saldos de inventario, causará presupuesto y generará compromiso de pago.');">
+                <input type="hidden" name="id_orden" value="<?= $ordenSeleccionada['entity']->id ?>">
+                
+                <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse; margin-bottom: 15px; text-align: center;">
+                    <thead style="background-color: #e9ecef;">
+                        <tr>
+                            <th style="text-align: left;">Artículo</th>
+                            <th>Tipo</th>
+                            <th>Medida</th>
+                            <th>Pedida (OC)</th>
+                            <th>Ya Recibida</th>
+                            <th>Por Recibir</th>
+                            <th>Cantidad a Recibir Ahora</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php 
+                        $todoRecibido = true;
+                        foreach ($detalles as $d): 
+                            $pedida = (float)$d['cantidad_pedida'];
+                            $recibida = (float)$d['cantidad_recibida'];
+                            $porRecibir = $pedida - $recibida;
+                            
+                            if ($porRecibir > 0) $todoRecibido = false;
+                        ?>
+                            <tr <?= $porRecibir <= 0 ? 'style="background-color: #d4edda; color: #155724;"' : '' ?>>
+                                <td style="text-align: left;">
+                                    <?= htmlspecialchars($d['denominacion_a']) ?>
+                                    <input type="hidden" name="id_articulo[]" value="<?= $d['id_articulo'] ?>">
+                                </td>
+                                <td><?= $d['tipo_tda'] == 1 ? 'Bien Nacional' : 'Insumo/Material' ?></td>
+                                <td><?= htmlspecialchars($d['denominacion_udm']) ?></td>
+                                <td><?= $pedida ?></td>
+                                <td><?= $recibida ?></td>
+                                <td style="font-weight: bold; color: <?= $porRecibir > 0 ? 'red' : 'green' ?>;">
+                                    <?= $porRecibir ?>
+                                </td>
+                                <td>
+                                    <?php if ($porRecibir > 0): ?>
+                                        <input type="number" name="cantidad_recibir[]" max="<?= $porRecibir ?>" min="0" step="1" value="<?= $porRecibir ?>" style="width: 80px; padding: 5px; text-align: center;" required>
+                                    <?php else: ?>
+                                        <span style="font-size: 1.2em;">✔ Completo</span>
+                                        <input type="hidden" name="cantidad_recibir[]" value="0">
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+
+                <?php if ($todoRecibido): ?>
+                    <div style="background-color: #d4edda; color: #155724; padding: 15px; border-radius: 5px; text-align: center; border: 1px solid #c3e6cb;">
+                        <strong>¡Éxito!</strong> Todos los artículos de esta Orden de Compra ya han sido recibidos en el almacén en su totalidad.
+                    </div>
+                <?php else: ?>
+                    <div style="text-align: right;">
+                        <button type="submit" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 4px; font-weight: bold; font-size: 1.1em; cursor: pointer;">
+                            ✔ Confirmar Recepción Física
+                        </button>
+                    </div>
+                <?php endif; ?>
+            </form>
+        <?php endif; ?>
+    </div>
+<?php endif; ?>

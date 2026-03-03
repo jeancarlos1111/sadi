@@ -1,0 +1,52 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($error)): ?>
+    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
+        <?= htmlspecialchars($error) ?>
+    </div>
+<?php endif; ?>
+
+<div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+    <form method="GET" action="" style="margin: 0;">
+        <input type="hidden" name="route" value="inventario/index">
+        <input type="text" name="search" placeholder="Buscar Artículo o Almacén..." value="<?= htmlspecialchars($search) ?>" style="padding: 5px; width: 300px;">
+        <button type="submit" style="padding: 5px;">Buscar</button>
+        <a href="?route=inventario/index" style="margin-left: 10px;">Limpiar</a>
+    </form>
+    <div>
+        <a href="?route=inventario/entradas" style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px; margin-right: 10px;">Entradas (+ Recepción)</a>
+        <a href="?route=inventario/despachos" style="background-color: #ffc107; color: black; padding: 10px 15px; text-decoration: none; border-radius: 4px;">Salidas / Despachos</a>
+    </div>
+</div>
+
+<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+    <thead style="background-color: #0056b3; color: white;">
+        <tr>
+            <th>Artículo / Insumo</th>
+            <th>Unidad de Medida</th>
+            <th>Stock (Existencia Actual)</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (empty($insumos)): ?>
+            <tr>
+                <td colspan="5" style="text-align: center;">No hay artículos en existencia.</td>
+            </tr>
+        <?php else: ?>
+            <?php foreach ($insumos as $data): ?>
+                <?php $item = $data['entity']; ?>
+                <tr>
+                    <td><strong><?= htmlspecialchars($data['articulo_desc']) ?></strong></td>
+                    <td><?= htmlspecialchars($data['unidad']) ?></td>
+                    <td style="font-weight: bold; color: <?= $item->cantidad > 0 ? 'green' : 'red' ?>;">
+                        <?= number_format($item->cantidad, 2, ',', '.') ?>
+                    </td>
+                    <td>
+                        <a href="#">Kardex</a>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </tbody>
+</table>

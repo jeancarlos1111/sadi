@@ -1,0 +1,52 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($error)): ?>
+    <div style="color:red; padding:10px; border:1px solid red; margin-bottom:20px;">
+        <?= htmlspecialchars($error) ?>
+    </div>
+<?php endif; ?>
+
+<div style="margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
+    <form method="GET" action="" style="margin:0;">
+        <input type="hidden" name="route" value="proyectos/index">
+        <input type="text" name="search" placeholder="Buscar por código o denominación..." value="<?= htmlspecialchars($search ?? '') ?>" style="padding:5px; width:300px;">
+        <button type="submit" style="padding:5px;">Buscar</button>
+        <a href="?route=proyectos/index" style="margin-left:10px;">Limpiar</a>
+    </form>
+    <a href="?route=proyectos/form" style="background-color:#28a745; color:white; padding:10px 15px; text-decoration:none; border-radius:4px;">+ Nuevo Proyecto</a>
+</div>
+
+<table border="1" cellpadding="8" cellspacing="0" style="width:100%; border-collapse:collapse;">
+    <thead style="background-color:#0056b3; color:white;">
+        <tr>
+            <th>Código Proyecto</th>
+            <th>Denominación</th>
+            <th>Unidad Medida</th>
+            <th>Año Inicio</th>
+            <th>Año Culminación</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (empty($items)): ?>
+            <tr><td colspan="6" style="text-align:center;">No se encontraron proyectos registrados.</td></tr>
+        <?php else: ?>
+            <?php foreach ($items as $item): ?>
+                <tr>
+                    <td><strong><?= htmlspecialchars($item->codigo_proyecto) ?></strong></td>
+                    <td><?= htmlspecialchars($item->denominacion) ?></td>
+                    <td><?= htmlspecialchars($item->unidad_medida) ?></td>
+                    <td style="text-align:center;"><?= htmlspecialchars($item->anio_inicio) ?></td>
+                    <td style="text-align:center;"><?= htmlspecialchars($item->anio_culm) ?></td>
+                    <td style="text-align:center;">
+                        <a href="?route=proyectos/form&id=<?= urlencode((string)$item->id_proyecto) ?>" style="margin-right:10px;">Editar/Metas</a>
+                        <form method="POST" action="?route=proyectos/eliminar" onsubmit="return confirm('¿Eliminar este proyecto?');" style="display:inline;">
+                            <input type="hidden" name="id" value="<?= htmlspecialchars((string)$item->id_proyecto) ?>">
+                            <button type="submit" style="color:red; border:none; background:none; cursor:pointer; text-decoration:underline;">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </tbody>
+</table>

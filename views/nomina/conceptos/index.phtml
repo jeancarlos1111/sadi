@@ -1,0 +1,66 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($error)): ?>
+    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
+        <?= htmlspecialchars($error) ?>
+    </div>
+<?php endif; ?>
+
+<div style="background-color: #e8f4f8; border: 1px solid #bee5eb; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+    <strong>ℹ Variables disponibles en Fórmulas:</strong>
+    <code>SUELDO</code> (sueldo básico),
+    <code>TOTAL_ASIG</code> (suma de asignaciones calculadas hasta el momento),
+    <code>SALARIO_MINIMO</code>,
+    <code>CESTATICKET</code><br>
+    <small><b>Ejemplos:</b> <code>SUELDO * 0.04</code> | <code>SUELDO + 200</code> | <code>TOTAL_ASIG * 0.005</code></small>
+</div>
+
+<div style="margin-bottom: 20px; text-align: right;">
+    <a href="?route=nomina/conceptos/form" style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">+ Nuevo Concepto</a>
+</div>
+
+<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+    <thead style="background-color: #0056b3; color: white;">
+        <tr>
+            <th>Código</th>
+            <th>Descripción</th>
+            <th>Tipo</th>
+            <th>Fórmula / Valor</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (empty($conceptos)): ?>
+            <tr>
+                <td colspan="5" style="text-align: center;">No hay conceptos de nómina registrados.</td>
+            </tr>
+        <?php else: ?>
+            <?php foreach ($conceptos as $c): ?>
+                <tr>
+                    <td><code><?= htmlspecialchars($c->codigo) ?></code></td>
+                    <td><?= htmlspecialchars($c->descripcion) ?></td>
+                    <td style="font-weight: bold; color: <?= $c->tipo === 'A' ? 'green' : 'red' ?>;">
+                        <?= $c->tipo === 'A' ? '▲ Asignación' : '▼ Deducción' ?>
+                    </td>
+                    <td>
+                        <?php if (!empty($c->formulaExpr)): ?>
+                            <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;"><?= htmlspecialchars($c->formulaExpr) ?></code>
+                            <span style="color: gray; font-size: 0.85em;"> (Fórmula Dinámica)</span>
+                        <?php elseif ($c->esPorcentaje): ?>
+                            <?= number_format($c->formulaValor, 2) ?>% del Sueldo
+                        <?php else: ?>
+                            Bs <?= number_format($c->formulaValor, 2, ',', '.') ?> (Fijo)
+                        <?php endif; ?>
+                    </td>
+                    <td>
+                        <a href="?route=nomina_conceptos/form&id=<?= $c->id ?>" style="margin-right: 10px;">Editar</a>
+                        <form method="POST" action="?route=nomina_conceptos/eliminar" onsubmit="return confirm('¿Eliminar este concepto?');" style="display:inline;">
+                            <input type="hidden" name="id" value="<?= $c->id ?>">
+                            <button type="submit" style="color:red; border:none; background:none; cursor:pointer;">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </tbody>
+</table>

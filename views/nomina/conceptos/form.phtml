@@ -1,0 +1,80 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($error)): ?>
+    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px; border-radius: 4px;">
+        <?= htmlspecialchars($error) ?>
+    </div>
+<?php endif; ?>
+
+<form method="POST" action="?route=nomina_conceptos/guardar">
+    <?php if ($concepto && $concepto->id): ?>
+        <input type="hidden" name="id" value="<?= $concepto->id ?>">
+    <?php endif; ?>
+
+    <table style="width: 100%; max-width: 700px; border-collapse: collapse;">
+        <tr>
+            <td style="padding: 10px 0; width: 180px;"><label><b>Código:</b></label></td>
+            <td>
+                <input type="text" name="codigo" value="<?= htmlspecialchars($concepto->codigo ?? '') ?>"
+                    required maxlength="10" style="padding: 8px; width: 120px; font-family: monospace;">
+                <small style="color: gray;">(Ej: A001, D003)</small>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 10px 0;"><label><b>Descripción:</b></label></td>
+            <td>
+                <input type="text" name="descripcion" value="<?= htmlspecialchars($concepto->descripcion ?? '') ?>"
+                    required style="padding: 8px; width: 100%;">
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 10px 0;"><label><b>Tipo:</b></label></td>
+            <td>
+                <select name="tipo_concepto" style="padding: 8px;">
+                    <option value="A" <?= (($concepto->tipo ?? '') === 'A') ? 'selected' : '' ?>>▲ Asignación (Ingreso)</option>
+                    <option value="D" <?= (($concepto->tipo ?? '') === 'D') ? 'selected' : '' ?>>▼ Deducción (Descuento)</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <hr>
+                <p style="margin: 5px 0;"><b>Modo de Cálculo</b> (completa UNO de los siguientes):</p>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 10px 0; vertical-align: top;"><label><b>Fórmula Dinámica:</b></label></td>
+            <td>
+                <input type="text" name="formula_expr"
+                    value="<?= htmlspecialchars($concepto->formulaExpr ?? '') ?>"
+                    style="padding: 8px; width: 100%; font-family: monospace;"
+                    placeholder="Ej: SUELDO * 0.04   o   SUELDO + CESTATICKET">
+                <small style="color: #0056b3;">
+                    Variables: <code>SUELDO</code>, <code>TOTAL_ASIG</code>, <code>SALARIO_MINIMO</code>, <code>CESTATICKET</code><br>
+                    Si defines una fórmula aquí, los campos de abajo son ignorados.
+                </small>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 10px 0;"><label><b>Valor fijo (Bs):</b></label></td>
+            <td>
+                <input type="number" name="formula_valor" step="0.01" min="0"
+                    value="<?= $concepto->formulaValor ?? 0 ?>"
+                    style="padding: 8px; width: 160px;">
+                &nbsp;
+                <label style="cursor: pointer;">
+                    <input type="checkbox" name="es_porcentaje" value="1"
+                        <?= ($concepto->esPorcentaje ?? false) ? 'checked' : '' ?>>
+                    Es % del sueldo básico
+                </label>
+            </td>
+        </tr>
+    </table>
+
+    <div style="margin-top: 20px;">
+        <button type="submit" style="background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 1em;">
+            💾 Guardar Concepto
+        </button>
+        <a href="?route=nomina_conceptos/index" style="margin-left: 15px; color: #6c757d;">Cancelar</a>
+    </div>
+</form>

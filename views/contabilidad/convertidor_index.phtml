@@ -1,0 +1,60 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<div style="background-color: #f8f9fa; padding: 20px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 20px;">
+    <p>El Convertidor General permite configurar a qué <b>Cuenta Contable</b> se debe cargar o abonar los montos cada vez que un módulo del sistema (Compras, Tesorería, Nómina) efectúe un gasto por una <b>Partida Presupuestaria</b> específica.</p>
+</div>
+
+<div style="margin-bottom: 20px; text-align: right;">
+    <a href="?route=convertidor/vincular" style="background-color: #0d6efd; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+        + Configurar Nueva Vinculación
+    </a>
+</div>
+
+<?php if (isset($_GET['success'])): ?>
+    <div style="color: #155724; background-color: #d4edda; border-color: #c3e6cb; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: .25rem;">
+        <?= htmlspecialchars($_GET['success']) ?>
+    </div>
+<?php endif; ?>
+
+<?php if (isset($error)): ?>
+    <div style="color: #721c24; background-color: #f8d7da; border-color: #f5c6cb; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: .25rem;">
+        <?= htmlspecialchars($error) ?>
+    </div>
+<?php endif; ?>
+
+<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse; background: white;">
+    <thead style="background-color: #212529; color: white;">
+        <tr>
+            <th>Tipo de Operación SADI</th>
+            <th>Partida Presupuestaria</th>
+            <th>Afectación Contable Patrimonial</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (empty($mapeos)): ?>
+            <tr>
+                <td colspan="4" style="text-align: center;">No hay vinculaciones configuradas. SADI usará cuentas genéricas temporalmente.</td>
+            </tr>
+        <?php else: ?>
+            <?php foreach ($mapeos as $m): ?>
+                <tr>
+                    <td style="font-weight: bold; color: #198754;"><?= htmlspecialchars($m['tipo_operacion']) ?></td>
+                    <td>
+                        <span style="font-weight: bold;"><?= htmlspecialchars($m['codigo_plan_unico']) ?></span><br>
+                        <small style="color: #6c757d;"><?= htmlspecialchars($m['partida']) ?></small>
+                    </td>
+                    <td>
+                        <span style="font-weight: bold;"><?= htmlspecialchars($m['cuenta']) ?></span>
+                    </td>
+                    <td style="text-align: center;">
+                        <form method="POST" action="?route=convertidor/eliminar" style="display:inline;" onsubmit="return confirm('¿Seguro que desea eliminar esta matriz de conversión? Podría ocurrir fallos contables si la partida se usa y no tiene mapeo.');">
+                            <input type="hidden" name="id_convertidor" value="<?= $m['id_convertidor'] ?>">
+                            <button type="submit" style="color: white; background-color: #dc3545; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Eliminar Vinculo</button>
+                        </form>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </tbody>
+</table>

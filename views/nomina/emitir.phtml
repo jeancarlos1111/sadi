@@ -1,0 +1,45 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<div style="background-color: #f8f9fa; padding: 20px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 20px;">
+    <h3>Procesamiento por Lotes</h3>
+    <p>Esta acción calculará automáticamente todas las asignaciones (sueldos base, bonos) y deducciones (SSO, FAOV, etc) aplicables para cada trabajador activo en la nómina seleccionada.</p>
+    <p style="color: #856404; background-color: #fff3cd; padding: 10px; border-radius: 4px; border: 1px solid #ffeeba;">
+        <strong>Atención:</strong> De manera simultánea SADI afectará las partidas presupuestarias en las fases Compromiso/Causado, y además generará la respectiva Solicitud de Pago al Tesorero para su liquidación.
+    </p>
+</div>
+
+<?php if (isset($error)): ?>
+    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
+        <?= htmlspecialchars($error) ?>
+    </div>
+<?php endif; ?>
+
+<form method="POST" action="?route=nomina/procesar" style="max-width: 600px; border: 1px solid #0056b3; padding: 20px; border-radius: 8px;" onsubmit="return confirm('¿Confirma que desea PROCESAR Y CONTABILIZAR la nómina en lote? Esta acción causará el presupuesto general de la nación.');">
+
+    <div style="margin-bottom: 15px;">
+        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Seleccione Nómina a Pagar:</label>
+        <select name="id_nomina" required style="width: 100%; padding: 10px;">
+            <option value="">-- Seleccione Nómina Activa --</option>
+            <?php foreach ($nominasActivas as $n): ?>
+                <option value="<?= $n->id ?>"><?= htmlspecialchars($n->nombre) ?> (Periodicidad: <?= htmlspecialchars($n->tipoPeriodo) ?>)</option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
+    <div style="margin-bottom: 15px;">
+        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Período a Liquidar (Descriptivo):</label>
+        <input type="text" name="periodo" required placeholder="Ej: Segunda Quincena Mayo 2026" style="width: 100%; padding: 10px;">
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Fecha de Emisión de Planilla:</label>
+        <input type="date" name="fecha_emision" required value="<?= date('Y-m-d') ?>" style="width: 100%; padding: 10px;">
+    </div>
+
+    <div style="text-align: right;">
+        <a href="?route=nomina/index" style="margin-right: 15px; text-decoration: none; color: #555;">Cancelar</a>
+        <button type="submit" style="background-color: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 4px; font-size: 1.1em; font-weight: bold; cursor: pointer;">
+            ⚡ Ejecutar Motor de Nómina
+        </button>
+    </div>
+</form>

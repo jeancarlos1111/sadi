@@ -1,0 +1,195 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($error)): ?>
+    <div style="background-color: #f8d7da; color: #721c24; padding: 15px; border: 1px solid #f5c6cb; border-radius: 4px; margin-bottom: 20px;">
+        <strong>Error:</strong> <?= htmlspecialchars($error) ?>
+    </div>
+<?php endif; ?>
+
+<div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid #e1e4e8; max-width: 900px; margin: 0 auto;">
+    <form action="?route=documentos_por_pagar/guardar" method="POST" id="formFactura">
+        <div style="display: flex; gap: 20px; border-bottom: 2px solid #f0f2f5; padding-bottom: 15px; margin-bottom: 25px;">
+            <div style="flex: 1;">
+                <label style="display: block; font-weight: 600; color: #4a5568; margin-bottom: 8px;">Origen del Gasto:</label>
+                <select id="tipo_origen" class="form-control" style="width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px;">
+                    <option value="compra">Orden de Compra (Bienes)</option>
+                    <option value="servicio">Orden de Servicio</option>
+                </select>
+            </div>
+            <div style="flex: 2;">
+                <label style="display: block; font-weight: 600; color: #4a5568; margin-bottom: 8px;">Seleccionar Orden Pendiente:</label>
+                <select id="id_orden_select" class="form-control" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px;">
+                    <option value="">-- Seleccione una orden --</option>
+                    <?php if (!empty($ordenesCompra)): ?>
+                        <?php foreach ($ordenesCompra as $oc): ?>
+                            <option value="<?= $oc['id_orden_de_compra'] ?>" data-tipo="compra">OC #<?= $oc['id_orden_de_compra'] ?> - <?= htmlspecialchars($oc['compania_proveedor']) ?> (<?= $oc['rif_proveedor'] ?>)</option>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </select>
+            </div>
+        </div>
+
+        <!-- Campos ocultos para enviar los IDs correctos -->
+        <input type="hidden" name="id_orden_de_compra" id="id_orden_de_compra">
+        <input type="hidden" name="id_orden_de_servicio" id="id_orden_de_servicio">
+        <input type="hidden" name="id_proveedor" id="id_proveedor">
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 5px;">Nro. Factura:</label>
+                <input type="text" name="nro_documento_d" required placeholder="000123" style="width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px;">
+            </div>
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 5px;">Nro. Control:</label>
+                <input type="text" name="nro_control_d" required placeholder="00-456" style="width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px;">
+            </div>
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 5px;">Fecha Emisión:</label>
+                <input type="date" name="fecha_emision_d" required value="<?= date('Y-m-d') ?>" style="width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px;">
+            </div>
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 5px;">Fecha Vencimiento:</label>
+                <input type="date" name="fecha_vencimiento_d" style="width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px;">
+            </div>
+        </div>
+
+        <div style="background: #f7fafc; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px dashed #cbd5e0;">
+            <h4 style="margin-top: 0; color: #2d3748; border-bottom: 1px solid #e1e4e8; padding-bottom: 8px;">Cálculos de Importe y Retenciones</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                <div>
+                    <label style="display: block; font-size: 0.9em; font-weight: 600;">Monto Base (Bs):</label>
+                    <input type="number" step="0.01" id="monto_base_d" name="monto_base_d" required readonly style="width: 100%; padding: 8px; background: #edf2f7; border: 1px solid #cbd5e0; border-radius: 4px;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.9em; font-weight: 600;">I.V.A. (Bs):</label>
+                    <input type="number" step="0.01" id="monto_impuesto_d" name="monto_impuesto_d" required readonly style="width: 100%; padding: 8px; background: #edf2f7; border: 1px solid #cbd5e0; border-radius: 4px;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.9em; font-weight: 600;">Total Factura:</label>
+                    <div id="total_factura_label" style="font-size: 1.2em; font-weight: bold; color: #2b6cb0; margin-top: 5px;">Bs 0,00</div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+                <div style="background: #eef2ff; padding: 10px; border-radius: 6px;">
+                    <label style="display: block; color: #4338ca; font-weight: 600;">Retención IVA (%):</label>
+                    <input type="number" step="0.01" value="75" id="porcentaje_retencion_iva" name="porcentaje_retencion_iva" style="width: 100%; padding: 8px; border: 1px solid #c7d2fe; border-radius: 4px;">
+                    <div id="monto_ret_iva" style="font-size: 0.85em; color: #6366f1; margin-top: 4px;">Monto: Bs 0,00</div>
+                </div>
+                <div style="background: #fffafa; padding: 10px; border-radius: 6px;">
+                    <label style="display: block; color: #9b2c2c; font-weight: 600;">Retención ISLR (%):</label>
+                    <input type="number" step="0.01" value="2" id="porcentaje_retencion_islr" name="porcentaje_retencion_islr" style="width: 100%; padding: 8px; border: 1px solid #fed7d7; border-radius: 4px;">
+                    <div id="monto_ret_islr" style="font-size: 0.85em; color: #c53030; margin-top: 4px;">Monto: Bs 0,00</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="background: #2d3748; color: white; padding: 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+            <div>
+                <span style="font-size: 1.1em; opacity: 0.9;">Monto Neto a Pagar al Proveedor:</span>
+                <div id="neto_pagar_label" style="font-size: 2.2em; font-weight: bold; color: #68d391;">Bs 0,00</div>
+                <small style="opacity: 0.8;">Este monto generará la Solicitud de Pago automáticamente.</small>
+            </div>
+            <div style="text-align: right;">
+                <button type="submit" style="background: #48bb78; color: white; border: none; padding: 15px 35px; border-radius: 8px; font-weight: bold; font-size: 1.1em; cursor: pointer; transition: all 0.2s;">
+                    Causar Factura y Generar Pagos
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tipoOrigen = document.getElementById('tipo_origen');
+    const idOrdenSelect = document.getElementById('id_orden_select');
+    const formFactura = document.getElementById('formFactura');
+    
+    // Datos de órdenes pasados desde PHP para el cambio de select
+    const ordenesCompra = <?= json_encode($ordenesCompra) ?>;
+    const ordenesServicio = <?= json_encode($ordenesServicio) ?>;
+
+    tipoOrigen.addEventListener('change', function() {
+        const tipo = this.value;
+        idOrdenSelect.innerHTML = '<option value="">-- Seleccione una orden --</option>';
+        
+        const lista = (tipo === 'compra') ? (ordenesCompra || []) : (ordenesServicio || []);
+        lista.forEach(item => {
+            const id = (tipo === 'compra') ? item.id_orden_de_compra : item.id_orden_de_servicio;
+            const prefix = (tipo === 'compra') ? 'OC' : 'OS';
+            const comp = item.compania_proveedor || 'Sin Empresa';
+            const rif = item.rif_proveedor || 'Sin RIF';
+            const opt = document.createElement('option');
+            opt.value = id;
+            opt.textContent = `${prefix} #${id} - ${comp} (${rif})`;
+            idOrdenSelect.appendChild(opt);
+        });
+        
+        resetCalculos();
+    });
+
+    idOrdenSelect.addEventListener('change', async function() {
+        const id = this.value;
+        if (!id) return;
+        
+        const tipo = tipoOrigen.value;
+        try {
+            const response = await fetch(`?route=documentos_por_pagar/getDatosOrden&id=${id}&tipo=${tipo}`);
+            const data = await response.json();
+            
+            if (data) {
+                document.getElementById('monto_base_d').value = data.monto_base_d;
+                document.getElementById('monto_impuesto_d').value = data.monto_impuesto_d;
+                document.getElementById('id_proveedor').value = data.id_proveedor;
+                
+                if (tipo === 'compra') {
+                    document.getElementById('id_orden_de_compra').value = id;
+                    document.getElementById('id_orden_de_servicio').value = '';
+                } else {
+                    document.getElementById('id_orden_de_servicio').value = id;
+                    document.getElementById('id_orden_de_compra').value = '';
+                }
+                
+                calcularTotales();
+            }
+        } catch (e) {
+            console.error("Error al cargar datos de la orden", e);
+        }
+    });
+
+    // Escuchar cambios en retenciones
+    document.getElementById('porcentaje_retencion_iva').addEventListener('input', calcularTotales);
+    document.getElementById('porcentaje_retencion_islr').addEventListener('input', calcularTotales);
+
+    function calcularTotales() {
+        const base = parseFloat(document.getElementById('monto_base_d').value) || 0;
+        const iva = parseFloat(document.getElementById('monto_impuesto_d').value) || 0;
+        const totalFactura = base + iva;
+        
+        const pIva = parseFloat(document.getElementById('porcentaje_retencion_iva').value) || 0;
+        const pIslr = parseFloat(document.getElementById('porcentaje_retencion_islr').value) || 0;
+        
+        const montoRetIva = iva * (pIva / 100);
+        const montoRetIslr = base * (pIslr / 100);
+        
+        const montoNeto = totalFactura - montoRetIva - montoRetIslr;
+
+        // Formatear etiquetas
+        document.getElementById('total_factura_label').textContent = formatBs(totalFactura);
+        document.getElementById('monto_ret_iva').textContent = `Monto: ${formatBs(montoRetIva)}`;
+        document.getElementById('monto_ret_islr').textContent = `Monto: ${formatBs(montoRetIslr)}`;
+        document.getElementById('neto_pagar_label').textContent = formatBs(montoNeto);
+    }
+
+    function resetCalculos() {
+        document.getElementById('monto_base_d').value = '';
+        document.getElementById('monto_impuesto_d').value = '';
+        document.getElementById('total_factura_label').textContent = 'Bs 0,00';
+        document.getElementById('neto_pagar_label').textContent = 'Bs 0,00';
+    }
+
+    function formatBs(val) {
+        return 'Bs ' + val.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+});
+</script>

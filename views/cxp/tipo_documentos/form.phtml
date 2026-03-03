@@ -1,0 +1,28 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<form method="POST" action="?route=tipo_documentos/guardar" style="max-width:500px;">
+    <?php if ($item && $item->id): ?><input type="hidden" name="id" value="<?= $item->id ?>"><?php endif; ?>
+
+    <div style="margin-bottom:10px;">
+        <label>Denominación (*):</label><br>
+        <input type="text" name="denominacion_tipo_documento" value="<?= htmlspecialchars($item->denominacion ?? '') ?>" required maxlength="100" style="width:100%; padding:5px;">
+    </div>
+    
+    <div style="margin-bottom:10px;">
+        <label>Siglas (opcional):</label><br>
+        <input type="text" name="siglas_tipo_documento" value="<?= htmlspecialchars($item->siglas ?? '') ?>" maxlength="10" style="width:100%; padding:5px;">
+    </div>
+
+    <div style="margin-bottom:20px;">
+        <label>
+            <input type="checkbox" name="afecta_presupuesto_tipo_documento" value="1" <?= ($item && $item->afectaPresupuesto) ? 'checked' : '' ?>>
+            Afecta Presupuesto
+        </label>
+        <div style="font-size:0.8em; color:#666; margin-top:5px;">Si se marca, los documentos de este tipo causarán deuda en el presupuesto.</div>
+    </div>
+
+    <div>
+        <button type="submit" style="padding:10px 20px; background-color:#28a745; color:white; border:none; cursor:pointer;">Guardar</button>
+        <a href="?route=tipo_documentos/index" style="margin-left:10px; color:#dc3545;">Cancelar</a>
+    </div>
+</form>

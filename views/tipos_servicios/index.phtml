@@ -1,0 +1,36 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($error)): ?><div style="color:red; padding:10px; border:1px solid red; margin-bottom:20px;"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+
+<div style="margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
+    <form method="GET" action="" style="margin:0;">
+        <input type="hidden" name="route" value="tipos_servicios/index">
+        <input type="text" name="search" placeholder="Buscar..." value="<?= htmlspecialchars($search) ?>" style="padding:5px; width:250px;">
+        <button type="submit" style="padding:5px;">Buscar</button>
+        <a href="?route=tipos_servicios/index" style="margin-left:8px;">Limpiar</a>
+    </form>
+    <a href="?route=tipos_servicios/form" style="background-color:#28a745; color:white; padding:10px 15px; text-decoration:none; border-radius:4px;">+ Nuevo Tipo</a>
+</div>
+
+<table border="1" cellpadding="8" cellspacing="0" style="width:100%; border-collapse:collapse;">
+    <thead style="background-color:#0056b3; color:white;">
+        <tr><th>Denominación</th><th>Descripción</th><th>Acciones</th></tr>
+    </thead>
+    <tbody>
+        <?php if (empty($items)): ?>
+            <tr><td colspan="3" style="text-align:center;">No hay tipos de servicio registrados.</td></tr>
+        <?php else: foreach ($items as $item): ?>
+            <tr>
+                <td><?= htmlspecialchars($item->denominacion) ?></td>
+                <td><?= htmlspecialchars($item->descripcion ?? '') ?></td>
+                <td>
+                    <a href="?route=tipos_servicios/form&id=<?= $item->id ?>" style="margin-right:8px;">Editar</a>
+                    <form method="POST" action="?route=tipos_servicios/eliminar" onsubmit="return confirm('¿Eliminar?');" style="display:inline;">
+                        <input type="hidden" name="id" value="<?= $item->id ?>">
+                        <button type="submit" style="color:red; border:none; background:none; cursor:pointer;">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+        <?php endforeach; endif; ?>
+    </tbody>
+</table>

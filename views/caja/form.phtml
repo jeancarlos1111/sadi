@@ -1,0 +1,33 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($error)): ?>
+    <div style="color:red; padding:10px; border:1px solid red; border-radius:4px; margin-bottom:18px;"><?= htmlspecialchars($error) ?></div>
+<?php endif; ?>
+
+<div style="max-width: 560px;">
+<form method="POST" action="?route=caja/guardar">
+    <?php if ($caja && $caja->id): ?><input type="hidden" name="id" value="<?= $caja->id ?>"><?php endif; ?>
+    <table style="width:100%; border-collapse:collapse;">
+        <tr>
+            <td style="padding:9px 0; width:180px;"><label><b>Denominación:</b></label></td>
+            <td><input type="text" name="denominacion" required maxlength="120" value="<?= htmlspecialchars($caja->denominacion ?? '') ?>" style="padding:8px; width:100%;" placeholder="Ej: Caja Chica Administración"></td>
+        </tr>
+        <tr>
+            <td style="padding:9px 0;"><label><b>Responsable:</b></label></td>
+            <td><input type="text" name="responsable" required maxlength="100" value="<?= htmlspecialchars($caja->responsable ?? '') ?>" style="padding:8px; width:100%;" placeholder="Nombre del custodio"></td>
+        </tr>
+        <tr>
+            <td style="padding:9px 0;"><label><b>Monto Asignado (Bs):</b></label></td>
+            <td><input type="number" name="monto_asignado" step="0.01" min="1" required value="<?= $caja ? number_format($caja->montoAsignado, 2, '.', '') : '' ?>" style="padding:8px; width:180px; font-size:1.05em;"></td>
+        </tr>
+        <tr>
+            <td style="padding:9px 0;"><label><b>Fecha Apertura:</b></label></td>
+            <td><input type="date" name="fecha_apertura" required value="<?= $caja->fechaApertura ?? date('Y-m-d') ?>" style="padding:8px;"></td>
+        </tr>
+    </table>
+    <div style="margin-top:18px;">
+        <button type="submit" style="background:#007bff; color:white; padding:10px 22px; border:none; border-radius:4px; cursor:pointer; font-size:1em;">💾 Guardar</button>
+        <a href="?route=caja/index" style="margin-left:14px; color:#6c757d;">Cancelar</a>
+    </div>
+</form>
+</div>

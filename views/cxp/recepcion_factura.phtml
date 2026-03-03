@@ -1,0 +1,181 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($error)): ?>
+    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
+        <?= htmlspecialchars($error) ?>
+    </div>
+<?php endif; ?>
+<?php if (isset($success)): ?>
+    <div style="color: green; padding: 10px; border: 1px solid green; margin-bottom: 20px; font-weight: bold;">
+        <?= htmlspecialchars($success) ?>
+    </div>
+<?php endif; ?>
+
+<div style="border: 1px solid #ccc; padding: 15px; border-radius: 5px; margin-bottom: 20px; background-color: #f8f9fa;">
+    <h3>1. Seleccionar Orden Ingresada a Almacén (Pendiente de Factura)</h3>
+    <form method="GET" action="index.php" style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px;">
+        <input type="hidden" name="route" value="cuentas_por_pagar/recepcion_facturas">
+        
+        <select name="id_orden" required style="padding: 8px; width: 500px; font-size: 1.1em;">
+            <option value="">-- Buscar Nota de Entrega validada --</option>
+            <?php foreach ($ordenesPendientes as $op): ?>
+                <option value="<?= $op['id_orden_de_compra'] ?>" <?= (isset($_GET['id_orden']) && $_GET['id_orden'] == $op['id_orden_de_compra']) ? 'selected' : '' ?>>
+                    Orden de Compra #<?= $op['id_orden_de_compra'] ?> | <?= htmlspecialchars($op['compania_proveedor']) ?> | Causado Total: Bs <?= number_format($op['monto_total_d'], 2) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+
+        <button type="submit" style="padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            Generar Forma
+        </button>
+        <a href="?route=cuentas_por_pagar/recepcion_facturas" style="padding: 8px 15px; color: #6c757d; text-decoration: none;">Limpiar</a>
+    </form>
+
+    <h3 style="margin-top: 20px;">1.B. Seleccionar Orden de Servicio (Pendiente de Factura)</h3>
+    <form method="GET" action="index.php" style="display: flex; gap: 10px; align-items: center;">
+        <input type="hidden" name="route" value="cuentas_por_pagar/recepcion_facturas">
+        
+        <select name="id_orden_servicio" required style="padding: 8px; width: 500px; font-size: 1.1em; background-color: #e2e3e5;">
+            <option value="">-- Buscar Orden de Servicio Contabilizada --</option>
+            <?php foreach ($ordenesServicioPendientes as $os): ?>
+                <option value="<?= $os['id_orden_de_servicio'] ?>" <?= (isset($_GET['id_orden_servicio']) && $_GET['id_orden_servicio'] == $os['id_orden_de_servicio']) ? 'selected' : '' ?>>
+                    Orden de Servicio #<?= $os['id_orden_de_servicio'] ?> | <?= htmlspecialchars($os['compania_proveedor']) ?> | Total: Bs <?= number_format($os['monto_total_d'], 2) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+
+        <button type="submit" style="padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            Generar Forma
+        </button>
+    </form>
+</div>
+
+<?php if (isset($notaEntrega)): ?>
+    <div style="border: 1px solid #17a2b8; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+        <h3 style="color: #17a2b8; margin-top: 0;">2. Procesar Factura Comercial y Generar Retenciones</h3>
+        <p><strong>Proveedor:</strong> <?= htmlspecialchars($notaEntrega['compania_proveedor']) ?> (<?= htmlspecialchars($notaEntrega['rif_proveedor']) ?>)</p>
+        <p><strong>Concepto OC:</strong> <?= htmlspecialchars($notaEntrega['concepto_odc']) ?></p>
+        <hr>
+
+        <form method="POST" action="?route=cuentas_por_pagar/guardar_factura" onsubmit="return confirm('¿Está seguro de generar la Factura, los Comprobantes de Retención y la Orden de Pago defintiva al Proveedor? No se puede deshacer.');">
+            <?php if (isset($notaEntrega['id_orden_de_compra'])): ?>
+                <input type="hidden" name="id_orden_de_compra" value="<?= $notaEntrega['id_orden_de_compra'] ?>">
+            <?php elseif (isset($notaEntrega['id_orden_de_servicio'])): ?>
+                <input type="hidden" name="id_orden_de_servicio" value="<?= $notaEntrega['id_orden_de_servicio'] ?>">
+            <?php endif; ?>
+            <input type="hidden" name="id_proveedor" value="<?= $notaEntrega['id_proveedor'] ?>">
+            
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="padding: 10px; width: 25%;"><label>N° de Factura:</label></td>
+                    <td style="padding: 10px;"><input type="text" name="nro_documento_d" required style="padding: 8px; width: 200px;" placeholder="Ej: 000123445"></td>
+                    <td style="padding: 10px; width: 25%;"><label>N° de Control:</label></td>
+                    <td style="padding: 10px;"><input type="text" name="nro_control_d" required style="padding: 8px; width: 200px;" placeholder="Ej: 00-4493393"></td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px;"><label>Fecha de Emisión (Factura):</label></td>
+                    <td style="padding: 10px;"><input type="date" name="fecha_emision_d" value="<?= date('Y-m-d') ?>" required style="padding: 8px; width: 200px;"></td>
+                    <td style="padding: 10px;"><label>Fecha Vencimiento (Opcional):</label></td>
+                    <td style="padding: 10px;"><input type="date" name="fecha_vencimiento_d" style="padding: 8px; width: 200px;"></td>
+                </tr>
+            </table>
+
+            <hr>
+            <h4>Cuentas Iniciales (Causadas en Almacén)</h4>
+            <div style="display: flex; gap: 20px;">
+                <div style="background-color: #f8d7da; padding: 15px; border-radius: 5px; flex: 1;">
+                    <label>Monto Base Imponible (Bs):</label><br>
+                    <input type="number" step="0.01" name="monto_base_d" id="txtBase" value="<?= (float)$notaEntrega['monto_base_d'] ?>" readonly style="padding: 8px; width: 100%; margin-top: 5px; background: #e9ecef;">
+                </div>
+                <div style="background-color: #cce5ff; padding: 15px; border-radius: 5px; flex: 1;">
+                    <label>Monto Impuesto / IVA (Bs):</label><br>
+                    <input type="number" step="0.01" name="monto_impuesto_d" id="txtIva" value="<?= (float)$notaEntrega['monto_impuesto_d'] ?>" readonly style="padding: 8px; width: 100%; margin-top: 5px; background: #e9ecef;">
+                </div>
+                <div style="background-color: #d4edda; padding: 15px; border-radius: 5px; flex: 1;">
+                    <label>Total Factura Original (Bs):</label><br>
+                    <input type="number" step="0.01" value="<?= (float)$notaEntrega['monto_total_d'] ?>" readonly style="padding: 8px; width: 100%; margin-top: 5px; font-weight: bold; background: #e9ecef;">
+                </div>
+            </div>
+
+            <hr>
+            <h4>Asignación de Porcentajes de Retención</h4>
+            <div style="display: flex; gap: 20px;">
+                <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; flex: 1; border: 1px solid #ffeeba;">
+                    <label style="font-weight: bold;">Retención de ISLR (%)</label><br>
+                    <p style="font-size: 0.9em; margin-top: 2px;">Calculado sobre la Base Imponible.</p>
+                    <select name="porcentaje_retencion_islr" id="cmbIslr" style="padding: 8px; width: 100%;">
+                        <option value="0">0% (No aplica)</option>
+                        <option value="1">1% (Servicios Básicos PJ)</option>
+                        <option value="2" selected>2% (Contratistas PJ)</option>
+                        <option value="3">3% (Honorarios PN)</option>
+                        <option value="5">5% (Honorarios PJ)</option>
+                    </select>
+                    <div style="margin-top: 10px; font-weight: bold; color: #856404;">
+                        Monto Ret. ISLR (Bs): <span id="lblRetIslr">0.00</span>
+                    </div>
+                </div>
+
+                <div style="background-color: #d1ecf1; padding: 15px; border-radius: 5px; flex: 1; border: 1px solid #bee5eb;">
+                    <label style="font-weight: bold;">Retención de IVA (%)</label><br>
+                    <p style="font-size: 0.9em; margin-top: 2px;">Calculado sobre el Monto del Impuesto.</p>
+                    <select name="porcentaje_retencion_iva" id="cmbIva" style="padding: 8px; width: 100%;">
+                        <option value="0">0% (No aplica)</option>
+                        <option value="75" selected>75% (Contribuyente G.)</option>
+                        <option value="100">100% (No Inscritos)</option>
+                    </select>
+                    <div style="margin-top: 10px; font-weight: bold; color: #0c5460;">
+                        Monto Ret. IVA (Bs): <span id="lblRetIva">0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+            <div style="background-color: #343a40; color: white; padding: 15px; border-radius: 5px; margin-top: 20px;">
+                <h3 style="margin-top: 0; border-bottom: 1px solid #6c757d; padding-bottom: 10px;">Resumen: Órden de Pago Definitiva</h3>
+                <div style="display: flex; justify-content: space-between; font-size: 1.2em; margin-bottom: 10px;">
+                    <span>Subtotal a Pagar: </span>
+                    <span id="lblNeto">0.00</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.9em; color: #ffc107; margin-bottom: 10px;">
+                    <span>Total Retenido al Proveedor: </span>
+                    <span id="lblTotalRetenido">0.00</span>
+                </div>
+            </div>
+
+            <div style="text-align: right; margin-top: 20px;">
+                <button type="submit" style="padding: 12px 25px; background-color: #28a745; color: white; border: none; border-radius: 4px; font-weight: bold; font-size: 1.1em; cursor: pointer;">
+                    ✔ Guardar Factura y Procesar Solicitud de Pago
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function calcularPagoFinal() {
+            const base = parseFloat(document.getElementById('txtBase').value) || 0;
+            const iva = parseFloat(document.getElementById('txtIva').value) || 0;
+            const totalF = base + iva;
+
+            const porcIslr = parseFloat(document.getElementById('cmbIslr').value) || 0;
+            const porcIva = parseFloat(document.getElementById('cmbIva').value) || 0;
+
+            const retIslr = base * (porcIslr / 100);
+            const retIva = iva * (porcIva / 100);
+
+            document.getElementById('lblRetIslr').textContent = retIslr.toFixed(2);
+            document.getElementById('lblRetIva').textContent = retIva.toFixed(2);
+
+            const retTotal = retIslr + retIva;
+            const montoPago = totalF - retTotal;
+
+            document.getElementById('lblTotalRetenido').textContent = "- " + retTotal.toFixed(2);
+            document.getElementById('lblNeto').textContent = "Bs " + montoPago.toFixed(2);
+        }
+
+        document.getElementById('cmbIslr').addEventListener('change', calcularPagoFinal);
+        document.getElementById('cmbIva').addEventListener('change', calcularPagoFinal);
+
+        // Inicializar al cargar
+        calcularPagoFinal();
+    </script>
+<?php endif; ?>

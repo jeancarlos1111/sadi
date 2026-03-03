@@ -1,0 +1,108 @@
+<div class="container-fluid mt-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-file-export me-2"></i><?= htmlspecialchars($titulo) ?></h5>
+            <a href="?route=retenciones/index" class="btn btn-sm btn-light">
+                <i class="fas fa-arrow-left me-1"></i> Volver
+            </a>
+        </div>
+        <div class="card-body p-4">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> Seleccione el período fiscal para generar los archivos de exportación obligatorios para el SENIAT.
+            </div>
+
+            <form method="GET" action="index.php" class="row g-3 align-items-end mb-4 bg-light p-3 rounded border">
+                <input type="hidden" name="route" value="retenciones/declarar">
+                
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Mes</label>
+                    <select name="mes" class="form-select">
+                        <?php 
+                        $meses = [
+                            '01' => 'Enero', '02' => 'Febrero', '03' => 'Marzo', '04' => 'Abril',
+                            '05' => 'Mayo', '06' => 'Junio', '07' => 'Julio', '08' => 'Agosto',
+                            '09' => 'Septiembre', '10' => 'Octubre', '11' => 'Noviembre', '12' => 'Diciembre'
+                        ];
+                        foreach ($meses as $num => $nombre): ?>
+                            <option value="<?= $num ?>" <?= ($mes == $num) ? 'selected' : '' ?>><?= $nombre ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Año</label>
+                    <select name="anio" class="form-select">
+                        <?php 
+                        $currentYear = date('Y');
+                        for ($y = $currentYear; $y >= $currentYear - 5; $y--): ?>
+                            <option value="<?= $y ?>" <?= ($anio == $y) ? 'selected' : '' ?>><?= $y ?></option>
+                        <?php endfor; ?>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-sync-alt me-1"></i> Actualizar
+                    </button>
+                </div>
+            </form>
+
+            <div class="row">
+                <!-- Exportación IVA -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 border-success shadow-sm">
+                        <div class="card-body text-center">
+                            <div class="display-4 text-success mb-3">
+                                <i class="fas fa-file-invoice-dollar"></i>
+                            </div>
+                            <h4 class="card-title">Retenciones de IVA</h4>
+                            <p class="card-text text-muted">Genera el archivo TXT delimitado por tabulaciones para la declaración de retenciones de IVA.</p>
+                            <a href="?route=retenciones/exportarIva&mes=<?= $mes ?>&anio=<?= $anio ?>" class="btn btn-success btn-lg px-4">
+                                <i class="fas fa-download me-2"></i> Descargar TXT (IVA)
+                            </a>
+                        </div>
+                        <div class="card-footer bg-transparent border-top-0 text-center pb-3">
+                            <small class="text-muted"><i class="fas fa-check-circle me-1"></i> Formato Portal SENIAT v2.0</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exportación ISLR -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 border-info shadow-sm">
+                        <div class="card-body text-center">
+                            <div class="display-4 text-info mb-3">
+                                <i class="fas fa-file-code"></i>
+                            </div>
+                            <h4 class="card-title">Retenciones de ISLR</h4>
+                            <p class="card-text text-muted">Genera el archivo XML para la relación detallada de retenciones de ISLR a proveedores.</p>
+                            <a href="?route=retenciones/exportarIslr&mes=<?= $mes ?>&anio=<?= $anio ?>" class="btn btn-info btn-lg px-4 text-white">
+                                <i class="fas fa-download me-2"></i> Descargar XML (ISLR)
+                            </a>
+                        </div>
+                        <div class="card-footer bg-transparent border-top-0 text-center pb-3">
+                            <small class="text-muted"><i class="fas fa-check-circle me-1"></i> Formato XML Relación Detallada</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 p-3 bg-light rounded border border-warning">
+                <h6 class="text-warning mb-2"><i class="fas fa-exclamation-triangle me-2"></i>Importante</h6>
+                <ul class="mb-0 small">
+                    <li>Asegúrese de haber registrado todos los documentos del período antes de generar los archivos.</li>
+                    <li>Los archivos generados utilizan el RIF institucional configurado en el sistema.</li>
+                    <li>Para ISLR, se utiliza el código de concepto por defecto (001) para todas las retenciones.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-header { border-bottom: none; }
+    .display-4 { font-size: 3.5rem; opacity: 0.8; }
+    .btn-lg { border-radius: 10px; font-weight: 600; }
+    .card { transition: transform 0.2s; }
+    .card:hover { transform: translateY(-5px); }
+</style>

@@ -1,0 +1,83 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($error)): ?>
+    <div style="color:red; padding:10px; border:1px solid red; margin-bottom:20px;">
+        <?= htmlspecialchars($error) ?>
+    </div>
+<?php endif; ?>
+
+<form method="POST" action="?route=proyectos/guardar" style="max-width:800px;">
+    <?php if (isset($item) && $item->id_proyecto): ?>
+        <input type="hidden" name="id" value="<?= htmlspecialchars((string)$item->id_proyecto) ?>">
+    <?php endif; ?>
+
+    <fieldset style="margin-bottom:20px; padding:15px; border:1px solid #ccc;">
+        <legend style="font-weight:bold;">Datos Generales del Proyecto</legend>
+
+        <div style="margin-bottom:10px;">
+            <label>Código del Proyecto (*):</label><br>
+            <input type="text" name="codigo_proyecto" value="<?= htmlspecialchars($item->codigo_proyecto ?? '') ?>" required maxlength="50" style="width:50%; padding:5px;">
+        </div>
+
+        <div style="margin-bottom:10px;">
+            <label>Denominación del Proyecto (*):</label><br>
+            <input type="text" name="denominacion" value="<?= htmlspecialchars($item->denominacion ?? '') ?>" required maxlength="255" style="width:100%; padding:5px;">
+        </div>
+
+        <div style="margin-bottom:10px;">
+            <label>Unidad de Medida:</label><br>
+            <input type="text" name="unidad_medida" value="<?= htmlspecialchars($item->unidad_medida ?? '') ?>" maxlength="50" style="width:100%; padding:5px;">
+        </div>
+
+        <div style="margin-bottom:10px;">
+            <label>Año de Inicio:</label><br>
+            <input type="text" name="anio_inicio" value="<?= htmlspecialchars($item->anio_inicio ?? '') ?>" style="width:30%; padding:5px;">
+        </div>
+
+        <div style="margin-bottom:10px;">
+            <label>Año de Culminación:</label><br>
+            <input type="text" name="anio_culm" value="<?= htmlspecialchars($item->anio_culm ?? '') ?>" style="width:30%; padding:5px;">
+        </div>
+    </fieldset>
+
+    <fieldset style="margin-bottom:20px; padding:15px; border:1px solid #0056b3;">
+        <legend style="font-weight:bold; color:#0056b3;">Metas Trimestrales (Cantidades)</legend>
+
+        <table border="1" cellpadding="5" cellspacing="0" style="width:100%; border-collapse:collapse; text-align:center;">
+            <thead style="background-color:#f4f4f4;">
+                <tr>
+                    <th>Trimestre</th>
+                    <th>Programado</th>
+                    <th>Ejecutado</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="font-weight:bold;">I Trimestre</td>
+                    <td><input type="number" step="0.01" name="cant_programada_trim_i" value="<?= htmlspecialchars((string)($item->cant_programada_trim_i ?? 0)) ?>" style="width:100%; padding:5px; box-sizing:border-box;"></td>
+                    <td><input type="number" step="0.01" name="cant_ejecutada_trim_i" value="<?= htmlspecialchars((string)($item->cant_ejecutada_trim_i ?? 0)) ?>" style="width:100%; padding:5px; box-sizing:border-box;"></td>
+                </tr>
+                <tr>
+                    <td style="font-weight:bold;">II Trimestre</td>
+                    <td><input type="number" step="0.01" name="cant_programada_trim_ii" value="<?= htmlspecialchars((string)($item->cant_programada_trim_ii ?? 0)) ?>" style="width:100%; padding:5px; box-sizing:border-box;"></td>
+                    <td><input type="number" step="0.01" name="cant_ejecutada_trim_ii" value="<?= htmlspecialchars((string)($item->cant_ejecutada_trim_ii ?? 0)) ?>" style="width:100%; padding:5px; box-sizing:border-box;"></td>
+                </tr>
+                <tr>
+                    <td style="font-weight:bold;">III Trimestre</td>
+                    <td><input type="number" step="0.01" name="cant_programada_trim_iii" value="<?= htmlspecialchars((string)($item->cant_programada_trim_iii ?? 0)) ?>" style="width:100%; padding:5px; box-sizing:border-box;"></td>
+                    <td><input type="number" step="0.01" name="cant_ejecutada_trim_iii" value="<?= htmlspecialchars((string)($item->cant_ejecutada_trim_iii ?? 0)) ?>" style="width:100%; padding:5px; box-sizing:border-box;"></td>
+                </tr>
+                <tr>
+                    <td style="font-weight:bold;">IV Trimestre</td>
+                    <td><input type="number" step="0.01" name="cant_programada_trim_iv" value="<?= htmlspecialchars((string)($item->cant_programada_trim_iv ?? 0)) ?>" style="width:100%; padding:5px; box-sizing:border-box;"></td>
+                    <td><input type="number" step="0.01" name="cant_ejecutada_trim_iv" value="<?= htmlspecialchars((string)($item->cant_ejecutada_trim_iv ?? 0)) ?>" style="width:100%; padding:5px; box-sizing:border-box;"></td>
+                </tr>
+            </tbody>
+        </table>
+    </fieldset>
+
+    <div style="margin-top:20px;">
+        <button type="submit" style="padding:10px 20px; background-color:#28a745; color:white; border:none; cursor:pointer;">Guardar Proyecto y Metas</button>
+        <a href="?route=proyectos/index" style="margin-left:10px; color:#dc3545; text-decoration:underline;">Cancelar Volver</a>
+    </div>
+</form>

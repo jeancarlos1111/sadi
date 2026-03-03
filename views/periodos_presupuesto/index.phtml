@@ -1,0 +1,75 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($success)): ?>
+    <div style="color:green; padding:10px; border:1px solid green; margin-bottom:15px;"><?= htmlspecialchars($success) ?></div>
+<?php endif; ?>
+<?php if (isset($error)): ?>
+    <div style="color:red; padding:10px; border:1px solid red; margin-bottom:15px;"><?= htmlspecialchars($error) ?></div>
+<?php endif; ?>
+
+<p style="color:#555;">
+    Seleccione el año a gestionar y marque los meses que desea <strong>cerrar</strong>.
+    Los meses cerrados <strong>no permitirán registrar nuevos comprobantes</strong> en ese período.
+</p>
+
+<form method="GET" action="" style="margin-bottom:20px; display:inline-flex; align-items:center; gap:10px;">
+    <input type="hidden" name="route" value="periodos_presupuesto/index">
+    <label style="font-weight:bold;">Año:</label>
+    <input type="number" name="anio" value="<?= htmlspecialchars((string)$anio) ?>" min="2000" max="2099" style="padding:5px; width:90px;">
+    <button type="submit" style="padding:5px 12px;">Cargar</button>
+    <a href="?route=periodos_presupuesto/index&anio=<?= ($anio - 1) ?>" style="padding:5px 10px;">◀ <?= $anio - 1 ?></a>
+    <a href="?route=periodos_presupuesto/index&anio=<?= ($anio + 1) ?>" style="padding:5px 10px;"><?= $anio + 1 ?> ▶</a>
+</form>
+
+<form method="POST" action="?route=periodos_presupuesto/guardar">
+    <input type="hidden" name="anio" value="<?= htmlspecialchars((string)$anio) ?>">
+
+    <table border="1" cellpadding="10" cellspacing="0" style="width:100%; border-collapse:collapse; max-width:700px;">
+        <thead style="background-color:#0056b3; color:white;">
+            <tr>
+                <th>Mes</th>
+                <th style="text-align:center;">Estado Actual</th>
+                <th style="text-align:center;">Cerrar Mes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($periodos as $mes => $periodo): ?>
+                <tr>
+                    <td style="font-weight:bold;"><?= htmlspecialchars($periodo->nombreMes()) ?></td>
+                    <td style="text-align:center;">
+                        <?php if ($periodo->isAbierto()): ?>
+                            <span style="color:green; font-weight:bold;">✅ ABIERTO</span>
+                        <?php else: ?>
+                            <span style="color:red; font-weight:bold;">🔒 CERRADO</span>
+                            <?php if ($periodo->fecha_cierre): ?>
+                                <small style="color:#666;"> (<?= htmlspecialchars($periodo->fecha_cierre) ?>)</small>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    </td>
+                    <td style="text-align:center;">
+                        <input
+                            type="checkbox"
+                            name="meses_cerrados[]"
+                            value="<?= $mes ?>"
+                            <?= !$periodo->isAbierto() ? 'checked' : '' ?>
+                            style="transform:scale(1.3); cursor:pointer;"
+                        >
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+
+    <div style="margin-top:15px;">
+        <label>Observación (opcional):</label><br>
+        <input type="text" name="observacion" maxlength="255" placeholder="Motivo del cierre/apertura..." style="width:100%; max-width:500px; padding:5px; margin-top:4px;">
+    </div>
+
+    <div style="margin-top:15px;">
+        <button type="submit" style="padding:10px 20px; background-color:#dc3545; color:white; border:none; cursor:pointer;"
+                onclick="return confirm('¿Confirmar los cambios de períodos?');">
+            🔒 Aplicar Cierre / Apertura
+        </button>
+        <a href="?route=periodos_presupuesto/index&anio=<?= $anio ?>" style="margin-left:10px; color:#0056b3; text-decoration:underline;">Cancelar</a>
+    </div>
+</form>

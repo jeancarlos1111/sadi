@@ -1,0 +1,64 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($error)): ?>
+    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
+        <?= htmlspecialchars($error) ?>
+    </div>
+<?php endif; ?>
+
+<form method="POST" action="?route=articulos/guardar" style="max-width: 600px;">
+    <?php if ($articulo && $articulo->id): ?>
+        <input type="hidden" name="id" value="<?= htmlspecialchars((string)$articulo->id) ?>">
+    <?php endif; ?>
+
+    <div style="margin-bottom: 10px;">
+        <label>Denominación (*):</label><br>
+        <input type="text" name="denominacion" value="<?= htmlspecialchars($articulo->denominacion ?? '') ?>" required maxlength="50" style="width: 100%; padding: 5px;">
+    </div>
+
+    <div style="margin-bottom: 10px;">
+        <label>Observación:</label><br>
+        <textarea name="observacion" rows="3" style="width: 100%; padding: 5px;"><?= htmlspecialchars($articulo->observacion ?? '') ?></textarea>
+    </div>
+
+    <div style="margin-bottom: 10px;">
+        <label>Tipo de Artículo (*):</label><br>
+        <select name="id_tipo_de_articulo" required style="width: 100%; padding: 5px;">
+            <option value="">SELECCIONE</option>
+            <?php foreach ($tiposArticulo as $tipo): ?>
+                <option value="<?= $tipo->id ?>" <?= ($articulo && $articulo->idTipoDeArticulo === $tipo->id) ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($tipo->denominacion) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
+    <div style="margin-bottom: 10px;">
+        <label>Unidad de Medida (*):</label><br>
+        <select name="id_unidades_de_medida" required style="width: 100%; padding: 5px;">
+            <option value="">SELECCIONE</option>
+            <?php foreach ($unidadesMedida as $udm): ?>
+                <option value="<?= $udm->id ?>" <?= ($articulo && $articulo->idUnidadesDeMedida === $udm->id) ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($udm->denominacion) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
+    <div style="margin-bottom: 10px;">
+        <label>ID Código Plan Único (Cuenta):</label><br>
+        <input type="number" name="id_codigo_plan_unico" value="<?= htmlspecialchars((string)($articulo->idCodigoPlanUnico ?? '')) ?>" style="width: 100%; padding: 5px;">
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <label>
+            <input type="checkbox" name="aplicar_iva" value="1" <?= ($articulo && $articulo->aplicarIva) ? 'checked' : '' ?>>
+            Aplicar I.V.A.
+        </label>
+    </div>
+
+    <div>
+        <button type="submit" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; cursor: pointer;">Guardar Artículo</button>
+        <a href="?route=articulos/index" style="margin-left: 10px; color: #dc3545; text-decoration: none;">Cancelar</a>
+    </div>
+</form>

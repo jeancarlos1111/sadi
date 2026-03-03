@@ -1,0 +1,54 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<div style="background-color: #f8f9fa; padding: 20px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 20px;">
+    <p>Configure cómo se reflejarán en la Contabilidad Patrimonial los gastos ejecutados en una Partida Presupuestaria específica.</p>
+</div>
+
+<form method="POST" action="?route=convertidor/guardarVinculo" style="max-width: 800px; border: 1px solid #ced4da; padding: 20px; border-radius: 8px; background: white;">
+
+    <div style="margin-bottom: 15px;">
+        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Tipo de Transacción Origen:</label>
+        <select name="tipo_operacion" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <option value="">Seleccione al accionar una operación...</option>
+            <?php foreach ($operaciones as $key => $label): ?>
+                <option value="<?= htmlspecialchars($key) ?>"><?= htmlspecialchars($label) ?></option>
+            <?php endforeach; ?>
+        </select>
+        <small style="color: #666;">Define en qué momento exacto del sistema se usará este cruce (Ej. Al recibir mercancía, al pagar nómina).</small>
+    </div>
+
+    <div style="margin-bottom: 15px;">
+        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Si se afecta la Partida Presupuestaria:</label>
+        <select name="id_codigo_plan_unico" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <option value="">Buscar partida...</option>
+            <?php foreach ($partidas as $p): ?>
+                <option value="<?= $p['id_codigo_plan_unico'] ?>"><?= htmlspecialchars($p['codigo_plan_unico'] . ' - ' . $p['denominacion']) ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Entonces Registrar (Debe/Haber) en la Cuenta Contable:</label>
+        <select name="id_cuenta" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <option value="">Buscar cuenta patrimonial...</option>
+            <?php foreach ($cuentas as $c): ?>
+                <!-- Solo agrupando por vista básica -->
+                <option value="<?= $c['id_cuenta_contable'] ?>">
+                    <?= htmlspecialchars($c['codigo_cuenta'].' - '.$c['denominacion_cuenta']) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+    
+    <div style="margin-bottom: 20px;">
+        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Descripción Breve o Justificación (Opcional):</label>
+        <input type="text" name="descripcion" placeholder="Ej: Regla de bienes de uso para compras" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+    </div>
+
+    <div style="text-align: right; margin-top: 30px; border-top: 1px solid #eee; padding-top: 15px;">
+        <a href="?route=convertidor/index" style="margin-right: 15px; text-decoration: none; color: #555;">Cancelar</a>
+        <button type="submit" style="background-color: #0d6efd; color: white; padding: 10px 20px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+            Guardar Vinculación
+        </button>
+    </div>
+</form>

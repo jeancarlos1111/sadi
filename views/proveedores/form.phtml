@@ -1,0 +1,60 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($error)): ?>
+    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
+        <?= htmlspecialchars($error) ?>
+    </div>
+<?php endif; ?>
+
+<form method="POST" action="?route=proveedores/guardar" style="max-width: 600px;">
+    <?php if ($proveedor && $proveedor->id): ?>
+        <input type="hidden" name="id" value="<?= htmlspecialchars((string)$proveedor->id) ?>">
+    <?php endif; ?>
+
+    <div style="margin-bottom: 10px;">
+        <label>RIF (*):</label><br>
+        <input type="text" name="rif" value="<?= htmlspecialchars($proveedor->rif ?? '') ?>" required maxlength="15" style="width: 100%; padding: 5px;">
+    </div>
+
+    <div style="margin-bottom: 10px;">
+        <label>NIT:</label><br>
+        <input type="text" name="nit" value="<?= htmlspecialchars($proveedor->nit ?? '') ?>" maxlength="15" style="width: 100%; padding: 5px;">
+    </div>
+
+    <div style="margin-bottom: 10px;">
+        <label>Compañía (*):</label><br>
+        <input type="text" name="compania" value="<?= htmlspecialchars($proveedor->compania ?? '') ?>" required maxlength="60" style="width: 100%; padding: 5px;">
+    </div>
+
+    <div style="margin-bottom: 10px;">
+        <label>Tipo Organización (*):</label><br>
+        <select name="id_tipo_organizacion" required style="width: 100%; padding: 5px;">
+            <option value="">SELECCIONE</option>
+            <?php foreach ($tiposOrganizacion as $tipo): ?>
+                <option value="<?= $tipo->id ?>" <?= ($proveedor && $proveedor->idTipoOrganizacion === $tipo->id) ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($tipo->nombre) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
+    <div style="margin-bottom: 10px;">
+        <label>Dirección (*):</label><br>
+        <textarea name="direccion" required rows="3" style="width: 100%; padding: 5px;"><?= htmlspecialchars($proveedor->direccion ?? '') ?></textarea>
+    </div>
+
+    <div style="margin-bottom: 10px;">
+        <label>Teléfono:</label><br>
+        <input type="text" name="telefono" value="<?= htmlspecialchars($proveedor->telefono ?? '') ?>" maxlength="30" style="width: 100%; padding: 5px;">
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <label>ID Código Contable:</label><br>
+        <input type="number" name="id_codigo_contable" value="<?= htmlspecialchars((string)($proveedor->idCodigoContable ?? '')) ?>" style="width: 100%; padding: 5px;">
+    </div>
+
+    <div>
+        <button type="submit" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; cursor: pointer;">Guardar Proveedor</button>
+        <a href="?route=proveedores/index" style="margin-left: 10px; color: #dc3545; text-decoration: none;">Cancelar</a>
+    </div>
+</form>

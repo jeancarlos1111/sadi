@@ -1,0 +1,29 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($_GET['error'])): ?>
+    <div style="color: red; padding: 12px; border: 1px solid red; border-radius: 4px; margin-bottom: 20px;">
+        <?= htmlspecialchars($_GET['error']) ?>
+    </div>
+<?php endif; ?>
+
+<div style="background: #f8f9fa; padding: 20px; border: 1px solid #ddd; max-width: 500px;">
+    <form method="POST" action="?route=tipos_operaciones_bancarias/guardar">
+        <input type="hidden" name="id" value="<?= $tipo ? $tipo->id : 0 ?>">
+        
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Acrónimo</label>
+            <input type="text" name="acronimo_tipo_operacion_bancaria" value="<?= $tipo ? htmlspecialchars($tipo->acronimo) : '' ?>" required maxlength="5" style="padding: 8px; width: 100px; box-sizing: border-box;" placeholder="Ej: TR, DP, CH">
+            <div style="font-size: 0.8em; color: gray; margin-top: 4px;">Máximo 5 caracteres.</div>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Nombre de la Operación</label>
+            <input type="text" name="nombre_tipo_operacion_bancaria" value="<?= $tipo ? htmlspecialchars($tipo->nombre) : '' ?>" required style="padding: 8px; width: 100%; box-sizing: border-box;" placeholder="Transferencia, Cheque, Depósito...">
+        </div>
+
+        <div style="margin-top: 20px; display: flex; justify-content: space-between;">
+            <a href="?route=tipos_operaciones_bancarias/index" style="color: #666; text-decoration: none; padding: 8px 15px;">Cancelar</a>
+            <button type="submit" style="background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">Guardar</button>
+        </div>
+    </form>
+</div>

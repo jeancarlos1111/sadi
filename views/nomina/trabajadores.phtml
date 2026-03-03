@@ -1,0 +1,59 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<div style="background-color: #f8f9fa; padding: 20px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 20px;">
+    <h3>Gestión de Personal</h3>
+    <p>Este es el listado de trabajadores activos registrados en la base de datos de SADI. Estos datos alimentan automáticamente el Motor de Nómina.</p>
+    <p style="color: #0c5460; background-color: #d1ecf1; padding: 10px; border-radius: 4px; border: 1px solid #bee5eb;">
+        <strong>Nota del MVP:</strong> Actualmente se muestran los registros insertados desde la inicialización del sistema (Seed Data). La pantalla de "Registrar Nuevo Trabajador", "Cambio de Cargo" e "Inclusión de Familiares" pertenece al desarrollo del Módulo Completo de RRHH que excede el ciclo de transacciones financieras de esta migración.
+<div style="margin-bottom: 20px; text-align: right;">
+    <a href="?route=nomina/crearTrabajador" style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+        + Registrar Nuevo Trabajador
+    </a>
+</div>
+
+<?php if (isset($_GET['success'])): ?>
+    <div style="color: #155724; background-color: #d4edda; border-color: #c3e6cb; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: .25rem;">
+        <?= htmlspecialchars($_GET['success']) ?>
+    </div>
+<?php endif; ?>
+
+<?php if (isset($error)): ?>
+    <div style="color: #721c24; background-color: #f8d7da; border-color: #f5c6cb; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: .25rem;">
+        <?= htmlspecialchars($error) ?>
+    </div>
+<?php endif; ?>
+
+<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse; background: white;">
+    <thead style="background-color: #17a2b8; color: white;">
+        <tr>
+            <th>Cédula</th>
+            <th>Nombres y Apellidos</th>
+            <th>Cargo</th>
+            <th>Tipo de Nómina</th>
+            <th>Fecha de Ingreso</th>
+            <th>Sueldo Base Asignado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (empty($trabajadores)): ?>
+            <tr>
+                <td colspan="7" style="text-align: center;">No hay trabajadores activos en el sistema.</td>
+            </tr>
+        <?php else: ?>
+            <?php foreach ($trabajadores as $t): ?>
+                <tr>
+                    <td style="font-weight: bold;"><?= htmlspecialchars($t['cedula']) ?></td>
+                    <td><?= htmlspecialchars($t['nombres'] . ' ' . $t['apellidos']) ?></td>
+                    <td><?= htmlspecialchars($t['cargo']) ?></td>
+                    <td><span style="background: #e2e3e5; padding: 3px 6px; border-radius: 4px; font-size: 0.9em;"><?= htmlspecialchars($t['nomina']) ?></span></td>
+                    <td><?= htmlspecialchars($t['ingreso']) ?></td>
+                    <td style="text-align: right; font-weight: bold; color: green;">Bs <?= number_format((float)$t['sueldo_basico'], 2, ',', '.') ?></td>
+                    <td style="text-align: center;">
+                        <a href="?route=nomina/editarTrabajador&cod_ficha=<?= $t['cod_ficha'] ?>" style="color: white; background-color: #ffc107; text-decoration: none; padding: 5px 10px; border-radius: 4px; color: #000; font-weight: bold;">Editar Cargo/Sueldo</a>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </tbody>
+</table>

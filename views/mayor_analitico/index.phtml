@@ -1,0 +1,67 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<p style="color:#555;">
+    Genere el <strong>Mayor Analítico Presupuestario</strong> en formato PDF filtrando por año, estructura y/o cuenta.
+    El reporte incluye todos los movimientos con el saldo disponible acumulado.
+</p>
+
+<fieldset style="max-width:620px; padding:20px; border:1px solid #0056b3;">
+    <legend style="font-weight:bold; color:#0056b3;">📋 Parámetros del Reporte</legend>
+
+    <form method="GET" action="" target="_blank" style="display:flex; flex-direction:column; gap:14px;">
+        <input type="hidden" name="route" value="mayor_analitico/generar">
+
+        <div>
+            <label style="display:block; font-weight:bold; margin-bottom:4px;">Año Fiscal (*):</label>
+            <input type="number" name="anio" value="<?= htmlspecialchars((string)$anio_actual) ?>"
+                   min="2000" max="2099" required style="padding:6px; width:120px;">
+        </div>
+
+        <div>
+            <label style="display:block; font-weight:bold; margin-bottom:4px;">Estructura Presupuestaria:</label>
+            <select name="id_estruc" style="padding:6px; width:100%;">
+                <option value="">── Todas las Estructuras ──</option>
+                <?php foreach ($estructuras as $ep): ?>
+                    <option value="<?= htmlspecialchars((string)$ep->id) ?>">
+                        <?= htmlspecialchars($ep->descripcion) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
+        <div>
+            <label style="display:block; font-weight:bold; margin-bottom:4px;">Partida (Cuenta):</label>
+            <select name="id_cuenta" style="padding:6px; width:100%;">
+                <option value="">── Todas las Cuentas ──</option>
+                <?php foreach ($planCuentas as $cpu): ?>
+                    <option value="<?= htmlspecialchars((string)$cpu->id) ?>">
+                        <?= htmlspecialchars($cpu->codigo . ' – ' . $cpu->denominacion) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
+        <div style="margin-top:5px;">
+            <button type="submit" style="padding:10px 24px; background-color:#dc3545; color:white; border:none; cursor:pointer; font-size:14px;">
+                📄 Generar Mayor Analítico (PDF)
+            </button>
+            <p style="font-size:12px; color:#777; margin-top:6px;">
+                El PDF se abrirá en una nueva pestaña y podrá descargarse directamente.
+            </p>
+        </div>
+    </form>
+</fieldset>
+
+<hr style="margin:25px 0;">
+
+<div style="background:#f0f4fa; border:1px solid #cce0ff; padding:15px; max-width:620px;">
+    <strong>Contenido del reporte:</strong>
+    <ul style="margin:8px 0; padding-left:20px; color:#555; font-size:13px;">
+        <li>Agrupado por <em>Estructura Presupuestaria</em> y <em>Código de Cuenta</em></li>
+        <li>Por cada movimiento: N° Comprobante, denominación, fecha, tipo de operación</li>
+        <li>Columnas de monto: Asignado (AAP) | Crédito (CA) | Gasto (CG) | Traspaso (TR)</li>
+        <li>Saldo disponible acumulado progresivo por cada línea</li>
+        <li>Totales por partida al cierre de cada cuenta</li>
+        <li>Formato A4 Apaisado con firmas de Preparado / Revisado / Autorizado</li>
+    </ul>
+</div>

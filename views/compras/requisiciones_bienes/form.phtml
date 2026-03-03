@@ -1,0 +1,87 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($error)): ?>
+    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
+        <?= htmlspecialchars($error) ?>
+    </div>
+<?php endif; ?>
+
+<form method="POST" action="?route=requisiciones_bienes/guardar" style="max-width: 800px;">
+    <?php if ($requisicion && $requisicion->id): ?>
+        <input type="hidden" name="id" value="<?= htmlspecialchars((string)$requisicion->id) ?>">
+    <?php endif; ?>
+
+    <fieldset style="margin-bottom: 20px;">
+        <legend>Datos Generales</legend>
+        
+        <div style="margin-bottom: 10px;">
+            <label>Fecha (*):</label><br>
+            <input type="date" name="fecha" value="<?= htmlspecialchars($requisicion->fecha ?? date('Y-m-d')) ?>" required style="width: 100%; padding: 5px;">
+        </div>
+
+        <div style="margin-bottom: 10px;">
+            <label>Concepto (*):</label><br>
+            <textarea name="concepto" required rows="3" style="width: 100%; padding: 5px;"><?= htmlspecialchars($requisicion->concepto ?? '') ?></textarea>
+        </div>
+
+        <div style="margin-bottom: 10px;">
+            <label>ID Estructura Presupuestaria (*):</label><br>
+            <!-- In SIGAFS this was selected via an Ajax popup, but keeping it simple as ID for the MVC example -->
+            <input type="number" name="id_estructura_presupuestaria" value="<?= htmlspecialchars((string)($requisicion->idEstructuraPresupuestaria ?? '')) ?>" required style="width: 100%; padding: 5px;">
+        </div>
+    </fieldset>
+
+    <fieldset style="margin-bottom: 20px;">
+        <legend>Artículos Solicitados</legend>
+        <table border="1" style="width: 100%; border-collapse: collapse; margin-bottom: 10px;" id="tabla-articulos">
+            <thead style="background-color: #eee;">
+                <tr>
+                    <th>Artículo</th>
+                    <th>Cantidad</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php 
+                $listaArticulosRow = $requisicion ? $requisicion->articulos : [['id_articulo' => '', 'cantidad' => '']];
+                foreach ($listaArticulosRow as $index => $art): 
+                ?>
+                <tr>
+                    <td>
+                        <select name="articulos[]" required style="width: 100%; padding: 5px;">
+                            <option value="">SELECCIONE UN ARTICULO</option>
+                            <?php foreach($articulosCatalogo as $catData): $cat = $catData['entity']; ?>
+                                <option value="<?= $cat->id ?>" <?= ($cat->id == $art['id_articulo']) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($cat->denominacion) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" step="0.01" name="cantidades[]" value="<?= htmlspecialchars((string)($art['cantidad'] ?? '')) ?>" required style="width: 100%; padding: 5px;">
+                    </td>
+                    <td>
+                        <button type="button" onclick="this.parentElement.parentElement.remove()" style="color: red; cursor:pointer;">Quitar</button>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        <button type="button" onclick="agregarArticulo()">+ Añadir Fila</button>
+
+        <script>
+        function agregarArticulo() {
+            var tbody = document.querySelector("#tabla-articulos tbody");
+            var firstRow = tbody.querySelector("tr").cloneNode(true);
+            firstRow.querySelector('select').value = "";
+            firstRow.querySelector('input').value = "";
+            tbody.appendChild(firstRow);
+        }
+        </script>
+    </fieldset>
+
+    <div>
+        <button type="submit" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; cursor: pointer;">Guardar Requisición</button>
+        <a href="?route=requisiciones_bienes/index" style="margin-left: 10px; color: #dc3545; text-decoration: none;">Cancelar</a>
+    </div>
+</form>

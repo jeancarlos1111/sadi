@@ -1,0 +1,223 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($error)): ?>
+    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
+        <?= htmlspecialchars($error) ?>
+    </div>
+<?php endif; ?>
+
+<form method="POST" action="?route=ordenes_compra/guardar" id="ordenCompraForm">
+    <div style="border: 1px solid #ccc; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+        <h3>Datos de la Orden</h3>
+        <table style="width: 100%;">
+            <tr>
+                <td style="padding-bottom: 10px;"><label for="id_proveedor">Proveedor:</label></td>
+                <td style="padding-bottom: 10px;">
+                    <select name="id_proveedor" id="id_proveedor" required style="width: 100%; padding: 5px;">
+                        <option value="">-- Seleccione un Proveedor --</option>
+                        <?php foreach ($proveedores as $prov): ?>
+                            <?php $p = $prov['entity']; ?>
+                            <option value="<?= $p->id ?>"><?= htmlspecialchars($p->rif . ' - ' . $p->compania) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-bottom: 10px;"><label for="fecha_odc">Fecha:</label></td>
+                <td style="padding-bottom: 10px;">
+                    <input type="date" name="fecha_odc" id="fecha_odc" value="<?= date('Y-m-d') ?>" required style="padding: 5px;">
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-bottom: 10px;"><label for="concepto_odc">Concepto:</label></td>
+                <td style="padding-bottom: 10px;">
+                    <textarea name="concepto_odc" id="concepto_odc" rows="3" required style="width: 100%; padding: 5px;"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-bottom: 10px;"><label for="porcentaje_iva_odc">% IVA Global:</label></td>
+                <td style="padding-bottom: 10px;">
+                    <input type="number" step="0.01" name="porcentaje_iva_odc" id="porcentaje_iva_odc" value="16.00" required style="padding: 5px; width: 100px;">
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div style="border: 1px solid #ccc; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h3 style="margin: 0;">Artículos y Renglones</h3>
+            <button type="button" id="btnAgregarArticulo" style="padding: 8px 15px; background-color: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                + Agregar Artículo
+            </button>
+        </div>
+        
+        <table id="tablaArticulos" border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
+            <thead style="background-color: #f8f9fa;">
+                <tr>
+                    <th style="width: 40%">Artículo (con Partida)</th>
+                    <th>Cantidad</th>
+                    <th>Costo Unitario</th>
+                    <th>Aplica IVA</th>
+                    <th>Subtotal</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Contenido dinámico mediante JS -->
+            </tbody>
+        </table>
+    </div>
+
+    <div style="border: 1px solid #ccc; padding: 15px; border-radius: 5px; margin-bottom: 20px; background-color: #f8f9fa;">
+        <table style="width: 100%; text-align: right; font-weight: bold; font-size: 1.1em;">
+            <tr>
+                <td style="width: 80%;">Base Imponible:</td>
+                <td>
+                    <input type="hidden" name="monto_base_odc" id="monto_base_odc" value="0">
+                    <span id="lbl_monto_base">0.00</span>
+                </td>
+            </tr>
+            <tr>
+                <td>Monto IVA:</td>
+                <td>
+                    <input type="hidden" name="monto_iva_odc" id="monto_iva_odc" value="0">
+                    <span id="lbl_monto_iva">0.00</span>
+                </td>
+            </tr>
+            <tr style="color: #0056b3; font-size: 1.3em;">
+                <td>TOTAL ORDEN DE COMPRA:</td>
+                <td>
+                    <input type="hidden" name="monto_total_odc" id="monto_total_odc" value="0">
+                    <span id="lbl_monto_total">0.00</span>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div>
+        <button type="submit" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+            ✔ Guardar Orden y Comprometer Presupuesto
+        </button>
+        <a href="?route=ordenes_compra/index" style="margin-left: 15px; text-decoration: none; color: #dc3545;">Cancelar</a>
+    </div>
+</form>
+
+<script>
+    // Datos de artículos pasados desde PHP a JS
+    const catalogoArticulos = [
+        <?php foreach ($articulos as $art): ?>
+            <?php $a = $art['entity']; ?>
+            { id: <?= $a->id ?>, nombre: "<?= addslashes($a->denominacion) ?>", partida: "<?= addslashes($art['partida'] ?? 'Sin Partida') ?>", aplica_iva: <?= $a->aplicarIva ? 'true' : 'false' ?> },
+        <?php endforeach; ?>
+    ];
+
+    const tabla = document.querySelector('#tablaArticulos tbody');
+    const btnAgregar = document.getElementById('btnAgregarArticulo');
+    
+    function calcularTotales() {
+        let base_imponible = 0;
+        let monto_iva = 0;
+        const porcentaje_iva = parseFloat(document.getElementById('porcentaje_iva_odc').value) || 0;
+
+        const filas = tabla.querySelectorAll('tr');
+        filas.forEach(fila => {
+            const cantidad = parseFloat(fila.querySelector('.input-cantidad').value) || 0;
+            const costo = parseFloat(fila.querySelector('.input-costo').value) || 0;
+            const chkIva = fila.querySelector('.cb-fake');
+            const aplicaIva = chkIva ? chkIva.checked : false;
+            
+            const subtotal = cantidad * costo;
+            fila.querySelector('.lbl-subtotal').textContent = subtotal.toFixed(2);
+            
+            base_imponible += subtotal;
+            if (aplicaIva) {
+                monto_iva += subtotal * (porcentaje_iva / 100);
+            }
+        });
+
+        const total = base_imponible + monto_iva;
+
+        // Actualizar UI
+        document.getElementById('lbl_monto_base').textContent = base_imponible.toFixed(2);
+        document.getElementById('lbl_monto_iva').textContent = monto_iva.toFixed(2);
+        document.getElementById('lbl_monto_total').textContent = total.toFixed(2);
+
+        // Actualizar Hidden Inputs para el POST
+        document.getElementById('monto_base_odc').value = base_imponible.toFixed(2);
+        document.getElementById('monto_iva_odc').value = monto_iva.toFixed(2);
+        document.getElementById('monto_total_odc').value = total.toFixed(2);
+    }
+
+    function agregarFila() {
+        const tr = document.createElement('tr');
+        
+        let opcionesArticulos = '<option value="">-- Seleccione --</option>';
+        catalogoArticulos.forEach(art => {
+            opcionesArticulos += `<option value="${art.id}">${art.nombre} (Partida: ${art.partida})</option>`;
+        });
+
+        tr.innerHTML = `
+            <td>
+                <select name="id_articulo[]" class="input-articulo" required style="width: 100%; padding: 5px;">
+                    ${opcionesArticulos}
+                </select>
+            </td>
+            <td>
+                <input type="number" step="0.01" name="cantidad_aodc[]" class="input-cantidad" value="1" required style="width: 100px; padding: 5px;">
+            </td>
+            <td>
+                <input type="number" step="0.01" name="costo_aodc[]" class="input-costo" value="0" required style="width: 100px; padding: 5px;">
+            </td>
+            <td style="text-align: center;">
+                <input type="checkbox" class="cb-fake">
+                <input type="hidden" name="aplica_iva[]" class="input-aplica-iva-real" value="0">
+            </td>
+            <td style="text-align: right; font-weight: bold;">
+                <span class="lbl-subtotal">0.00</span>
+            </td>
+            <td style="text-align: center;">
+                <button type="button" class="btn-eliminar" style="color: red; background: none; border: none; cursor: pointer; font-size: 1.2em;">✖</button>
+            </td>
+        `;
+
+        // Eventos
+        const selArticulo = tr.querySelector('.input-articulo');
+        const chkIva = tr.querySelector('.cb-fake');
+        const hiddenIva = tr.querySelector('.input-aplica-iva-real');
+
+        selArticulo.addEventListener('change', function() {
+            const selectedVal = this.value;
+            const articulo = catalogoArticulos.find(a => a.id == selectedVal);
+            if (articulo && articulo.aplica_iva) {
+                chkIva.checked = true;
+                hiddenIva.value = '1';
+            } else {
+                chkIva.checked = false;
+                hiddenIva.value = '0';
+            }
+            calcularTotales();
+        });
+
+        chkIva.addEventListener('change', function() {
+            hiddenIva.value = this.checked ? '1' : '0';
+            calcularTotales();
+        });
+
+        tr.querySelector('.input-cantidad').addEventListener('input', calcularTotales);
+        tr.querySelector('.input-costo').addEventListener('input', calcularTotales);
+        
+        tr.querySelector('.btn-eliminar').addEventListener('click', function() {
+            tr.remove();
+            calcularTotales();
+        });
+
+        tabla.appendChild(tr);
+    }
+
+    btnAgregar.addEventListener('click', agregarFila);
+    document.getElementById('porcentaje_iva_odc').addEventListener('input', calcularTotales);
+
+    // Agregar una fila vacía por defecto al iniciar
+    agregarFila();
+
+</script>

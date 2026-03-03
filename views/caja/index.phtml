@@ -1,0 +1,52 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<div style="margin-bottom: 20px; text-align: right;">
+    <a href="?route=caja/form" style="background-color: #28a745; color: white; padding: 10px 16px; text-decoration: none; border-radius: 4px;">+ Nueva Caja Chica</a>
+</div>
+
+<?php if (empty($cajas)): ?>
+    <div style="text-align: center; padding: 30px; color: gray; border: 2px dashed #dee2e6; border-radius: 6px;">
+        No hay cajas chicas registradas. <a href="?route=caja/form">Crear la primera</a>.
+    </div>
+<?php else: ?>
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+    <?php foreach ($cajas as $c): 
+        $pct = $c->montoAsignado > 0 ? ($c->montoDisponible / $c->montoAsignado) * 100 : 0;
+        $color = $pct > 30 ? '#198754' : ($pct > 10 ? '#fd7e14' : '#dc3545');
+    ?>
+    <div style="border: 1px solid #dee2e6; border-radius: 8px; padding: 18px; background: white; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <strong style="font-size: 1.05em;">💼 <?= htmlspecialchars($c->denominacion) ?></strong>
+            <span style="font-size: 0.78em; background: <?= $c->activa ? '#d4edda' : '#f8d7da' ?>; color: <?= $c->activa ? '#155724' : '#721c24' ?>; padding: 3px 8px; border-radius: 10px;">
+                <?= $c->activa ? 'Activa' : 'Cerrada' ?>
+            </span>
+        </div>
+        <div style="color: gray; font-size: 0.85em; margin-bottom: 12px;">
+            👤 <?= htmlspecialchars($c->responsable) ?> &nbsp;|&nbsp; 📅 <?= $c->fechaApertura ?>
+        </div>
+
+        <!-- Barra de disponibilidad -->
+        <div style="font-size: 0.82em; color: gray; margin-bottom: 3px;">Disponible vs Asignado</div>
+        <div style="background: #e9ecef; border-radius: 4px; height: 10px; margin-bottom: 10px;">
+            <div style="background: <?= $color ?>; width: <?= min(100, round($pct)) ?>%; height: 100%; border-radius: 4px; transition: width 0.3s;"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 14px;">
+            <span style="font-size: 0.9em; color: gray;">Asignado: <b>Bs <?= number_format($c->montoAsignado, 2, ',', '.') ?></b></span>
+            <span style="font-size: 0.9em; color: <?= $color ?>; font-weight: bold;">Disponible: Bs <?= number_format($c->montoDisponible, 2, ',', '.') ?></span>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <a href="?route=caja/detalle&id=<?= $c->id ?>" style="flex:1; text-align:center; background: #0056b3; color: white; padding: 7px; border-radius: 4px; text-decoration: none; font-size: 0.88em;">
+                📋 Ver Detalle / Registrar
+            </a>
+            <a href="?route=caja/form&id=<?= $c->id ?>" style="padding: 7px 10px; border: 1px solid #6c757d; color: #6c757d; border-radius: 4px; text-decoration: none; font-size: 0.88em;">
+                ✏
+            </a>
+            <form method="POST" action="?route=caja/eliminar" onsubmit="return confirm('¿Eliminar esta caja chica?');" style="margin:0;">
+                <input type="hidden" name="id" value="<?= $c->id ?>">
+                <button type="submit" style="padding: 7px 10px; border: 1px solid #dc3545; color: #dc3545; background: none; border-radius: 4px; cursor: pointer; font-size: 0.88em;">🗑</button>
+            </form>
+        </div>
+    </div>
+    <?php endforeach; ?>
+</div>
+<?php endif; ?>

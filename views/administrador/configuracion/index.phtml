@@ -1,0 +1,12 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($error)): ?>
+    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
+        <?= htmlspecialchars($error) ?>
+    </div>
+<?php else: ?>
+    <p>Las funcionalidades de respaldo de base de datos, ejecución de sentencias directas y cierre anual de periodo están en desarrollo.</p>
+<?php endif; ?>
+<div>
+    <a href="?route=administrador/usuarios" style="padding: 10px 20px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 4px;">Volver a Usuarios</a>
+</div>

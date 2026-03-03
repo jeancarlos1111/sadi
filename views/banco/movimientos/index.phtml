@@ -1,0 +1,77 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($error)): ?>
+    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
+        <?= htmlspecialchars($error) ?>
+    </div>
+<?php endif; ?>
+
+<?php if (isset($_GET['success'])): ?>
+    <div style="color: green; padding: 10px; border: 1px solid green; margin-bottom: 20px;">
+        <?= htmlspecialchars($_GET['success']) ?>
+    </div>
+<?php endif; ?>
+
+<div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+    <form method="GET" action="" style="margin: 0;">
+        <input type="hidden" name="route" value="banco/index">
+        <input type="text" name="search" placeholder="Ref, Cta o Banco..." value="<?= htmlspecialchars($search) ?>" style="padding: 5px; width: 300px;">
+        <button type="submit" style="padding: 5px;">Buscar</button>
+        <a href="?route=banco/index" style="margin-left: 10px;">Limpiar</a>
+    </form>
+    <div>
+        <a href="?route=banco/emitirPago" style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">+ Emitir Pago Bancario</a>
+    </div>
+</div>
+
+<h3>Listado de Cuentas Activas</h3>
+<ul style="margin-bottom: 30px;">
+    <?php foreach ($cuentas as $cta): ?>
+        <li><strong><?= htmlspecialchars($cta->nombreBanco) ?>:</strong> <?= htmlspecialchars($cta->numeroCuenta) ?></li>
+    <?php endforeach; ?>
+</ul>
+
+<h3>Movimientos Recientes</h3>
+<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+    <thead style="background-color: #0056b3; color: white;">
+        <tr>
+            <th>Fecha</th>
+            <th>Banco y Cuenta</th>
+            <th>Tipo / Ref</th>
+            <th>Monto</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (empty($movimientos)): ?>
+            <tr>
+                <td colspan="5" style="text-align: center;">No hay movimientos registrados.</td>
+            </tr>
+        <?php else: ?>
+            <?php foreach ($movimientos as $data): ?>
+                <?php $mov = $data['entity']; ?>
+                <tr>
+                    <td><?= htmlspecialchars($mov->fecha) ?></td>
+                    <td><?= htmlspecialchars($data['banco']) ?><br><small><?= htmlspecialchars($data['cuenta_bancaria']) ?></small></td>
+                    <td>
+                        <strong><?= htmlspecialchars($data['operacion_acronimo']) ?></strong> - <?= htmlspecialchars($data['operacion_nombre']) ?><br>
+                        <small>Ref: <?= htmlspecialchars($mov->referencia) ?></small>
+                    </td>
+                    <td style="font-weight: bold; color: <?= $mov->monto >= 0 ? 'green' : 'red' ?>;">
+                        <?= number_format($mov->monto, 2, ',', '.') ?>
+                    </td>
+                    <td style="text-align: center;">
+                        <?php if (isset($mov->idSolicitudPago) && $mov->idSolicitudPago): ?>
+                            <form method="POST" action="?route=banco/reversar" onsubmit="return confirm('¿Está seguro de reversar este pago?');">
+                                <input type="hidden" name="id_solicitud" value="<?= $mov->idSolicitudPago ?>">
+                                <button type="submit" style="color: red; border: none; background: none; cursor: pointer; text-decoration: underline;">Reversar</button>
+                            </form>
+                        <?php else: ?>
+                            <span style="color: gray; font-size: 0.9em;">Sistema</span>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </tbody>
+</table>

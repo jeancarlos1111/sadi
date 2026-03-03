@@ -1,0 +1,111 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($success)): ?>
+    <div style="background:#d4edda; color:#155724; padding:12px; border:1px solid #c3e6cb; border-radius:4px; margin-bottom:16px;">✅ <?= htmlspecialchars($success) ?></div>
+<?php endif; ?>
+<?php if (isset($error)): ?>
+    <div style="color:red; padding:10px; border:1px solid red; border-radius:4px; margin-bottom:16px;">⚠ <?= htmlspecialchars($error) ?></div>
+<?php endif; ?>
+
+<?php
+$pct = $caja->montoAsignado > 0 ? ($caja->montoDisponible / $caja->montoAsignado) * 100 : 0;
+$colorBar = $pct > 30 ? '#198754' : ($pct > 10 ? '#fd7e14' : '#dc3545');
+?>
+
+<!-- Panel de estado de la caja -->
+<div style="background:#f8f9fa; border:1px solid #dee2e6; border-radius:8px; padding:16px; margin-bottom:24px; display:flex; gap:32px; align-items:center; flex-wrap:wrap;">
+    <div>
+        <div style="color:gray; font-size:0.82em;">Total Asignado</div>
+        <div style="font-size:1.3em; font-weight:bold;">Bs <?= number_format($caja->montoAsignado, 2, ',', '.') ?></div>
+    </div>
+    <div style="flex:1; min-width:200px;">
+        <div style="display:flex; justify-content:space-between; font-size:0.82em; color:gray; margin-bottom:4px;">
+            <span>Saldo Disponible</span><span><?= round($pct) ?>%</span>
+        </div>
+        <div style="background:#e9ecef; border-radius:4px; height:14px;">
+            <div style="background:<?= $colorBar ?>; width:<?= min(100, round($pct)) ?>%; height:100%; border-radius:4px;"></div>
+        </div>
+        <div style="font-size:1.2em; font-weight:bold; color:<?= $colorBar ?>; margin-top:4px;">Bs <?= number_format($caja->montoDisponible, 2, ',', '.') ?></div>
+    </div>
+    <div style="text-align:right;">
+        <div style="color:gray; font-size:0.82em;">Responsable</div>
+        <div><?= htmlspecialchars($caja->responsable) ?></div>
+        <div style="color:gray; font-size:0.82em;"><?= $caja->fechaApertura ?></div>
+    </div>
+</div>
+
+<!-- Dos columnas: Registrar Gasto | Reponer -->
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:28px;">
+
+    <!-- Registrar Gasto -->
+    <div style="border:1px solid #f5c6cb; border-radius:8px; padding:16px; background:#fff8f8;">
+        <h3 style="color:#dc3545; margin:0 0 12px 0;">💸 Registrar Gasto</h3>
+        <form method="POST" action="?route=caja/registrarGasto">
+            <input type="hidden" name="id_caja_chica" value="<?= $caja->id ?>">
+            <label style="font-size:0.88em; font-weight:bold;">Concepto:</label><br>
+            <input type="text" name="concepto" required maxlength="200" style="padding:7px; width:100%; margin-bottom:8px;" placeholder="Descripción del gasto"><br>
+            <label style="font-size:0.88em; font-weight:bold;">Monto (Bs):</label><br>
+            <input type="number" name="monto" step="0.01" min="0.01" required max="<?= $caja->montoDisponible ?>" style="padding:7px; width:100%; margin-bottom:8px;"><br>
+            <label style="font-size:0.88em; font-weight:bold;">Fecha:</label><br>
+            <input type="date" name="fecha" required value="<?= date('Y-m-d') ?>" style="padding:7px; margin-bottom:8px;"><br>
+            <label style="font-size:0.88em; font-weight:bold;">Nro. Comprobante / Factura:</label><br>
+            <input type="text" name="comprobante" maxlength="60" style="padding:7px; width:100%; margin-bottom:12px;" placeholder="Factura, recibo, etc.">
+            <button type="submit" style="background:#dc3545; color:white; border:none; padding:9px 18px; border-radius:4px; cursor:pointer; width:100%;">Registrar Gasto</button>
+        </form>
+    </div>
+
+    <!-- Reponer Fondos -->
+    <div style="border:1px solid #c3e6cb; border-radius:8px; padding:16px; background:#f8fff9;">
+        <h3 style="color:#198754; margin:0 0 12px 0;">🔄 Reponer Fondos</h3>
+        <form method="POST" action="?route=caja/reponer">
+            <input type="hidden" name="id_caja_chica" value="<?= $caja->id ?>">
+            <label style="font-size:0.88em; font-weight:bold;">Monto a Reponer (Bs):</label><br>
+            <input type="number" name="monto_reposicion" step="0.01" min="0.01" required style="padding:7px; width:100%; margin-bottom:8px; font-size:1.05em;"><br>
+            <label style="font-size:0.88em; font-weight:bold;">Fecha de Reposición:</label><br>
+            <input type="date" name="fecha_reposicion" required value="<?= date('Y-m-d') ?>" style="padding:7px; margin-bottom:8px;"><br>
+            <label style="font-size:0.88em; font-weight:bold;">Referencia / Nro. Cheque o Transferencia:</label><br>
+            <input type="text" name="referencia_reposicion" maxlength="80" style="padding:7px; width:100%; margin-bottom:12px;" placeholder="Nro. de cheque o transferencia">
+            <button type="submit" onclick="return confirm('¿Confirmar la reposición?');" style="background:#198754; color:white; border:none; padding:9px 18px; border-radius:4px; cursor:pointer; width:100%;">Confirmar Reposición</button>
+        </form>
+    </div>
+</div>
+
+<!-- Historial de Movimientos -->
+<h3 style="border-bottom:2px solid #0056b3; padding-bottom:6px; color:#0056b3;">📋 Historial de Movimientos</h3>
+
+<?php if (empty($movimientos)): ?>
+    <p style="color:gray; text-align:center; padding:20px;">No hay movimientos registrados en esta caja chica.</p>
+<?php else: ?>
+<table border="1" cellpadding="7" cellspacing="0" style="width:100%; border-collapse:collapse; font-size:0.9em;">
+    <thead style="background:#343a40; color:white;">
+        <tr>
+            <th>Fecha</th>
+            <th>Tipo</th>
+            <th>Concepto</th>
+            <th>Comprobante</th>
+            <th style="text-align:right;">Monto (Bs)</th>
+        </tr>
+    </thead>
+    <tbody>
+    <?php foreach ($movimientos as $m): 
+        $esGasto = $m['tipo'] === 'GASTO';
+        $color   = $esGasto ? '#dc3545' : '#198754';
+        $signo   = $esGasto ? '-' : '+';
+    ?>
+        <tr>
+            <td><?= htmlspecialchars($m['fecha']) ?></td>
+            <td style="font-weight:bold; color:<?= $color ?>;"><?= htmlspecialchars($m['tipo']) ?></td>
+            <td><?= htmlspecialchars($m['concepto']) ?></td>
+            <td><code style="font-size:0.85em;"><?= htmlspecialchars($m['comprobante'] ?: '—') ?></code></td>
+            <td style="text-align:right; font-weight:bold; color:<?= $color ?>;">
+                <?= $signo ?> Bs <?= number_format($m['monto'], 2, ',', '.') ?>
+            </td>
+        </tr>
+    <?php endforeach; ?>
+    </tbody>
+</table>
+<?php endif; ?>
+
+<div style="margin-top:20px;">
+    <a href="?route=caja/index" style="color:#0056b3;">← Volver a Cajas Chicas</a>
+</div>

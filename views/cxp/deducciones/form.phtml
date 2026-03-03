@@ -1,0 +1,42 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<form method="POST" action="?route=deducciones_cxp/guardar" style="max-width:500px;">
+    <?php if ($item && $item->id): ?><input type="hidden" name="id" value="<?= $item->id ?>"><?php endif; ?>
+
+    <div style="margin-bottom:10px;">
+        <label>Código (*):</label><br>
+        <input type="text" name="codigo_deduccion" value="<?= htmlspecialchars($item->codigo ?? '') ?>" required maxlength="20" style="width:100%; padding:5px;">
+        <small>Ej: ISLR, IVA, TM</small>
+    </div>
+
+    <div style="margin-bottom:10px;">
+        <label>Denominación / Descripcion (*):</label><br>
+        <input type="text" name="denominacion" value="<?= htmlspecialchars($item->denominacion ?? '') ?>" required maxlength="100" style="width:100%; padding:5px;">
+    </div>
+    
+    <div style="margin-bottom:10px;">
+        <label>Porcentaje (%):</label><br>
+        <input type="number" step="0.01" name="porcentaje" value="<?= $item ? $item->porcentaje : '0.00' ?>" style="width:100%; padding:5px;">
+    </div>
+
+    <div style="margin-bottom:10px;">
+        <label>Aplica Sobre (*):</label><br>
+        <select name="aplica_sobre" required style="width:100%; padding:5px;">
+            <option value="BASE" <?= ($item && $item->aplicaSobre === 'BASE') ? 'selected' : '' ?>>Monto Base (Subtotal)</option>
+            <option value="IVA" <?= ($item && $item->aplicaSobre === 'IVA') ? 'selected' : '' ?>>Monto IVA</option>
+            <option value="TOTAL" <?= ($item && $item->aplicaSobre === 'TOTAL') ? 'selected' : '' ?>>Monto Total</option>
+        </select>
+    </div>
+
+    <div style="margin-bottom:20px;">
+        <label>
+            <input type="checkbox" name="activo" value="1" <?= (!$item || $item->activo) ? 'checked' : '' ?>>
+            Deducción Activa
+        </label>
+    </div>
+
+    <div>
+        <button type="submit" style="padding:10px 20px; background-color:#28a745; color:white; border:none; cursor:pointer;">Guardar</button>
+        <a href="?route=deducciones_cxp/index" style="margin-left:10px; color:#dc3545;">Cancelar</a>
+    </div>
+</form>

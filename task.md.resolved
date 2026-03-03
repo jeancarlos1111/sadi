@@ -1,0 +1,305 @@
+# Plan de Implementación SADI
+>
+> Basado en análisis comparativo SIGAFS vs SADI (2026-02-28)
+> Marcar: `[ ]` pendiente · `[/]` en progreso · `[x]` completado
+
+---
+
+## FASE 1 — Entidades base ✅ COMPLETADA (2026-02-28)
+
+### 1.1 Beneficiarios
+
+- [x] Modelo [Beneficiario](file:///home/jean/Descargas/sadi/src/Models/Beneficiario.php#5-22)
+- [x] Migración/tabla `beneficiario` en schema.sql
+- [x] [BeneficiariosController](file:///home/jean/Descargas/sadi/src/Controllers/BeneficiariosController.php#9-94) con CRUD completo
+- [x] Vistas: `beneficiarios/index.phtml`, `beneficiarios/form.phtml`
+- [x] Enlace en menú Cuentas por Pagar
+
+### 1.2 Catálogos de Compras
+
+- [x] Modelo `UnidadMedida` completado (tabla ya existía)
+- [x] `UnidadesMedidaController` + vistas CRUD
+- [x] Modelo `TipoArticulo` completado (tabla ya existía)
+- [x] `TiposArticulosController` + vistas CRUD
+
+### 1.3 Catálogos de Servicios
+
+- [x] Modelo + migración `tipo_servicio`
+- [x] `TiposServiciosController` + vistas CRUD
+- [x] Modelo + migración `servicio`
+- [x] `ServiciosController` + vistas CRUD
+
+### 1.4 Plan de Cuentas Presupuestarias
+
+- [x] Modelo `PlanUnicoCuentas` (tabla ya existía)
+- [x] `PlanUnicoCuentasController` + vistas CRUD
+
+### 1.5 Catálogos de Presupuesto
+
+- [x] Modelo + migración `tipo_operacion_presupuesto`
+- [x] `TiposOperacionPresupuestoController` + vistas CRUD
+- [x] Modelo + migración `unidad_administrativa`
+- [x] `UnidadesAdministrativasController` + vistas CRUD
+- [x] Navbar actualizado (main.phtml) con todos los nuevos accesos
+
+---
+
+## FASE 2 — Módulo COMPRAS ✅ COMPLETADA
+
+### 2.1 Proceso Bienes e Insumos
+
+- [x] Contabilizar Orden de Compra (vista + lógica)
+- [x] Reversar Orden de Compra (vista + lógica)
+- [x] Disponibilidad presupuestaria (consulta saldo disponible)
+
+### 2.2 Proceso Servicios
+
+- [x] `RequisicionesServiciosController` con CRUD
+- [x] Vistas: [index](file:///home/jean/Descargas/sadi/src/Controllers/SolicitudesPagoController.php#32-52), [crear](file:///home/jean/Descargas/sadi/src/Controllers/NominaController.php#174-180), [editar](file:///home/jean/Descargas/sadi/src/Controllers/NominaController.php#198-211) para Requisición de Servicios
+- [x] `OrdenesServicioController` con CRUD
+- [x] Vistas: [index](file:///home/jean/Descargas/sadi/src/Controllers/SolicitudesPagoController.php#32-52), [crear](file:///home/jean/Descargas/sadi/src/Controllers/NominaController.php#174-180), [editar](file:///home/jean/Descargas/sadi/src/Controllers/NominaController.php#198-211), [ver](file:///home/jean/Descargas/sadi/src/Controllers/BancoController.php#224-247) para Orden de Servicio
+- [x] Contabilizar Orden de Servicio
+- [x] Reversar Orden de Servicio
+
+### 2.3 Reportes de Compras
+
+- [x] Reporte de Órdenes de Compra (PDF)
+- [x] Reporte de Órdenes de Servicio (PDF)
+- [x] Reporte de Requisiciones (PDF)
+
+---
+
+## FASE 3 — Módulo CUENTAS POR PAGAR (completar)
+
+### 3.1 Catálogos CxP
+
+- [x] Modelo + migración `tipos_documentos_cxp`
+- [x] UI CRUD para Tipos de documentos
+- [x] Modelo + migración `deducciones_cxp`
+- [x] UI CRUD para Deducciones
+- [x] Modelo + migración `cargos_cxp` (Opcional) ✅
+- [x] UI CRUD para Cargos (Opcional) ✅
+
+### 3.2 Orden de Pago
+
+- [x] Contabilizar Orden de Pago (vista + lógica de asiento)
+- [x] Reversar Orden de Pago (Solicitud de Pago) ✅
+
+### 3.3 Retenciones en CxP
+
+- [x] Vista: Factura (registro de facturas recibidas)
+- [x] Vista: Comprobante de Retención
+- [x] [RetencionesController](file:///home/jean/Descargas/sadi/src/Controllers/RetencionesController.php#9-128) completar lógica
+
+### 3.4 Reportes CxP
+
+- [x] Reporte: Orden de pago (PDF)
+- [x] Reporte: Comprobante de retención (PDF)
+- [x] Reporte: Cuentas por pagar a proveedor/beneficiario (PDF) ✅
+- [x] Reporte: Retenciones emitidas/efectuadas (PDF) ✅
+- [x] Reporte: Libro IVA (PDF)
+- [x] Exportación SENIAT (IVA/ISLR) 🚀
+
+---
+
+## FASE 4 — Módulo BANCO [/] EN PROGRESO
+
+### 4.1 Catálogos de Banco [x] COMPLETADO
+
+- [x] Vista CRUD para Bancos (entidad separada)
+- [x] Modelo + migración `tipos_cuenta_bancaria` (implementado como catálogos)
+- [x] UI CRUD para Tipos de cuenta (no se requirió tabla extra, se usó el flujo de Cuentas)
+- [x] UI CRUD para Cuentas bancarias
+- [x] Modelo + migración `tipos_operacion_bancaria`
+- [x] UI CRUD para Tipos de operaciones
+
+### 4.2 Proceso Pagos [x] COMPLETADO
+
+- [x] Desprogramación de pagos (vista + lógica)
+
+### 4.3 Emisión de Cheques [x] COMPLETADO
+
+- [x] [ChequesController](file:///home/jean/Descargas/sadi/src/Controllers/ChequesController.php#13-259) con lógica de emisión
+- [x] Vista: Cheque directo (sin orden de pago previa)
+- [x] Vista: Cheque por orden de pago (vía Emisión de Pagos)
+- [x] Vista: Procesar cheques en lote (vía Emisión de Pagos)
+
+### 4.4 Reportes de Banco [x] COMPLETADO
+
+- [x] Reporte: Estado de cuenta bancaria (PDF)
+- [x] Reporte: Cheques pagados a proveedores/beneficiarios (PDF)
+- [x] Reporte: Listado de cheques (PDF)
+- [x] Reporte: Cheque voucher (imprimible)
+
+---
+
+## FASE 5 — Módulo PRESUPUESTO (completar)
+
+### 5.1 Catálogos de Presupuesto
+
+- [ ] Metas Trimestrales de Proyectos (UI CRUD)
+
+### 5.2 Procesos Presupuestarios
+
+- [ ] Aperturar cuentas presupuestarias
+- [ ] Comprobante de gasto
+- [ ] Modificaciones > Traspaso de créditos
+- [ ] Cierre de meses (apertura/cierre de periodos)
+- [ ] Consulta de disponibilidad presupuestaria
+- [ ] Ajustar presupuesto a reformulación
+
+### 5.3 Reportes de Presupuesto
+
+- [ ] Reporte: Mayor analítico presupuestario (PDF)
+
+---
+
+## FASE 6 — Módulo NÓMINA (completar)
+
+### 6.1 Catálogos de Nómina
+
+- [ ] `ProfesionesController` + UI CRUD
+- [ ] `GradosInstruccionController` + UI CRUD
+- [ ] `PrestamosController` + modelo + migración + UI CRUD
+  - [ ] Tipos de préstamo
+  - [ ] Registro de préstamos por trabajador
+  - [ ] Cuotas y amortizaciones
+
+### 6.2 Proceso de Nómina
+
+- [ ] Históricos por nómina (consulta de nóminas pasadas por trabajador)
+
+### 6.3 Reportes de Nómina
+
+- [ ] Reporte: Resumen de nómina (PDF)
+- [ ] Reporte: Resumen por nómina (PDF)
+- [ ] Reporte: Resumen de prestaciones (PDF)
+- [ ] Reporte: Resumen de retenciones (PDF)
+- [ ] Reporte: Resumen de aportes patronales (PDF)
+
+---
+
+## FASE 7 — Módulo CONTABILIDAD (completar)
+
+### 7.1 Catálogos Contables
+
+- [ ] UI completa Plan de Cuentas Contables (árbol editable)
+- [ ] Especificar Bases Imponibles (BI) para IVA
+
+### 7.2 Reportes Contables
+
+- [ ] Reporte: Balance de comprobación (PDF)
+- [ ] Reporte: Mayor analítico contable (PDF)
+- [ ] Reporte: Estado de resultados (PDF)
+
+---
+
+## FASE 8 — Módulo INVENTARIO (completar)
+
+### 8.1 Catálogos de Inventario
+
+- [ ] UI CRUD para Unidades de medida (en módulo inventario)
+- [ ] UI CRUD para Tipos de artículos
+- [ ] UI CRUD para Ubicación de artículos (ej: oficina, depósito, etc.)
+
+### 8.2 Procesos de Inventario
+
+- [ ] Vista: Traer artículos desde Orden de Compra
+
+### 8.3 Reportes de Inventario
+
+- [ ] Reporte: Inventario de bienes (PDF)
+- [ ] Reporte: Inventario de insumos/suministros (PDF)
+
+---
+
+## FASE 9 — Módulo CAJA
+
+### 9.1 Catálogos de Caja
+
+- [ ] Modelo + migración completa `cajas_chicas`
+- [ ] UI: Definición de cajas chicas
+
+### 9.2 Procesos de Caja
+
+- [ ] Vista: Establecer fondo de caja chica
+- [ ] Vista: Comprobantes de caja chica
+- [ ] Lógica: Contabilizar movimiento de caja
+- [ ] Lógica: Reversar movimiento de caja
+
+### 9.3 Reportes de Caja
+
+- [ ] Reporte: Libro de caja chica (PDF)
+- [ ] Reporte: Comprobantes emitidos (PDF)
+
+---
+
+## FASE 10 — Módulo PRESUPUESTO DE INGRESOS
+
+- [ ] `PresupuestoIngresoController` completar lógica
+- [ ] Vista: Formulación de ingresos
+- [ ] Vista: Ejecución de ingresos
+- [ ] Reporte: Ejecución de ingresos (PDF)
+
+---
+
+## FASE 11 — Módulo ADMINISTRADOR
+
+- [ ] Gestión de usuarios (crear, editar, desactivar)
+- [ ] Gestión de roles y permisos
+- [ ] Asignación de módulos por usuario/rol
+- [ ] Log de auditoría (quién hizo qué y cuándo)
+- [ ] Configuración general del sistema (nombre institución, logo, etc.)
+
+---
+
+## FASE 12 — Mejoras Transversales
+
+### 12.1 UX General
+
+- [ ] Dashboard home con indicadores clave (presupuesto disponible, cheques emitidos, nómina del mes)
+- [ ] Breadcrumbs en todas las vistas
+- [ ] Paginación unificada en todos los listados
+- [ ] Mensajes de éxito/error consistentes (flash messages)
+
+### 12.2 Reportes PDF
+
+- [ ] Clase base/helper para generación de PDFs con cabecera institucional
+- [ ] Cabecera con nombre de institución, fecha, usuario que genera
+- [ ] Logo configurable por módulo
+
+### 12.3 Seguridad
+
+- [ ] Middleware de autorización por módulo
+- [ ] CSRF token en todos los formularios POST
+- [ ] Validación server-side en todos los endpoints
+
+### 12.4 Calidad
+
+- [ ] Definir convenciones de código del proyecto (README actualizado)
+- [ ] Migraciones versionadas para todas las tablas nuevas
+- [ ] Revisión de todas las migraciones existentes
+
+---
+
+## 📋 Convenciones del proyecto SADI
+
+| Item | Convención |
+|---|---|
+| Framework | PHP puro con patrón MVC manual |
+| Vistas | [.phtml](file:///home/jean/Descargas/sadi/views/layouts/main.phtml) en `/views/{modulo}/{vista}.phtml` |
+| Controladores | `src/Controllers/{Nombre}Controller.php` |
+| Modelos | `src/Models/{Nombre}.php` |
+| BD dev | SQLite ([database/sadi.sqlite](file:///home/jean/Descargas/sadi/database/sadi.sqlite)) |
+| BD prod | PostgreSQL |
+| PDFs | FPDF ([src/Libs/fpdf.php](file:///home/jean/Descargas/sadi/src/Libs/fpdf.php)) |
+
+---
+
+## 📌 Referencia rápida de archivos clave
+
+- Conexión BD: [src/Database/Connection.php](file:///home/jean/Descargas/sadi/src/Database/Connection.php)
+- Router: [public/index.php](file:///home/jean/Descargas/sadi/public/index.php)
+- Layout base: [views/layouts/main.phtml](file:///home/jean/Descargas/sadi/views/layouts/main.phtml)
+- Schema BD: [database/schema.sql](file:///home/jean/Descargas/sadi/database/schema.sql)
+- Análisis completo: [analisis_menus_sigafs_vs_sadi.md](file:///home/jean/.gemini/antigravity/brain/20b35314-59f0-419e-8396-008260203956/analisis_menus_sigafs_vs_sadi.md)

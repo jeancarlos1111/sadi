@@ -1,0 +1,55 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<div style="margin-bottom:20px;">
+    <button onclick="window.print()" style="padding:10px 15px; background-color:#17a2b8; color:white; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">🖨 Imprimir Listado</button>
+</div>
+
+<table border="1" cellpadding="8" cellspacing="0" style="width:100%; border-collapse:collapse; font-size: 0.9em;">
+    <thead style="background-color:#0056b3; color:white;">
+        <tr>
+            <th>Fecha Factura</th>
+            <th>Proveedor</th>
+            <th>Documento / RIF</th>
+            <th>Tipo</th>
+            <th>Nº Factura</th>
+            <th>Base Imponible</th>
+            <th>Impuestos (IVA)</th>
+            <th>Total Deuda (Mto Facturado)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php 
+        $granTotalDeuda = 0;
+        if (empty($pendientes)): ?>
+            <tr><td colspan="8" style="text-align:center;">No hay cuentas por pagar pendientes.</td></tr>
+        <?php else: foreach ($pendientes as $p): 
+            $granTotalDeuda += $p['monto_total_d'];
+        ?>
+            <tr>
+                <td><?= htmlspecialchars($p['fecha_emision_d'] ?? '') ?></td>
+                <td><strong><?= htmlspecialchars($p['compania_proveedor'] ?? '') ?></strong></td>
+                <td><?= htmlspecialchars($p['rif_proveedor'] ?? '') ?></td>
+                <td><?= htmlspecialchars($p['denominacion_tipo_documento'] ?? '') ?></td>
+                <td style="color:#d9534f; font-weight:bold;"><?= htmlspecialchars($p['nro_documento_d'] ?? '') ?></td>
+                <td style="text-align:right;"><?= number_format($p['monto_base_d'], 2, ',', '.') ?></td>
+                <td style="text-align:right;"><?= number_format($p['monto_impuesto_d'], 2, ',', '.') ?></td>
+                <td style="text-align:right; font-weight:bold;">Bs <?= number_format($p['monto_total_d'], 2, ',', '.') ?></td>
+            </tr>
+        <?php endforeach; endif; ?>
+    </tbody>
+    <tfoot>
+        <tr style="background-color:#e9ecef;">
+            <th colspan="7" style="text-align:right; font-size:1.1em;">TOTAL GENERAL PENDIENTE POR PAGAR:</th>
+            <th style="text-align:right; font-size:1.1em; color:#d9534f;">Bs <?= number_format($granTotalDeuda, 2, ',', '.') ?></th>
+        </tr>
+    </tfoot>
+</table>
+
+<style>
+@media print {
+    body { font-size: 12pt; }
+    button, form, a, .dropdown { display: none !important; }
+    table { width: 100%; }
+    th { background-color: #eee !important; color: #000 !important; }
+}
+</style>

@@ -1,0 +1,12 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($error)): ?>
+    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
+        <?= htmlspecialchars($error) ?>
+    </div>
+<?php else: ?>
+    <p>La vista transaccional para crear o modificar comprobantes de diario y cargar movimientos contables está en desarrollo.</p>
+<?php endif; ?>
+<div>
+    <a href="?route=contabilidad/asientos" style="padding: 10px 20px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 4px;">Volver a Comprobantes</a>
+</div>

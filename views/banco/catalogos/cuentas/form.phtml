@@ -1,0 +1,36 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($_GET['error'])): ?>
+    <div style="color: red; padding: 12px; border: 1px solid red; border-radius: 4px; margin-bottom: 20px;">
+        <?= htmlspecialchars($_GET['error']) ?>
+    </div>
+<?php endif; ?>
+
+<div style="background: #f8f9fa; padding: 20px; border: 1px solid #ddd; max-width: 500px;">
+    <form method="POST" action="?route=cuentas_bancarias/guardar">
+        <input type="hidden" name="id" value="<?= $cuenta ? $cuenta->id : 0 ?>">
+        
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Banco</label>
+            <select name="id_banco" required style="padding: 8px; width: 100%; box-sizing: border-box;">
+                <option value="">Seleccione un banco...</option>
+                <?php foreach ($bancos as $b): ?>
+                    <option value="<?= $b->id ?>" <?= ($cuenta && $cuenta->idBanco == $b->id) ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($b->nombreBanco) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Número de Cuenta</label>
+            <input type="text" name="numero_cta_bancaria" value="<?= $cuenta ? htmlspecialchars($cuenta->numeroCuenta) : '' ?>" required maxlength="25" style="padding: 8px; width: 100%; box-sizing: border-box;">
+            <div style="font-size: 0.8em; color: gray; margin-top: 4px;">Máximo 25 caracteres.</div>
+        </div>
+
+        <div style="margin-top: 20px; display: flex; justify-content: space-between;">
+            <a href="?route=cuentas_bancarias/index" style="color: #666; text-decoration: none; padding: 8px 15px;">Cancelar</a>
+            <button type="submit" style="background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">Guardar</button>
+        </div>
+    </form>
+</div>

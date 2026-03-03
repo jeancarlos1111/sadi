@@ -1,0 +1,48 @@
+<h2><?= htmlspecialchars($titulo) ?></h2>
+
+<?php if (isset($success)): ?>
+    <div style="background: #d4edda; color: #155724; padding: 12px 16px; border: 1px solid #c3e6cb; border-radius: 4px; margin-bottom: 20px;">
+        <?= htmlspecialchars($success) ?>
+    </div>
+<?php endif; ?>
+
+<?php if (isset($error)): ?>
+    <div style="color: red; padding: 12px; border: 1px solid red; border-radius: 4px; margin-bottom: 20px;">
+        <?= htmlspecialchars($error) ?>
+    </div>
+<?php endif; ?>
+
+<div style="margin-bottom: 20px; display: flex; justify-content: flex-end;">
+    <a href="?route=cuentas_bancarias/form" style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">+ Nueva Cuenta Bancaria</a>
+</div>
+
+<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+    <thead style="background-color: #0056b3; color: white;">
+        <tr>
+            <th>Banco</th>
+            <th>Número de Cuenta</th>
+            <th style="text-align: center; width: 150px;">Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (empty($cuentas)): ?>
+            <tr>
+                <td colspan="3" style="text-align: center;">No hay cuentas bancarias registradas.</td>
+            </tr>
+        <?php else: ?>
+            <?php foreach ($cuentas as $c): ?>
+                <tr>
+                    <td><?= htmlspecialchars($c->nombreBanco) ?></td>
+                    <td><?= htmlspecialchars($c->numeroCuenta) ?></td>
+                    <td style="text-align: center;">
+                        <a href="?route=cuentas_bancarias/form&id=<?= $c->id ?>" style="margin-right: 10px;">Editar</a>
+                        <form method="POST" action="?route=cuentas_bancarias/eliminar" style="display: inline;" onsubmit="return confirm('¿Está seguro de eliminar esta cuenta?');">
+                            <input type="hidden" name="id" value="<?= $c->id ?>">
+                            <button type="submit" style="color: red; border: none; background: none; cursor: pointer; text-decoration: underline;">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </tbody>
+</table>
