@@ -1,0 +1,51 @@
+<?php $isHomePage = ($viewPath === 'home/index'); ?>
+<nav class="main-header navbar navbar-expand navbar-white navbar-light <?= $isHomePage ? 'layout-navbar-fixed' : '' ?>">
+  <?php if ($isHomePage): ?>
+  <div class="container">
+    <a href="?route=home/index" class="navbar-brand">
+      <span class="brand-text font-weight-bold text-primary"><i class="fas fa-building mr-1"></i> SADI Administrativo</span>
+    </a>
+  <?php endif; ?>
+
+  <!-- Left navbar links -->
+  <ul class="navbar-nav">
+    <?php if (!$isHomePage): ?>
+    <li class="nav-item">
+      <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+    </li>
+    <?php endif; ?>
+    <li class="nav-item d-none d-sm-inline-block">
+      <a href="?route=home/index" class="nav-link">Inicio</a>
+    </li>
+  </ul>
+
+  <!-- Right navbar links -->
+  <ul class="navbar-nav ml-auto">
+    <!-- User Account Menu -->
+    <li class="nav-item dropdown user-menu">
+      <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
+        <i class="fas fa-user-circle fa-fw"></i>
+        <span class="d-none d-md-inline"><?= htmlspecialchars($_SESSION['usuario'] ?? 'Usuario') ?></span>
+      </a>
+      <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+        <!-- User image -->
+        <li class="user-header bg-primary">
+          <i class="fas fa-user-circle fa-3x text-white mt-2"></i>
+          <p>
+            <?= htmlspecialchars($_SESSION['usuario'] ?? 'Usuario') ?>
+            <small>SADI Administrativo</small>
+          </p>
+        </li>
+        <!-- Menu Footer-->
+        <li class="user-footer">
+          <a href="#" class="btn btn-default btn-flat">Perfil</a>
+          <a href="?route=auth/logout" class="btn btn-danger btn-flat float-right">Cerrar Sesión</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+
+  <?php if ($isHomePage): ?>
+  </div>
+  <?php endif; ?>
+</nav>

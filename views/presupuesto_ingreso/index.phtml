@@ -1,38 +1,43 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
-
-<div style="background-color: #f8f9fa; padding: 20px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 20px;">
-    <p>Monitor consolidado del <b>Presupuesto de Ingresos</b>. Revise el monto original estimado (Formulado) versus lo que efectivamente ha sido liquidado/ingresado (Recaudado) y verifique el déficit o excedente de la Institución.</p>
-</div>
-
-<div style="margin-bottom: 20px; display: flex; justify-content: flex-end; gap: 10px;">
-    <a href="?route=presupuestoIngreso/formular" style="background-color: #0d6efd; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px; font-weight: bold;">
-        + Formular Ingreso (Estimado)
-    </a>
-    <a href="?route=presupuestoIngreso/recaudar" style="background-color: #198754; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px; font-weight: bold;">
-        $ Recaudar/Liquidar Ingreso
-    </a>
-</div>
-
-<?php if (isset($_GET['success'])): ?>
-    <div style="color: #155724; background-color: #d4edda; border-color: #c3e6cb; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: .25rem;">
-        <?= htmlspecialchars($_GET['success']) ?>
+<div class="card card-outline card-success">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+        <div class="card-tools">
+            <a href="?route=presupuestoIngreso/formular" class="btn btn-sm btn-primary">
+                <i class="fas fa-plus"></i> Formular Ingreso (Estimado)
+            </a>
+            <a href="?route=presupuestoIngreso/recaudar" class="btn btn-sm btn-success">
+                <i class="fas fa-dollar-sign"></i> Recaudar/Liquidar Ingreso
+            </a>
+        </div>
     </div>
-<?php endif; ?>
+    <div class="card-body">
+        <div class="alert alert-info">
+            <h5><i class="icon fas fa-info"></i> Información</h5>
+            Monitor consolidado del <b>Presupuesto de Ingresos</b>. Revise el monto original estimado (Formulado) versus lo que efectivamente ha sido liquidado/ingresado (Recaudado) y verifique el déficit o excedente de la Institución.
+        </div>
 
-<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse; background: white;">
-    <thead style="background-color: #0c4128; color: white;">
-        <tr>
-            <th>Ramo / Clasificador</th>
-            <th style="text-align: right;">Monto Estimado Inicial (Bs)</th>
-            <th style="text-align: right;">Monto Efectivamente Recaudado (Bs)</th>
-            <th style="text-align: right;">Diferencia (Por Recaudar)</th>
-            <th style="text-align: center;">% Ejecución</th>
-        </tr>
-    </thead>
+        <?php if (isset($_GET['success'])): ?>
+            <div class="alert alert-success alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-check"></i> Éxito</h5>
+                <?= htmlspecialchars($_GET['success']) ?>
+            </div>
+        <?php endif; ?>
+
+        <table class="table table-bordered table-striped dataTable w-100">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Ramo / Clasificador</th>
+                    <th class="text-right">Monto Estimado Inicial (Bs)</th>
+                    <th class="text-right">Monto Efectivamente Recaudado (Bs)</th>
+                    <th class="text-right">Diferencia (Por Recaudar)</th>
+                    <th class="text-center">% Ejecución</th>
+                </tr>
+            </thead>
     <tbody>
         <?php if (empty($formulado)): ?>
             <tr>
-                <td colspan="5" style="text-align: center;">Aún no se ha formulado ningún Crédito Adicional o Ingreso Ordinario.</td>
+                <td colspan="5" class="text-center text-muted py-4">Aún no se ha formulado ningún Crédito Adicional o Ingreso Ordinario.</td>
             </tr>
         <?php else: ?>
             <?php 
@@ -45,34 +50,39 @@
                     $porcentaje = ($f['monto_estimado_inicial'] > 0) ? ($f['monto_recaudado'] / $f['monto_estimado_inicial']) * 100 : 0;
             ?>
                 <tr>
-                    <td>
-                        <span style="font-weight: bold; color: #198754;"><?= htmlspecialchars($f['codigo_ramo']) ?></span><br>
-                        <small style="color: #6c757d;"><?= htmlspecialchars($f['denominacion_ramo']) ?></small>
+                    <td class="align-middle">
+                        <span class="font-weight-bold text-success"><?= htmlspecialchars($f['codigo_ramo']) ?></span><br>
+                        <small class="text-muted"><?= htmlspecialchars($f['denominacion_ramo']) ?></small>
                     </td>
-                    <td style="text-align: right; font-weight: bold;">Bs <?= number_format($f['monto_estimado_inicial'], 2, ',', '.') ?></td>
-                    <td style="text-align: right; font-weight: bold; color: green;">Bs <?= number_format($f['monto_recaudado'], 2, ',', '.') ?></td>
-                    <td style="text-align: right; color: <?= $porRecaudar < 0 ? 'green' : 'red' ?>;">
+                    <td class="text-right align-middle font-weight-bold">Bs <?= number_format($f['monto_estimado_inicial'], 2, ',', '.') ?></td>
+                    <td class="text-right align-middle font-weight-bold text-success">Bs <?= number_format($f['monto_recaudado'], 2, ',', '.') ?></td>
+                    <td class="text-right align-middle font-weight-bold <?= $porRecaudar < 0 ? 'text-success' : 'text-danger' ?>">
                         Bs <?= number_format($porRecaudar, 2, ',', '.') ?>
                     </td>
-                    <td style="text-align: center;">
-                        <div style="background-color: #e9ecef; border-radius: 4px; overflow: hidden; width: 100%;">
-                            <div style="background-color: <?= $porcentaje >= 100 ? '#28a745' : '#0d6efd' ?>; width: <?= min($porcentaje, 100) ?>%; padding: 2px 0;">
-                                <span style="font-size: 0.8em; color: white; display: block; text-shadow: 1px 1px 1px rgba(0,0,0,0.5);"><?= number_format($porcentaje, 1, ',', '.') ?>%</span>
-                            </div>
+                    <td class="text-center align-middle">
+                        <div class="progress progress-sm">
+                            <div class="progress-bar <?= $porcentaje >= 100 ? 'bg-success' : 'bg-primary' ?>" style="width: <?= min($porcentaje, 100) ?>%"></div>
                         </div>
+                        <small>
+                            <?= number_format($porcentaje, 1, ',', '.') ?>%
+                        </small>
                     </td>
                 </tr>
             <?php endforeach; ?>
             
-            <tr style="background-color: #f8f9fa; font-weight: bold; font-size: 1.1em;">
-                <td style="text-align: right;">TOTALES</td>
-                <td style="text-align: right;">Bs <?= number_format($totalFormulado, 2, ',', '.') ?></td>
-                <td style="text-align: right;">Bs <?= number_format($totalRecaudado, 2, ',', '.') ?></td>
-                <td style="text-align: right;">Bs <?= number_format($totalFormulado - $totalRecaudado, 2, ',', '.') ?></td>
-                <td style="text-align: center;">
-                   <?= ($totalFormulado > 0) ? number_format(($totalRecaudado / $totalFormulado) * 100, 1, ',', '.') . '%' : '0%' ?> 
-                </td>
-            </tr>
+            <tfoot class="thead-light font-weight-bold">
+                <tr>
+                    <td class="text-right">TOTALES</td>
+                    <td class="text-right">Bs <?= number_format($totalFormulado, 2, ',', '.') ?></td>
+                    <td class="text-right">Bs <?= number_format($totalRecaudado, 2, ',', '.') ?></td>
+                    <td class="text-right">Bs <?= number_format($totalFormulado - $totalRecaudado, 2, ',', '.') ?></td>
+                    <td class="text-center">
+                       <?= ($totalFormulado > 0) ? number_format(($totalRecaudado / $totalFormulado) * 100, 1, ',', '.') . '%' : '0%' ?> 
+                    </td>
+                </tr>
+            </tfoot>
         <?php endif; ?>
-    </tbody>
-</table>
+        </tbody>
+        </table>
+    </div>
+</div>

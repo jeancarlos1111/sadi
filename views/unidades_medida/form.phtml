@@ -1,26 +1,39 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
+<div class="card card-outline card-primary" style="max-width: 600px; margin: 0 auto;">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+    </div>
+    <form method="POST" action="?route=unidades_medida/guardar">
+        <div class="card-body">
+            <?php if (isset($error)): ?>
+                <div class="alert alert-danger alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    <h5><i class="icon fas fa-ban"></i> Error</h5>
+                    <?= htmlspecialchars($error) ?>
+                </div>
+            <?php endif; ?>
 
-<?php if (isset($error)): ?><div style="color:red; padding:10px; border:1px solid red; margin-bottom:20px;"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+            <?php if ($item && $item->id): ?>
+                <input type="hidden" name="id" value="<?= $item->id ?>">
+            <?php endif; ?>
 
-<form method="POST" action="?route=unidades_medida/guardar" style="max-width:500px;">
-    <?php if ($item && $item->id): ?>
-        <input type="hidden" name="id" value="<?= $item->id ?>">
-    <?php endif; ?>
-
-    <div style="margin-bottom:10px;">
-        <label>Denominación (*):</label><br>
-        <input type="text" name="denominacion" value="<?= htmlspecialchars($item->denominacion ?? '') ?>" required maxlength="60" style="width:100%; padding:5px;" placeholder="Ej: Kilogramo">
-    </div>
-    <div style="margin-bottom:10px;">
-        <label>Sigla / Unidad (*):</label><br>
-        <input type="text" name="unidades" value="<?= htmlspecialchars($item->unidades ?? '') ?>" required maxlength="10" style="width:100%; padding:5px;" placeholder="Ej: KG">
-    </div>
-    <div style="margin-bottom:20px;">
-        <label>Observación:</label><br>
-        <input type="text" name="observacion" value="<?= htmlspecialchars($item->observacion ?? '') ?>" maxlength="200" style="width:100%; padding:5px;">
-    </div>
-    <div>
-        <button type="submit" style="padding:10px 20px; background-color:#28a745; color:white; border:none; cursor:pointer;">Guardar</button>
-        <a href="?route=unidades_medida/index" style="margin-left:10px; color:#dc3545;">Cancelar</a>
-    </div>
-</form>
+            <div class="form-group">
+                <label>Denominación (*)</label>
+                <input type="text" class="form-control" name="denominacion" value="<?= htmlspecialchars($item->denominacion ?? '') ?>" required maxlength="60" placeholder="Ej: Kilogramo">
+            </div>
+            <div class="form-group">
+                <label>Sigla / Unidad (*)</label>
+                <input type="text" class="form-control" name="unidades" value="<?= htmlspecialchars($item->unidades ?? '') ?>" required maxlength="10" placeholder="Ej: KG">
+            </div>
+            
+            <div class="form-group">
+                <label>Observación</label>
+                <input type="text" class="form-control" name="observacion" value="<?= htmlspecialchars($item->observacion ?? '') ?>" maxlength="200" placeholder="Observación">
+            </div>
+        </div>
+        
+        <div class="card-footer">
+            <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Guardar</button>
+            <a href="?route=unidades_medida/index" class="btn btn-default float-right">Cancelar</a>
+        </div>
+    </form>
+</div>

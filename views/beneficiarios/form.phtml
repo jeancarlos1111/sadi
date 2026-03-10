@@ -1,51 +1,60 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
-
-<?php if (isset($error)): ?>
-    <div style="color:red; padding:10px; border:1px solid red; margin-bottom:20px;"><?= htmlspecialchars($error) ?></div>
-<?php endif; ?>
-
-<form method="POST" action="?route=beneficiarios/guardar" style="max-width:600px;">
-    <?php if ($beneficiario && $beneficiario->id): ?>
-        <input type="hidden" name="id" value="<?= htmlspecialchars((string)$beneficiario->id) ?>">
-    <?php endif; ?>
-
-    <div style="margin-bottom:10px;">
-        <label>Cédula (*):</label><br>
-        <input type="text" name="cedula" value="<?= htmlspecialchars($beneficiario->cedula ?? '') ?>" required maxlength="20" style="width:100%; padding:5px;" placeholder="Ej: V-12345678">
+<div class="card card-outline card-primary" style="max-width: 600px; margin: 0 auto;">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
     </div>
+    <form method="POST" action="?route=beneficiarios/guardar">
+        <div class="card-body">
+            <?php if (isset($error)): ?>
+                <div class="alert alert-danger alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    <h5><i class="icon fas fa-ban"></i> Error</h5>
+                    <?= htmlspecialchars($error) ?>
+                </div>
+            <?php endif; ?>
 
-    <div style="margin-bottom:10px;">
-        <label>Nombres (*):</label><br>
-        <input type="text" name="nombres" value="<?= htmlspecialchars($beneficiario->nombres ?? '') ?>" required maxlength="100" style="width:100%; padding:5px;">
-    </div>
+            <?php if ($beneficiario && $beneficiario->id): ?>
+                <input type="hidden" name="id" value="<?= htmlspecialchars((string)$beneficiario->id) ?>">
+            <?php endif; ?>
 
-    <div style="margin-bottom:10px;">
-        <label>Apellidos (*):</label><br>
-        <input type="text" name="apellidos" value="<?= htmlspecialchars($beneficiario->apellidos ?? '') ?>" required maxlength="100" style="width:100%; padding:5px;">
-    </div>
+            <div class="form-group">
+                <label>Cédula (*)</label>
+                <input type="text" class="form-control" name="cedula" value="<?= htmlspecialchars($beneficiario->cedula ?? '') ?>" required maxlength="20" placeholder="Ej: V-12345678">
+            </div>
 
-    <div style="margin-bottom:10px;">
-        <label>Dirección (*):</label><br>
-        <textarea name="direccion" required rows="2" style="width:100%; padding:5px;"><?= htmlspecialchars($beneficiario->direccion ?? '') ?></textarea>
-    </div>
+            <div class="form-group">
+                <label>Nombres (*)</label>
+                <input type="text" class="form-control" name="nombres" value="<?= htmlspecialchars($beneficiario->nombres ?? '') ?>" required maxlength="100">
+            </div>
 
-    <div style="margin-bottom:10px;">
-        <label>Teléfono:</label><br>
-        <input type="text" name="telefono" value="<?= htmlspecialchars($beneficiario->telefono ?? '') ?>" maxlength="30" style="width:100%; padding:5px;" placeholder="Ej: 0414-1234567">
-    </div>
+            <div class="form-group">
+                <label>Apellidos (*)</label>
+                <input type="text" class="form-control" name="apellidos" value="<?= htmlspecialchars($beneficiario->apellidos ?? '') ?>" required maxlength="100">
+            </div>
 
-    <div style="margin-bottom:10px;">
-        <label>Email:</label><br>
-        <input type="email" name="email" value="<?= htmlspecialchars($beneficiario->email ?? '') ?>" maxlength="100" style="width:100%; padding:5px;">
-    </div>
+            <div class="form-group">
+                <label>Dirección (*)</label>
+                <textarea class="form-control" name="direccion" required rows="2"><?= htmlspecialchars($beneficiario->direccion ?? '') ?></textarea>
+            </div>
 
-    <div style="margin-bottom:20px;">
-        <label>ID Código Contable:</label><br>
-        <input type="number" name="id_codigo_contable" value="<?= htmlspecialchars((string)($beneficiario->idCodigoContable ?? '')) ?>" style="width:100%; padding:5px;">
-    </div>
+            <div class="form-group">
+                <label>Teléfono</label>
+                <input type="text" class="form-control" name="telefono" value="<?= htmlspecialchars($beneficiario->telefono ?? '') ?>" maxlength="30" placeholder="Ej: 0414-1234567">
+            </div>
 
-    <div>
-        <button type="submit" style="padding:10px 20px; background-color:#28a745; color:white; border:none; cursor:pointer;">Guardar Beneficiario</button>
-        <a href="?route=beneficiarios/index" style="margin-left:10px; color:#dc3545;">Cancelar</a>
-    </div>
-</form>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" class="form-control" name="email" value="<?= htmlspecialchars($beneficiario->email ?? '') ?>" maxlength="100">
+            </div>
+
+            <div class="form-group">
+                <label>ID Código Contable</label>
+                <input type="number" class="form-control" name="id_codigo_contable" value="<?= htmlspecialchars((string)($beneficiario->idCodigoContable ?? '')) ?>">
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Guardar Beneficiario</button>
+            <a href="?route=beneficiarios/index" class="btn btn-default float-right">Cancelar</a>
+        </div>
+    </form>
+</div>

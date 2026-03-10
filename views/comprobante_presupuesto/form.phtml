@@ -1,78 +1,95 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
+<div class="row">
+    <div class="col-md-12">
+        <form method="POST" action="?route=comprobante_presupuesto/guardar" id="form-comprobante">
+            <div class="card card-outline card-primary">
+                <div class="card-header">
+                    <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+                </div>
+                <div class="card-body">
+                    <?php if (isset($error)): ?>
+                        <div class="alert alert-danger alert-dismissible">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                            <h5><i class="icon fas fa-ban"></i> Error</h5>
+                            <?= htmlspecialchars($error) ?>
+                        </div>
+                    <?php endif; ?>
 
-<?php if (isset($error)): ?>
-    <div style="color:red; padding:10px; border:1px solid red; margin-bottom:15px;"><?= htmlspecialchars($error) ?></div>
-<?php endif; ?>
+                    <?php if (isset($item) && $item->id_comprobante): ?>
+                        <input type="hidden" name="id_comprobante" value="<?= htmlspecialchars((string)$item->id_comprobante) ?>">
+                    <?php endif; ?>
+                    <input type="hidden" name="acronimo_c" value="<?= htmlspecialchars($tipo) ?>">
 
-<form method="POST" action="?route=comprobante_presupuesto/guardar" id="form-comprobante">
-    <?php if (isset($item) && $item->id_comprobante): ?>
-        <input type="hidden" name="id_comprobante" value="<?= htmlspecialchars((string)$item->id_comprobante) ?>">
-    <?php endif; ?>
-    <input type="hidden" name="acronimo_c" value="<?= htmlspecialchars($tipo) ?>">
+                    <div class="card card-info">
+                        <div class="card-header">
+                            <h3 class="card-title">Datos del Comprobante (<?= htmlspecialchars($tipo) ?>)</h3>
+                        </div>
+                        <div class="card-body">
 
-    <fieldset style="margin-bottom:15px; padding:15px; border:1px solid #ccc;">
-        <legend style="font-weight:bold;">Datos del Comprobante (<?= htmlspecialchars($tipo) ?>)</legend>
+                            <div class="row">
+                                <div class="col-md-3 form-group">
+                                    <label>Fecha (*)</label>
+                                    <input type="date" class="form-control" name="fecha_c" value="<?= htmlspecialchars($item->fecha_c ?? date('Y-m-d')) ?>" required>
+                                </div>
+                                <div class="col-md-5 form-group">
+                                    <label>Denominación (*)</label>
+                                    <input type="text" class="form-control" name="denominacion_c" value="<?= htmlspecialchars($item->denominacion_c ?? '') ?>" required maxlength="255">
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label>N° Referencia</label>
+                                    <input type="text" class="form-control" name="referencia_c" value="<?= htmlspecialchars($item->referencia_c ?? '') ?>" maxlength="100">
+                                </div>
+                            </div>
 
-        <div style="display:flex; gap:15px; flex-wrap:wrap;">
-            <div style="flex:1; min-width:150px; margin-bottom:10px;">
-                <label>Fecha (*):</label><br>
-                <input type="date" name="fecha_c" value="<?= htmlspecialchars($item->fecha_c ?? date('Y-m-d')) ?>" required style="width:100%; padding:5px;">
-            </div>
-            <div style="flex:3; min-width:250px; margin-bottom:10px;">
-                <label>Denominación (*):</label><br>
-                <input type="text" name="denominacion_c" value="<?= htmlspecialchars($item->denominacion_c ?? '') ?>" required maxlength="255" style="width:100%; padding:5px;">
-            </div>
-            <div style="flex:2; min-width:200px; margin-bottom:10px;">
-                <label>N° Referencia:</label><br>
-                <input type="text" name="referencia_c" value="<?= htmlspecialchars($item->referencia_c ?? '') ?>" maxlength="100" style="width:100%; padding:5px;">
-            </div>
-        </div>
+                            <?php if ($tipo === 'CG'): ?>
+                            <div class="form-group">
+                                <label>Beneficiario (Cédula/RIF)</label>
+                                <select class="form-control" name="beneficiario_cedula">
+                                    <option value="">-- Sin Beneficiario --</option>
+                                    <?php foreach ($beneficiarios as $b): ?>
+                                        <option value="<?= htmlspecialchars($b->cedula) ?>"
+                                            <?= (isset($item) && $item->beneficiario_cedula === $b->cedula) ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($b->cedula . ' – ' . $b->nombres . ' ' . $b->apellidos) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
 
-        <?php if ($tipo === 'CG'): ?>
-        <div style="margin-bottom:10px;">
-            <label>Beneficiario (Cédula/RIF):</label><br>
-            <select name="beneficiario_cedula" style="width:100%; padding:5px;">
-                <option value="">-- Sin Beneficiario --</option>
-                <?php foreach ($beneficiarios as $b): ?>
-                    <option value="<?= htmlspecialchars($b->cedula) ?>"
-                        <?= (isset($item) && $item->beneficiario_cedula === $b->cedula) ? 'selected' : '' ?>>
-                        <?= htmlspecialchars($b->cedula . ' – ' . $b->nombres . ' ' . $b->apellidos) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-        </div>
-        <?php endif; ?>
-    </fieldset>
+                    <div class="card card-success">
+                        <div class="card-header">
+                            <h3 class="card-title">Líneas de Detalle</h3>
+                        </div>
+                        <div class="card-body p-0">
+                            <?php
+                            // Leyenda de comportamiento del tipo de operación
+                            $leyendas = [
+                                'CG' => '⬇ REDUCEN el disponible: los gastos causados o comprometidos.',
+                                'CA' => '⬆ AUMENTAN el disponible: ingresos por crédito adicional al presupuesto.',
+                                'TR' => '⬇ REDUCEN el disponible en la cuenta seleccionada (Traspaso de salida).',
+                            ];
+                            ?>
+                            <div class="p-3 bg-light d-flex justify-content-between">
+                                <small class="text-muted border-left-primary">
+                                    <i class="fas fa-info-circle text-info"></i> <?= htmlspecialchars($leyendas[$tipo] ?? '') ?>
+                                </small>
+                                <a href="#" onclick="consultarDisponible(event)" class="text-primary font-weight-bold">
+                                    <i class="fas fa-chart-bar"></i> Consultar disponible
+                                </a>
+                            </div>
 
-    <fieldset style="margin-bottom:15px; padding:15px; border:1px solid #0056b3;">
-        <legend style="font-weight:bold; color:#0056b3;">Líneas de Detalle</legend>
-
-        <?php
-        // Leyenda de comportamiento del tipo de operación
-        $leyendas = [
-            'CG' => '⬇ REDUCEN el disponible: los gastos causados o comprometidos.',
-            'CA' => '⬆ AUMENTAN el disponible: ingresos por crédito adicional al presupuesto.',
-            'TR' => '⬇ REDUCEN el disponible en la cuenta seleccionada (Traspaso de salida).',
-        ];
-        ?>
-        <p style="color:#555; font-style:italic; margin-top:0;">
-            <?= htmlspecialchars($leyendas[$tipo] ?? '') ?>
-            <small style="margin-left:10px;">
-                <a href="#" onclick="consultarDisponible(event)">📊 Consultar disponible</a>
-            </small>
-        </p>
-
-        <table border="1" cellpadding="5" cellspacing="0" style="width:100%; border-collapse:collapse;" id="tabla-lineas">
-            <thead style="background-color:#f4f4f4;">
-                <tr>
-                    <th>Estructura Presupuestaria</th>
-                    <th>Partida / Cuenta</th>
-                    <th>Monto (Bs.)</th>
-                    <th>Descripción Línea</th>
-                    <th style="width:40px;">Quitar</th>
-                </tr>
-            </thead>
-            <tbody id="cuerpo-lineas">
+                            <table class="table table-bordered table-striped text-center m-0" id="tabla-lineas">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>Estructura Presupuestaria</th>
+                                        <th>Partida / Cuenta</th>
+                                        <th>Monto (Bs.)</th>
+                                        <th>Descripción Línea</th>
+                                        <th style="width:40px;">Quitar</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cuerpo-lineas">
                 <?php if (!empty($lineas)): ?>
                     <?php foreach ($lineas as $idx => $linea): ?>
                     <tr class="linea-detalle">
@@ -128,20 +145,25 @@
                     </tr>
                 <?php endif; ?>
             </tbody>
-        </table>
+                            </table>
+                            
+                            <div class="p-3">
+                                <button type="button" onclick="agregarLinea()" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Agregar Línea</button>
+                            </div>
+                        </div>
+                    </div>
 
-        <div style="margin-top:8px;">
-            <button type="button" onclick="agregarLinea()" style="padding:5px 12px; background-color:#0056b3; color:white; border:none; cursor:pointer;">+ Agregar Línea</button>
-        </div>
-    </fieldset>
+                    <div id="disponibilidad-resultado" class="alert alert-info mt-3" style="display:none;"></div>
 
-    <div id="disponibilidad-resultado" style="display:none; margin-bottom:10px; padding:8px; border:1px solid #0056b3; background:#eef4ff;"></div>
-
-    <div style="margin-top:15px;">
-        <button type="submit" style="padding:10px 20px; background-color:#28a745; color:white; border:none; cursor:pointer;">Guardar <?= htmlspecialchars($tipo) ?></button>
-        <a href="?route=comprobante_presupuesto/index" style="margin-left:10px; color:#dc3545; text-decoration:underline;">Cancelar</a>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Guardar <?= htmlspecialchars($tipo) ?></button>
+                    <a href="?route=comprobante_presupuesto/index" class="btn btn-default float-right">Cancelar</a>
+                </div>
+            </div>
+        </form>
     </div>
-</form>
+</div>
 
 <script>
 // Plantilla HTML de una fila nueva (datos del servidor serializados)
@@ -163,8 +185,8 @@ function agregarLinea() {
         <td>${buildSelect('id_estruc', estructurasOpts, 'desc')}</td>
         <td>${buildSelect('id_cuenta', cuentasOpts, 'label')}</td>
         <td><input type="number" name="monto[]" step="0.01" min="0.01" style="width:100%; padding:4px; text-align:right;" placeholder="0.00" required></td>
-        <td><input type="text" name="descripcion_linea[]" maxlength="255" style="width:100%; padding:4px;" placeholder="Descripción opcional"></td>
-        <td style="text-align:center;"><button type="button" onclick="quitarLinea(this)" style="color:red; border:none; background:none; cursor:pointer; font-size:16px;">✕</button></td>
+        <td><input type="text" class="form-control" name="descripcion_linea[]" maxlength="255" placeholder="Descripción opcional"></td>
+        <td class="text-center align-middle"><button type="button" onclick="quitarLinea(this)" class="btn btn-sm btn-danger"><i class="fas fa-times"></i></button></td>
     `;
     tbody.appendChild(tr);
 }

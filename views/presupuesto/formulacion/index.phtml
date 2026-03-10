@@ -1,79 +1,100 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
-
 <?php if (isset($error)): ?>
-    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px; border-radius: 4px;">
+    <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <h5><i class="icon fas fa-ban"></i> Error!</h5>
         <?= htmlspecialchars($error) ?>
     </div>
 <?php endif; ?>
 
-<div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-    <form method="GET" action="" style="margin: 0;">
-        <input type="hidden" name="route" value="presupuesto/formulacion">
-        <input type="text" name="search" placeholder="Buscar partida o estructura..." value="<?= htmlspecialchars($search) ?>" style="padding: 6px; width: 280px;">
-        <button type="submit" style="padding: 6px 12px;">Buscar</button>
-        <a href="?route=presupuesto/formulacion" style="margin-left: 8px; color: gray;">Limpiar</a>
-    </form>
-    <a href="?route=presupuesto/form" style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">+ Nueva Partida</a>
-</div>
+<div class="card card-primary card-outline">
+    <div class="card-header">
+        <h3 class="card-title mt-1"><i class="fas fa-file-invoice-dollar mr-1"></i> <?= htmlspecialchars($titulo) ?></h3>
+        <div class="card-tools">
+            <a href="?route=presupuesto/form" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> Nueva Partida</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <form method="GET" action="" class="form-inline">
+                <input type="hidden" name="route" value="presupuesto/formulacion">
+                <div class="input-group input-group-sm">
+                    <input type="text" name="search" class="form-control" placeholder="Buscar partida o estructura..." value="<?= htmlspecialchars($search ?? '') ?>" style="width: 280px;">
+                    <span class="input-group-append">
+                        <button type="submit" class="btn btn-primary btn-flat"><i class="fas fa-search"></i></button>
+                    </span>
+                </div>
+                <a href="?route=presupuesto/formulacion" class="btn btn-default btn-sm ml-2">Limpiar</a>
+            </form>
+        </div>
 
-<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
-    <thead style="background-color: #0056b3; color: white;">
-        <tr>
-            <th>Estructura Presupuestaria</th>
-            <th>Código Partida</th>
-            <th>Denominación</th>
-            <th style="text-align: right;">Monto Asignado (Bs)</th>
-            <th style="text-align: right;">Comprometido (Bs)</th>
-            <th style="text-align: right;">Causado (Bs)</th>
-            <th style="text-align: right;">Disponible (Bs)</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php if (empty($partidas)): ?>
-            <tr>
-                <td colspan="8" style="text-align: center; padding: 20px; color: gray;">No hay partidas presupuestarias formuladas.</td>
-            </tr>
-        <?php else: ?>
-            <?php
-            $totalAsignado = 0;
-            $totalComprometido = 0;
-            $totalDisponible = 0;
-            foreach ($partidas as $data):
-                $pg = $data['entity'];
-                $disponible = $data['disponibilidad'];
-                $totalAsignado += $pg->montoAsignado;
-                $totalComprometido += $pg->montoComprometido;
-                $totalDisponible += $disponible;
-                $colorDisp = $disponible < 0 ? 'red' : ($disponible < ($pg->montoAsignado * 0.10) ? 'orange' : 'green');
-            ?>
-            <tr>
-                <td><?= htmlspecialchars($data['estructura_desc']) ?></td>
-                <td><code><?= htmlspecialchars($data['partida_codigo']) ?></code></td>
-                <td><?= htmlspecialchars($data['partida_desc']) ?></td>
-                <td style="text-align: right;"><?= number_format($pg->montoAsignado, 2, ',', '.') ?></td>
-                <td style="text-align: right; color: orange;"><?= number_format($pg->montoComprometido, 2, ',', '.') ?></td>
-                <td style="text-align: right; color: #dc3545;"><?= number_format($pg->montoCausado, 2, ',', '.') ?></td>
-                <td style="text-align: right; font-weight: bold; color: <?= $colorDisp ?>;">
-                    <?= number_format($disponible, 2, ',', '.') ?>
-                </td>
-                <td>
-                    <a href="?route=presupuesto/form&id=<?= $pg->id ?>" style="margin-right: 8px;">Editar</a>
-                    <form method="POST" action="?route=presupuesto/eliminar" onsubmit="return confirm('¿Eliminar esta partida presupuestaria?');" style="display:inline;">
-                        <input type="hidden" name="id" value="<?= $pg->id ?>">
-                        <button type="submit" style="color: red; border:none; background:none; cursor:pointer;">Eliminar</button>
-                    </form>
-                </td>
-            </tr>
-            <?php endforeach; ?>
-            <tr style="background-color: #e9ecef; font-weight: bold; border-top: 3px solid #0056b3;">
-                <td colspan="3" style="text-align: right;">TOTALES:</td>
-                <td style="text-align: right;"><?= number_format($totalAsignado, 2, ',', '.') ?></td>
-                <td style="text-align: right; color: orange;"><?= number_format($totalComprometido, 2, ',', '.') ?></td>
-                <td style="text-align: right;"></td>
-                <td style="text-align: right; color: green;"><?= number_format($totalDisponible, 2, ',', '.') ?></td>
-                <td></td>
-            </tr>
-        <?php endif; ?>
-    </tbody>
-</table>
+        <table class="table table-bordered table-striped dataTable w-100">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Estructura Presupuestaria</th>
+                    <th>Código Partida</th>
+                    <th>Denominación</th>
+                    <th class="text-right">Monto Asignado (Bs)</th>
+                    <th class="text-right">Comprometido (Bs)</th>
+                    <th class="text-right">Causado (Bs)</th>
+                    <th class="text-right">Disponible (Bs)</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (empty($partidas)): ?>
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">No hay partidas presupuestarias formuladas.</td>
+                    </tr>
+                <?php else: ?>
+                    <?php
+                    $totalAsignado = 0;
+                    $totalComprometido = 0;
+                    $totalDisponible = 0;
+                    foreach ($partidas as $data):
+                        $pg = $data['entity'];
+                        $disponible = $data['disponibilidad'];
+                        $totalAsignado += $pg->montoAsignado;
+                        $totalComprometido += $pg->montoComprometido;
+                        $totalDisponible += $disponible;
+                        $colorDisp = $disponible < 0 ? 'red' : ($disponible < ($pg->montoAsignado * 0.10) ? 'orange' : 'green');
+                    ?>
+                    <tr>
+                        <td class="align-middle"><?= htmlspecialchars($data['estructura_desc']) ?></td>
+                        <td class="align-middle"><code><?= htmlspecialchars($data['partida_codigo']) ?></code></td>
+                        <td class="align-middle"><?= htmlspecialchars($data['partida_desc']) ?></td>
+                        <td class="text-right align-middle"><?= number_format($pg->montoAsignado, 2, ',', '.') ?></td>
+                        <td class="text-right align-middle text-warning"><?= number_format($pg->montoComprometido, 2, ',', '.') ?></td>
+                        <td class="text-right align-middle text-danger"><?= number_format($pg->montoCausado, 2, ',', '.') ?></td>
+                        <td class="text-right align-middle font-weight-bold" style="color: <?= $colorDisp ?>;">
+                            <?= number_format($disponible, 2, ',', '.') ?>
+                        </td>
+                        <td class="text-center align-middle">
+                            <a href="?route=presupuesto/form&id=<?= $pg->id ?>" class="btn btn-sm btn-info" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form method="POST" action="?route=presupuesto/eliminar" onsubmit="return confirm('¿Eliminar esta partida presupuestaria?');" class="d-inline">
+                                <input type="hidden" name="id" value="<?= $pg->id ?>">
+                                <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+            <?php if (!empty($partidas)): ?>
+            <tfoot>
+                <tr class="table-secondary font-weight-bold" style="border-top: 3px solid #6c757d;">
+                    <td colspan="3" class="text-right">TOTALES:</td>
+                    <td class="text-right"><?= number_format($totalAsignado, 2, ',', '.') ?></td>
+                    <td class="text-right text-warning"><?= number_format($totalComprometido, 2, ',', '.') ?></td>
+                    <td class="text-right text-danger"></td>
+                    <td class="text-right text-success"><?= number_format($totalDisponible, 2, ',', '.') ?></td>
+                    <td></td>
+                </tr>
+            </tfoot>
+            <?php endif; ?>
+        </table>
+    </div>
+</div>

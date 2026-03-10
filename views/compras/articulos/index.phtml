@@ -1,59 +1,80 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
-
-<?php if (isset($error)): ?>
-    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
-        <?= htmlspecialchars($error) ?>
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+        <div class="card-tools">
+            <a href="?route=articulos/form" class="btn btn-sm btn-success"><i class="fas fa-plus"></i> Nuevo Artículo</a>
+        </div>
     </div>
-<?php endif; ?>
-
-<div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-    <form method="GET" action="" style="margin: 0;">
-        <input type="hidden" name="route" value="articulos/index">
-        <input type="text" name="search" placeholder="Buscar Artículo..." value="<?= htmlspecialchars($search) ?>" style="padding: 5px; width: 300px;">
-        <button type="submit" style="padding: 5px;">Buscar</button>
-        <a href="?route=articulos/index" style="margin-left: 10px;">Limpiar</a>
-    </form>
-    <a href="?route=articulos/form" style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">+ Nuevo Artículo</a>
-</div>
-
-<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
-    <thead style="background-color: #0056b3; color: white;">
-        <tr>
-            <th>ID</th>
-            <th>Denominación</th>
-            <th>Tipo</th>
-            <th>Unidad de Medida</th>
-            <th>Aplica IVA</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php if (empty($articulos)): ?>
-            <tr>
-                <td colspan="6" style="text-align: center;">No se encontraron artículos.</td>
-            </tr>
-        <?php else: ?>
-            <?php foreach ($articulos as $data): ?>
-                <?php 
-                    $a = $data['entity']; 
-                    $tipo = $data['denominacion_tda'];
-                    $udm = $data['denominacion_udm'];
-                ?>
-                <tr>
-                    <td><?= htmlspecialchars((string)$a->id) ?></td>
-                    <td><?= htmlspecialchars($a->denominacion) ?></td>
-                    <td><?= htmlspecialchars($tipo) ?></td>
-                    <td><?= htmlspecialchars($udm) ?></td>
-                    <td><?= $a->aplicarIva ? 'Sí' : 'No' ?></td>
-                    <td>
-                        <a href="?route=articulos/form&id=<?= urlencode((string)$a->id) ?>" style="margin-right: 10px;">Editar</a>
-                        <form method="POST" action="?route=articulos/eliminar" onsubmit="return confirm('¿Seguro de eliminar este artículo?');" style="display:inline;">
-                            <input type="hidden" name="id" value="<?= htmlspecialchars((string)$a->id) ?>">
-                            <button type="submit" style="color: red; border:none; background:none; cursor:pointer;">Eliminar</button>
-                        </form>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
+    <div class="card-body">
+        <?php if (isset($error)): ?>
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-ban"></i> Error</h5>
+                <?= htmlspecialchars($error) ?>
+            </div>
         <?php endif; ?>
-    </tbody>
-</table>
+
+        <?php if (isset($_SESSION['success'])): ?>
+            <div class="alert alert-success alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-check"></i> Éxito</h5>
+                <?= htmlspecialchars($_SESSION['success']) ?>
+            </div>
+            <?php unset($_SESSION['success']); ?>
+        <?php endif; ?>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped dataTable w-100">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Denominación</th>
+                        <th>Tipo</th>
+                        <th>Unidad de Medida</th>
+                        <th class="text-center">Aplica IVA</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($articulos)): ?>
+                        <tr>
+                            <td colspan="6" class="text-center">No se encontraron artículos.</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($articulos as $data): ?>
+                            <?php 
+                                $a = $data['entity']; 
+                                $tipo = $data['denominacion_tda'];
+                                $udm = $data['denominacion_udm'];
+                            ?>
+                            <tr>
+                                <td><?= htmlspecialchars((string)$a->id) ?></td>
+                                <td><?= htmlspecialchars($a->denominacion) ?></td>
+                                <td><?= htmlspecialchars($tipo) ?></td>
+                                <td><?= htmlspecialchars($udm) ?></td>
+                                <td class="text-center">
+                                    <?php if ($a->aplicarIva): ?>
+                                        <span class="badge badge-success">Sí</span>
+                                    <?php else: ?>
+                                        <span class="badge badge-secondary">No</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="text-center">
+                                    <a href="?route=articulos/form&id=<?= urlencode((string)$a->id) ?>" class="btn btn-sm btn-info" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="POST" action="?route=articulos/eliminar" onsubmit="return confirm('¿Seguro de eliminar este artículo?');" style="display:inline;">
+                                        <input type="hidden" name="id" value="<?= htmlspecialchars((string)$a->id) ?>">
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

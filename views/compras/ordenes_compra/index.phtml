@@ -1,97 +1,126 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
-
-<?php if (isset($_GET['success'])): ?>
-    <div style="color:green; padding:10px; border:1px solid green; margin-bottom:15px; border-radius:4px; background:#f0fff0;">
-        ✔ <?= htmlspecialchars($_GET['success']) ?>
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+        <div class="card-tools">
+            <a href="?route=ordenes_compra/form" class="btn btn-sm btn-success"><i class="fas fa-plus"></i> Nueva O/C</a>
+        </div>
     </div>
-<?php endif; ?>
-
-<?php if (isset($_GET['error'])): ?>
-    <div style="color:red; padding:10px; border:1px solid red; margin-bottom:15px; border-radius:4px; background:#fff0f0;">
-        ⛔ <?= htmlspecialchars($_GET['error']) ?>
-    </div>
-<?php endif; ?>
-
-<?php if (isset($error)): ?>
-    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
-        <?= htmlspecialchars($error) ?>
-    </div>
-<?php endif; ?>
-
-<div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-    <form method="GET" action="" style="margin: 0;">
-        <input type="hidden" name="route" value="ordenes_compra/index">
-        <input type="text" name="search" placeholder="Buscar O/C..." value="<?= htmlspecialchars($search) ?>" style="padding: 5px; width: 250px;">
-        <select name="mes" style="padding: 5px;">
-            <option value="">Todos los Meses</option>
-            <?php for($i=1; $i<=12; $i++): $m = str_pad((string)$i, 2, '0', STR_PAD_LEFT); ?>
-                <option value="<?= $m ?>" <?= ($mes === $m) ? 'selected' : '' ?>>Mes <?= $m ?></option>
-            <?php endfor; ?>
-        </select>
-        <button type="submit" style="padding: 5px;">Buscar</button>
-        <a href="?route=ordenes_compra/index" style="margin-left: 10px;">Limpiar</a>
-    </form>
-    <a href="?route=ordenes_compra/form" style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">+ Nueva O/C</a>
-</div>
-
-<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
-    <thead style="background-color: #0056b3; color: white;">
-        <tr>
-            <th>Nro.</th>
-            <th>Fecha</th>
-            <th>Provedor</th>
-            <th>Concepto</th>
-            <th>Estado</th>
-            <th>Monto Total</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php if (empty($ordenes)): ?>
-            <tr>
-                <td colspan="7" style="text-align: center;">No se encontraron órdenes de compra.</td>
-            </tr>
-        <?php else: ?>
-            <?php foreach ($ordenes as $data): ?>
-                <?php 
-                    $oc = $data['entity']; 
-                    $proveedor = $data['proveedor'];
-                ?>
-                <tr>
-                    <td><?= htmlspecialchars((string)$oc->id) ?></td>
-                    <td><?= htmlspecialchars($oc->fecha) ?></td>
-                    <td><?= htmlspecialchars($proveedor) ?></td>
-                    <td><?= htmlspecialchars($oc->concepto) ?></td>
-                    <td>
-                        <?php if (isset($oc->contabilizada) && $oc->contabilizada): ?>
-                            <span style="color:green; font-weight:bold;">Contabilizada</span>
-                        <?php else: ?>
-                            <span style="color:orange; font-weight:bold;">Pendiente</span>
-                        <?php endif; ?>
-                    </td>
-                    <td><?= number_format($oc->montoTotal, 2, ',', '.') ?></td>
-                    <td>
-                        <a href="?route=documental/ordenCompra&id=<?= urlencode((string)$oc->id) ?>" target="_blank" style="margin-right: 10px; color: #198754; font-weight: bold;">[ PDF ]</a>
-                        
-                        <?php if (!isset($oc->contabilizada) || !$oc->contabilizada): ?>
-                            <a href="?route=ordenes_compra/form&id=<?= urlencode((string)$oc->id) ?>" style="margin-right: 10px;">Editar</a>
-                            <form method="POST" action="?route=ordenes_compra/contabilizar" onsubmit="return confirm('¿Contabilizar esta orden de compra? (Esto compromete Presupuesto).');" style="display:inline;">
-                                <input type="hidden" name="id" value="<?= htmlspecialchars((string)$oc->id) ?>">
-                                <button type="submit" style="color:#0056b3; border:none; background:none; cursor:pointer; font-weight:bold; margin-right:8px;">Contabilizar</button>
-                            </form>
-                            <form method="POST" action="?route=ordenes_compra/eliminar" onsubmit="return confirm('¿Seguro de eliminar esta orden?');" style="display:inline;">
-                                <input type="hidden" name="id" value="<?= htmlspecialchars((string)$oc->id) ?>">
-                                <button type="submit" style="color: red; border:none; background:none; cursor:pointer;">Eliminar</button>
-                            </form>
-                        <?php else: ?>
-                            <form method="POST" action="?route=ordenes_compra/reversar" onsubmit="return confirm('¿Reversar Contabilización de la Orden de Compra? (Esto libera Presupuesto).');" style="display:inline;">
-                                <input type="hidden" name="id" value="<?= htmlspecialchars((string)$oc->id) ?>">
-                                <button type="submit" style="color: orange; border:none; background:none; cursor:pointer; font-weight:bold;">Reversar</button>
-                            </form>
-                        <?php endif; ?>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
+    <div class="card-body">
+        <?php if (isset($_GET['success'])): ?>
+            <div class="alert alert-success alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-check"></i> Éxito</h5>
+                <?= htmlspecialchars($_GET['success']) ?>
+            </div>
         <?php endif; ?>
-    </tbody>
-</table>
+
+        <?php if (isset($_GET['error'])): ?>
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-ban"></i> Error</h5>
+                <?= htmlspecialchars($_GET['error']) ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if (isset($error)): ?>
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-ban"></i> Error</h5>
+                <?= htmlspecialchars($error) ?>
+            </div>
+        <?php endif; ?>
+
+        <form method="GET" action="" class="form-inline mb-4">
+            <input type="hidden" name="route" value="ordenes_compra/index">
+            <div class="form-group mr-2">
+                <input type="text" name="search" class="form-control" placeholder="Buscar O/C..." value="<?= htmlspecialchars($search) ?>" style="width: 250px;">
+            </div>
+            <div class="form-group mr-2">
+                <select name="mes" class="form-control">
+                    <option value="">Todos los Meses</option>
+                    <?php for($i=1; $i<=12; $i++): $m = str_pad((string)$i, 2, '0', STR_PAD_LEFT); ?>
+                        <option value="<?= $m ?>" <?= ($mes === $m) ? 'selected' : '' ?>>Mes <?= $m ?></option>
+                    <?php endfor; ?>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
+            <a href="?route=ordenes_compra/index" class="btn btn-default ml-2">Limpiar</a>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped dataTable w-100 table-sm">
+                <thead class="thead-dark">
+                    <tr>
+                        <th class="text-center">Nro.</th>
+                        <th class="text-center">Fecha</th>
+                        <th>Proveedor</th>
+                        <th>Concepto</th>
+                        <th class="text-center">Estado</th>
+                        <th class="text-right">Monto Total</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($ordenes)): ?>
+                        <tr>
+                            <td colspan="7" class="text-center">No se encontraron órdenes de compra.</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($ordenes as $data): ?>
+                            <?php 
+                                $oc = $data['entity']; 
+                                $proveedor = $data['proveedor'];
+                            ?>
+                            <tr>
+                                <td class="text-center align-middle"><strong><?= htmlspecialchars((string)$oc->id) ?></strong></td>
+                                <td class="text-center align-middle"><?= htmlspecialchars($oc->fecha) ?></td>
+                                <td class="align-middle"><?= htmlspecialchars($proveedor) ?></td>
+                                <td class="align-middle"><?= htmlspecialchars($oc->concepto) ?></td>
+                                <td class="text-center align-middle">
+                                    <?php if (isset($oc->contabilizada) && $oc->contabilizada): ?>
+                                        <span class="badge badge-success px-2 py-1"><i class="fas fa-check-circle"></i> Contabilizada</span>
+                                    <?php else: ?>
+                                        <span class="badge badge-warning px-2 py-1"><i class="fas fa-clock"></i> Pendiente</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="text-right align-middle font-weight-bold">
+                                    <?= number_format($oc->montoTotal, 2, ',', '.') ?>
+                                </td>
+                                <td class="text-center align-middle text-nowrap">
+                                    <a href="?route=documental/ordenCompra&id=<?= urlencode((string)$oc->id) ?>" target="_blank" class="btn btn-sm btn-secondary" title="Imprimir PDF">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </a>
+                                    
+                                    <?php if (!isset($oc->contabilizada) || !$oc->contabilizada): ?>
+                                        <a href="?route=ordenes_compra/form&id=<?= urlencode((string)$oc->id) ?>" class="btn btn-sm btn-info" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form method="POST" action="?route=ordenes_compra/contabilizar" onsubmit="return confirm('¿Contabilizar esta orden de compra? (Esto compromete Presupuesto).');" style="display:inline;">
+                                            <input type="hidden" name="id" value="<?= htmlspecialchars((string)$oc->id) ?>">
+                                            <button type="submit" class="btn btn-sm btn-primary" title="Contabilizar">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="?route=ordenes_compra/eliminar" onsubmit="return confirm('¿Seguro de eliminar esta orden?');" style="display:inline;">
+                                            <input type="hidden" name="id" value="<?= htmlspecialchars((string)$oc->id) ?>">
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    <?php else: ?>
+                                        <form method="POST" action="?route=ordenes_compra/reversar" onsubmit="return confirm('¿Reversar Contabilización de la Orden de Compra? (Esto libera Presupuesto).');" style="display:inline;">
+                                            <input type="hidden" name="id" value="<?= htmlspecialchars((string)$oc->id) ?>">
+                                            <button type="submit" class="btn btn-sm btn-warning" title="Reversar">
+                                                <i class="fas fa-undo"></i>
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

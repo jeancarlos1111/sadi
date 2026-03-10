@@ -1,70 +1,62 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <div class="card card-outline card-primary">
+            <div class="card-header">
+                <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+            </div>
+            <form method="POST" action="?route=estruc_presupuestaria/guardar">
+                <div class="card-body">
+                    <?php if (isset($error)): ?>
+                        <div class="alert alert-danger alert-dismissible">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                            <h5><i class="icon fas fa-ban"></i> Error</h5>
+                            <?= htmlspecialchars($error) ?>
+                        </div>
+                    <?php endif; ?>
 
-<?php if (isset($error)): ?>
-    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px; border-radius: 4px;">
-        <?= htmlspecialchars($error) ?>
-    </div>
-<?php endif; ?>
+                    <?php if ($estructura && $estructura->id): ?>
+                        <input type="hidden" name="id" value="<?= $estructura->id ?>">
+                    <?php endif; ?>
 
-<div style="max-width: 600px;">
-    <form method="POST" action="?route=estruc_presupuestaria/guardar">
-        <?php if ($estructura && $estructura->id): ?>
-            <input type="hidden" name="id" value="<?= $estructura->id ?>">
-        <?php endif; ?>
+                    <div class="form-group">
+                        <label>Descripción <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="descripcion_ep"
+                            value="<?= htmlspecialchars($estructura->descripcion ?? '') ?>"
+                            required maxlength="200"
+                            placeholder="Ej: Dirección General - Administración">
+                        <small class="form-text text-muted">Nombre completo de la unidad o programa presupuestario.</small>
+                    </div>
 
-        <table style="width: 100%; border-collapse: collapse;">
-            <tr>
-                <td style="padding: 10px 0; width: 200px; vertical-align: top;">
-                    <label><b>Descripción:</b></label>
-                </td>
-                <td>
-                    <input type="text" name="descripcion_ep"
-                        value="<?= htmlspecialchars($estructura->descripcion ?? '') ?>"
-                        required maxlength="200"
-                        style="padding: 8px; width: 100%;"
-                        placeholder="Ej: Dirección General - Administración">
-                    <small style="color: gray;">Nombre completo de la unidad o programa presupuestario.</small>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                    <hr style="margin: 10px 0;">
-                    <p style="color: gray; font-size: 0.9em; margin: 0 0 8px 0;">
-                        <b>Clasificación Programática (opcional):</b> Códigos de referencia ONAPRE según el instructivo 4.
-                    </p>
-                </td>
-            </tr>
-            <tr>
-                <td style="padding: 6px 0;"><label>Acción Centralizada:</label></td>
-                <td>
-                    <input type="number" name="id_acciones_centralizadas" min="0"
-                        value="<?= $estructura->idAccionesCentralizadas ?? 0 ?>"
-                        style="padding: 6px; width: 100px;">
-                </td>
-            </tr>
-            <tr>
-                <td style="padding: 6px 0;"><label>Acción Específica:</label></td>
-                <td>
-                    <input type="number" name="id_accion_especifica" min="0"
-                        value="<?= $estructura->idAccionEspecifica ?? 0 ?>"
-                        style="padding: 6px; width: 100px;">
-                </td>
-            </tr>
-            <tr>
-                <td style="padding: 6px 0;"><label>Otras Acciones:</label></td>
-                <td>
-                    <input type="number" name="id_otras_acciones_especificas" min="0"
-                        value="<?= $estructura->idOtrasAcciones ?? 0 ?>"
-                        style="padding: 6px; width: 100px;">
-                </td>
-            </tr>
-        </table>
+                    <h5 class="mt-4 border-bottom pb-2 text-muted">Clasificación Programática <small>(Opcional)</small></h5>
+                    <p class="text-sm text-muted mb-3">Códigos de referencia ONAPRE según el instructivo 4.</p>
 
-        <div style="margin-top: 20px;">
-            <button type="submit" style="background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 1em;">
-                💾 Guardar Estructura
-            </button>
-            <a href="?route=estruc_presupuestaria/index" style="margin-left: 15px; color: #6c757d;">Cancelar</a>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label>Acción Centralizada:</label>
+                                <input type="number" class="form-control" name="id_acciones_centralizadas" min="0" value="<?= $estructura->idAccionesCentralizadas ?? 0 ?>">
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label>Acción Específica:</label>
+                                <input type="number" class="form-control" name="id_accion_especifica" min="0" value="<?= $estructura->idAccionEspecifica ?? 0 ?>">
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label>Otras Acciones:</label>
+                                <input type="number" class="form-control" name="id_otras_acciones_especificas" min="0" value="<?= $estructura->idOtrasAcciones ?? 0 ?>">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Estructura</button>
+                    <a href="?route=estruc_presupuestaria/index" class="btn btn-default float-right">Cancelar</a>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 </div>

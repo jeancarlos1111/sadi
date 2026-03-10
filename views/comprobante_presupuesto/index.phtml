@@ -1,55 +1,60 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
-
-<?php if (isset($success)): ?>
-    <div style="color:green; padding:10px; border:1px solid green; margin-bottom:20px;">
-        <?= htmlspecialchars($success) ?>
-    </div>
-<?php endif; ?>
-<?php if (isset($error)): ?>
-    <div style="color:red; padding:10px; border:1px solid red; margin-bottom:20px;">
-        <?= htmlspecialchars($error) ?>
-    </div>
-<?php endif; ?>
-
-<div style="margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-    <form method="GET" action="" style="margin:0; display:flex; gap:8px; align-items:center;">
-        <input type="hidden" name="route" value="comprobante_presupuesto/index">
-        <input type="text" name="search" placeholder="Buscar por N° o denominación..." value="<?= htmlspecialchars($search) ?>" style="padding:5px; width:240px;">
-        <select name="tipo" style="padding:5px;">
-            <option value="">-- Todos los tipos --</option>
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+        <div class="card-tools">
             <?php foreach ($tipos as $cod => $label): ?>
-                <option value="<?= htmlspecialchars($cod) ?>" <?= $tipo_filtro === $cod ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($cod) ?> – <?= htmlspecialchars($label) ?>
-                </option>
+                <a href="?route=comprobante_presupuesto/form&tipo=<?= urlencode($cod) ?>" class="btn btn-sm btn-success">
+                   <i class="fas fa-plus"></i> <?= htmlspecialchars($cod) ?>
+                </a>
             <?php endforeach; ?>
-        </select>
-        <button type="submit" style="padding:5px 10px;">Buscar</button>
-        <a href="?route=comprobante_presupuesto/index" style="margin-left:5px;">Limpiar</a>
-    </form>
-
-    <div style="display:flex; gap:8px;">
-        <?php foreach ($tipos as $cod => $label): ?>
-            <a href="?route=comprobante_presupuesto/form&tipo=<?= urlencode($cod) ?>"
-               style="background-color:#28a745; color:white; padding:8px 12px; text-decoration:none; border-radius:4px; font-size:13px;">
-               + <?= htmlspecialchars($cod) ?>
-            </a>
-        <?php endforeach; ?>
+        </div>
     </div>
-</div>
+    <div class="card-body">
+        <?php if (isset($success)): ?>
+            <div class="alert alert-success alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-check"></i> Éxito</h5>
+                <?= htmlspecialchars($success) ?>
+            </div>
+        <?php endif; ?>
+        <?php if (isset($error)): ?>
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-ban"></i> Error</h5>
+                <?= htmlspecialchars($error) ?>
+            </div>
+        <?php endif; ?>
 
-<table border="1" cellpadding="8" cellspacing="0" style="width:100%; border-collapse:collapse;">
-    <thead style="background-color:#0056b3; color:white;">
-        <tr>
-            <th>N° Comprobante</th>
-            <th>Tipo</th>
-            <th>Fecha</th>
-            <th>Denominación</th>
-            <th>Referencia</th>
-            <th>Beneficiario</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
+        <div style="margin-bottom:15px;">
+            <form method="GET" action="" class="form-inline">
+                <input type="hidden" name="route" value="comprobante_presupuesto/index">
+                <input type="text" class="form-control mr-2" name="search" placeholder="Buscar N° o denominación..." value="<?= htmlspecialchars($search) ?>" style="width:240px;">
+                <select class="form-control mr-2" name="tipo">
+                    <option value="">-- Todos los tipos --</option>
+                    <?php foreach ($tipos as $cod => $label): ?>
+                        <option value="<?= htmlspecialchars($cod) ?>" <?= $tipo_filtro === $cod ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($cod) ?> – <?= htmlspecialchars($label) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <button type="submit" class="btn btn-primary mr-2"><i class="fas fa-search"></i> Buscar</button>
+                <a href="?route=comprobante_presupuesto/index" class="btn btn-default">Limpiar</a>
+            </form>
+        </div>
+
+        <table class="table table-bordered table-striped dataTable w-100">
+            <thead>
+                <tr>
+                    <th>N° Comprobante</th>
+                    <th>Tipo</th>
+                    <th>Fecha</th>
+                    <th>Denominación</th>
+                    <th>Referencia</th>
+                    <th>Beneficiario</th>
+                    <th width="15%" class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
         <?php if (empty($items)): ?>
             <tr><td colspan="7" style="text-align:center;">No hay comprobantes registrados.</td></tr>
         <?php else: ?>
@@ -65,12 +70,16 @@
                     <td><?= htmlspecialchars($c->denominacion_c) ?></td>
                     <td><?= htmlspecialchars($c->referencia_c ?? '—') ?></td>
                     <td><?= htmlspecialchars($c->beneficiario_cedula ?? '—') ?></td>
-                    <td style="text-align:center; white-space:nowrap;">
-                        <a href="?route=comprobante_presupuesto/form&id=<?= urlencode((string)$c->id_comprobante) ?>" style="margin-right:8px;">Editar</a>
+                    <td class="text-center text-nowrap">
+                        <a href="?route=comprobante_presupuesto/form&id=<?= urlencode((string)$c->id_comprobante) ?>" class="btn btn-sm btn-info" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </a>
                         <form method="POST" action="?route=comprobante_presupuesto/eliminar"
                               onsubmit="return confirm('¿Eliminar el comprobante <?= htmlspecialchars($c->numero_c) ?>?');" style="display:inline;">
                             <input type="hidden" name="id" value="<?= htmlspecialchars((string)$c->id_comprobante) ?>">
-                            <button type="submit" style="color:red; border:none; background:none; cursor:pointer; text-decoration:underline;">Eliminar</button>
+                            <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
                         </form>
                     </td>
                 </tr>
@@ -78,3 +87,5 @@
         <?php endif; ?>
     </tbody>
 </table>
+    </div>
+</div>

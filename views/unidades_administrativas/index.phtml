@@ -1,36 +1,50 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+        <div class="card-tools">
+            <a href="?route=unidades_administrativas/form" class="btn btn-sm btn-success">
+                <i class="fas fa-plus"></i> Nueva Unidad
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <?php if (isset($error)): ?>
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-ban"></i> Error</h5>
+                <?= htmlspecialchars($error) ?>
+            </div>
+        <?php endif; ?>
 
-<?php if (isset($error)): ?><div style="color:red; padding:10px; border:1px solid red; margin-bottom:20px;"><?= htmlspecialchars($error) ?></div><?php endif; ?>
-
-<div style="margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
-    <form method="GET" action="" style="margin:0;">
-        <input type="hidden" name="route" value="unidades_administrativas/index">
-        <input type="text" name="search" placeholder="Buscar código o nombre..." value="<?= htmlspecialchars($search) ?>" style="padding:5px; width:250px;">
-        <button type="submit" style="padding:5px;">Buscar</button>
-        <a href="?route=unidades_administrativas/index" style="margin-left:8px;">Limpiar</a>
-    </form>
-    <a href="?route=unidades_administrativas/form" style="background-color:#28a745; color:white; padding:10px 15px; text-decoration:none; border-radius:4px;">+ Nueva Unidad</a>
-</div>
-
-<table border="1" cellpadding="8" cellspacing="0" style="width:100%; border-collapse:collapse;">
-    <thead style="background-color:#0056b3; color:white;">
-        <tr><th>Código</th><th>Denominación</th><th>Acciones</th></tr>
-    </thead>
-    <tbody>
+        <table class="table table-bordered table-striped dataTable w-100">
+            <thead>
+                <tr>
+                    <th width="15%">Código</th>
+                    <th>Denominación</th>
+                    <th width="15%">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
         <?php if (empty($items)): ?>
             <tr><td colspan="3" style="text-align:center;">No hay unidades administrativas registradas.</td></tr>
         <?php else: foreach ($items as $item): ?>
             <tr>
                 <td><strong><?= htmlspecialchars($item->codigo) ?></strong></td>
                 <td><?= htmlspecialchars($item->denominacion) ?></td>
-                <td>
-                    <a href="?route=unidades_administrativas/form&id=<?= $item->id ?>" style="margin-right:8px;">Editar</a>
+                <td class="text-center">
+                    <a href="?route=unidades_administrativas/form&id=<?= $item->id ?>" class="btn btn-sm btn-info" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </a>
                     <form method="POST" action="?route=unidades_administrativas/eliminar" onsubmit="return confirm('¿Eliminar?');" style="display:inline;">
                         <input type="hidden" name="id" value="<?= $item->id ?>">
-                        <button type="submit" style="color:red; border:none; background:none; cursor:pointer;">Eliminar</button>
+                        <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
                     </form>
                 </td>
             </tr>
         <?php endforeach; endif; ?>
-    </tbody>
-</table>
+            </tbody>
+        </table>
+    </div>
+</div>

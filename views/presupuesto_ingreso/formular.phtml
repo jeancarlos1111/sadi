@@ -1,32 +1,41 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <div class="card card-outline card-primary">
+            <div class="card-header">
+                <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+            </div>
+            <form method="POST" action="?route=presupuestoIngreso/guardarFormulacion">
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5><i class="icon fas fa-info"></i> Información</h5>
+                        Cargue o asigne una cuota al <b>Presupuesto Inicial Requerido (Estimado)</b> para un ramo específico de ingresos. El monto se sumará en caso de que el ramo ya cuente con Formulación existente.
+                    </div>
 
-<div style="background-color: #f8f9fa; padding: 20px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 20px;">
-    <p>Cargue o asigne una cuota al <b>Presupuesto Inicial Requerido (Estimado)</b> para un ramo específico de ingresos. El monto se sumará en caso de que el ramo ya cuente con Formulación existente.</p>
+                    <div class="form-group">
+                        <label>Ramo de Ingreso (Clasificador):</label>
+                        <select name="id_ramo" class="form-control" required>
+                            <option value="">Seleccione el origen del dinero a estimar...</option>
+                            <?php foreach ($ramos as $r): ?>
+                                <option value="<?= $r['id_ramo'] ?>">
+                                    <?= htmlspecialchars($r['codigo_ramo'] . ' - ' . $r['denominacion_ramo']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Monto de Crédito Estimado (Bs):</label>
+                        <input type="number" class="form-control" step="0.01" min="1" name="monto_estimado" required placeholder="Ej: 500000.00">
+                    </div>
+                </div>
+
+                <div class="card-footer text-right">
+                    <a href="?route=presupuestoIngreso/index" class="btn btn-default mr-2">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Procesar Asignación de Presupuesto
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
-
-<form method="POST" action="?route=presupuestoIngreso/guardarFormulacion" style="max-width: 600px; border: 1px solid #ced4da; padding: 20px; border-radius: 8px; background: white;">
-
-    <div style="margin-bottom: 15px;">
-        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Ramo de Ingreso (Clasificador):</label>
-        <select name="id_ramo" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-            <option value="">Seleccione el origen del dinero a estimar...</option>
-            <?php foreach ($ramos as $r): ?>
-                <option value="<?= $r['id_ramo'] ?>">
-                    <?= htmlspecialchars($r['codigo_ramo'] . ' - ' . $r['denominacion_ramo']) ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
-    </div>
-
-    <div style="margin-bottom: 20px;">
-        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Monto de Crédito Estimado (Bs):</label>
-        <input type="number" step="0.01" min="1" name="monto_estimado" required placeholder="Ej: 500000.00" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-    </div>
-
-    <div style="text-align: right; margin-top: 30px; border-top: 1px solid #eee; padding-top: 15px;">
-        <a href="?route=presupuestoIngreso/index" style="margin-right: 15px; text-decoration: none; color: #555;">Cancelar</a>
-        <button type="submit" style="background-color: #0d6efd; color: white; padding: 10px 20px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
-            Procesar Asignación de Presupuesto
-        </button>
-    </div>
-</form>

@@ -29,8 +29,7 @@ class AuthController extends BaseController
             }
         }
 
-        // Usaremos una vista especial sin el layout principal (o un layout limpio)
-        require_once __DIR__ . '/../../views/auth/login.phtml';
+        $this->renderView('auth/login', ['error' => $error]);
     }
 
     public function logout(): void

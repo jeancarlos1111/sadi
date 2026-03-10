@@ -1,106 +1,121 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card card-outline card-primary">
+            <div class="card-header">
+                <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+            </div>
+            <div class="card-body">
+                <?php if (isset($error)): ?>
+                    <div class="alert alert-danger alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                        <h5><i class="icon fas fa-ban"></i> Error</h5>
+                        <?= htmlspecialchars($error) ?>
+                    </div>
+                <?php endif; ?>
 
-<?php if (isset($error)): ?>
-    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
-        <?= htmlspecialchars($error) ?>
-    </div>
-<?php endif; ?>
+                <form method="POST" action="?route=ordenes_compra/guardar" id="ordenCompraForm">
+                    <h5 class="mb-3 text-primary border-bottom pb-2">Datos de la Orden</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="id_proveedor">Proveedor <span class="text-danger">*</span></label>
+                                <select name="id_proveedor" id="id_proveedor" class="form-control" required>
+                                    <option value="">-- Seleccione un Proveedor --</option>
+                                    <?php foreach ($proveedores as $prov): ?>
+                                        <?php $p = $prov['entity']; ?>
+                                        <option value="<?= $p->id ?>"><?= htmlspecialchars($p->rif . ' - ' . $p->compania) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="fecha_odc">Fecha <span class="text-danger">*</span></label>
+                                <input type="date" name="fecha_odc" id="fecha_odc" class="form-control" value="<?= date('Y-m-d') ?>" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="porcentaje_iva_odc">% IVA Global</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" name="porcentaje_iva_odc" id="porcentaje_iva_odc" class="form-control" value="16.00" required>
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-<form method="POST" action="?route=ordenes_compra/guardar" id="ordenCompraForm">
-    <div style="border: 1px solid #ccc; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
-        <h3>Datos de la Orden</h3>
-        <table style="width: 100%;">
-            <tr>
-                <td style="padding-bottom: 10px;"><label for="id_proveedor">Proveedor:</label></td>
-                <td style="padding-bottom: 10px;">
-                    <select name="id_proveedor" id="id_proveedor" required style="width: 100%; padding: 5px;">
-                        <option value="">-- Seleccione un Proveedor --</option>
-                        <?php foreach ($proveedores as $prov): ?>
-                            <?php $p = $prov['entity']; ?>
-                            <option value="<?= $p->id ?>"><?= htmlspecialchars($p->rif . ' - ' . $p->compania) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td style="padding-bottom: 10px;"><label for="fecha_odc">Fecha:</label></td>
-                <td style="padding-bottom: 10px;">
-                    <input type="date" name="fecha_odc" id="fecha_odc" value="<?= date('Y-m-d') ?>" required style="padding: 5px;">
-                </td>
-            </tr>
-            <tr>
-                <td style="padding-bottom: 10px;"><label for="concepto_odc">Concepto:</label></td>
-                <td style="padding-bottom: 10px;">
-                    <textarea name="concepto_odc" id="concepto_odc" rows="3" required style="width: 100%; padding: 5px;"></textarea>
-                </td>
-            </tr>
-            <tr>
-                <td style="padding-bottom: 10px;"><label for="porcentaje_iva_odc">% IVA Global:</label></td>
-                <td style="padding-bottom: 10px;">
-                    <input type="number" step="0.01" name="porcentaje_iva_odc" id="porcentaje_iva_odc" value="16.00" required style="padding: 5px; width: 100px;">
-                </td>
-            </tr>
-        </table>
-    </div>
+                    <div class="form-group">
+                        <label for="concepto_odc">Concepto <span class="text-danger">*</span></label>
+                        <textarea name="concepto_odc" id="concepto_odc" class="form-control" rows="2" required placeholder="Descripción de la orden de compra"></textarea>
+                    </div>
 
-    <div style="border: 1px solid #ccc; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h3 style="margin: 0;">Artículos y Renglones</h3>
-            <button type="button" id="btnAgregarArticulo" style="padding: 8px 15px; background-color: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                + Agregar Artículo
-            </button>
+                    <div class="d-flex justify-content-between align-items-end mb-3 mt-4 border-bottom pb-2">
+                        <h5 class="text-primary m-0">Artículos y Renglones</h5>
+                        <button type="button" id="btnAgregarArticulo" class="btn btn-sm btn-info">
+                            <i class="fas fa-plus"></i> Agregar Artículo
+                        </button>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table id="tablaArticulos" class="table table-bordered table-sm table-striped">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th style="width: 40%">Artículo (con Partida)</th>
+                                    <th class="text-center">Cantidad</th>
+                                    <th class="text-center">Costo Unitario</th>
+                                    <th class="text-center">Aplica IVA</th>
+                                    <th class="text-right">Subtotal</th>
+                                    <th class="text-center">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Contenido dinámico mediante JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-6 offset-md-6">
+                            <table class="table table-sm table-borderless text-right font-weight-bold" style="font-size: 1.1em;">
+                                <tr>
+                                    <td style="width: 60%;">Base Imponible:</td>
+                                    <td>
+                                        <input type="hidden" name="monto_base_odc" id="monto_base_odc" value="0">
+                                        <span id="lbl_monto_base">0.00</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Monto IVA:</td>
+                                    <td>
+                                        <input type="hidden" name="monto_iva_odc" id="monto_iva_odc" value="0">
+                                        <span id="lbl_monto_iva">0.00</span>
+                                    </td>
+                                </tr>
+                                <tr class="text-primary" style="font-size: 1.3em; border-top: 2px solid #ccc;">
+                                    <td>TOTAL O/C:</td>
+                                    <td>
+                                        <input type="hidden" name="monto_total_odc" id="monto_total_odc" value="0">
+                                        <span id="lbl_monto_total">0.00</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 border-top pt-3 text-right">
+                        <a href="?route=ordenes_compra/index" class="btn btn-default"><i class="fas fa-times"></i> Cancelar</a>
+                        <button type="submit" class="btn btn-success ml-2">
+                            <i class="fas fa-save"></i> Guardar y Comprometer
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-        
-        <table id="tablaArticulos" border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
-            <thead style="background-color: #f8f9fa;">
-                <tr>
-                    <th style="width: 40%">Artículo (con Partida)</th>
-                    <th>Cantidad</th>
-                    <th>Costo Unitario</th>
-                    <th>Aplica IVA</th>
-                    <th>Subtotal</th>
-                    <th>Acción</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Contenido dinámico mediante JS -->
-            </tbody>
-        </table>
     </div>
-
-    <div style="border: 1px solid #ccc; padding: 15px; border-radius: 5px; margin-bottom: 20px; background-color: #f8f9fa;">
-        <table style="width: 100%; text-align: right; font-weight: bold; font-size: 1.1em;">
-            <tr>
-                <td style="width: 80%;">Base Imponible:</td>
-                <td>
-                    <input type="hidden" name="monto_base_odc" id="monto_base_odc" value="0">
-                    <span id="lbl_monto_base">0.00</span>
-                </td>
-            </tr>
-            <tr>
-                <td>Monto IVA:</td>
-                <td>
-                    <input type="hidden" name="monto_iva_odc" id="monto_iva_odc" value="0">
-                    <span id="lbl_monto_iva">0.00</span>
-                </td>
-            </tr>
-            <tr style="color: #0056b3; font-size: 1.3em;">
-                <td>TOTAL ORDEN DE COMPRA:</td>
-                <td>
-                    <input type="hidden" name="monto_total_odc" id="monto_total_odc" value="0">
-                    <span id="lbl_monto_total">0.00</span>
-                </td>
-            </tr>
-        </table>
-    </div>
-
-    <div>
-        <button type="submit" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
-            ✔ Guardar Orden y Comprometer Presupuesto
-        </button>
-        <a href="?route=ordenes_compra/index" style="margin-left: 15px; text-decoration: none; color: #dc3545;">Cancelar</a>
-    </div>
-</form>
+</div>
 
 <script>
     // Datos de artículos pasados desde PHP a JS

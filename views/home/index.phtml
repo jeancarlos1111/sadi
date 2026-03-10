@@ -1,13 +1,96 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
+<div class="row mb-4">
+  <div class="col-12 text-center">
+    <h2 class="text-primary font-weight-bold">SADI - MENÚ PRINCIPAL</h2>
+    <p class="lead">Bienvenido/a, <strong><?= htmlspecialchars($_SESSION['usuario'] ?? 'Administrador') ?></strong>. Seleccione el módulo con el que desea trabajar:</p>
+  </div>
+</div>
 
-<p>¡Bienvenido a la nueva arquitectura SADI (PHP 8.4 MVC)!</p>
-<p>La estructura base ha sido configurada exitosamente.</p>
+<div class="row justify-content-center">
+  <!-- Presupuesto -->
+  <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+    <div class="small-box bg-info h-100 mb-0 d-flex flex-column">
+      <div class="inner text-center py-4 flex-grow-1">
+        <h3><i class="fas fa-chart-pie fa-2x mb-2"></i></h3>
+        <h4>Presupuesto</h4>
+      </div>
+      <a href="?route=presupuesto/index" class="small-box-footer rounded-bottom">Entrar al Módulo <i class="fas fa-arrow-circle-right"></i></a>
+    </div>
+  </div>
+  
+  <!-- Compras -->
+  <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+    <div class="small-box bg-success h-100 mb-0 d-flex flex-column">
+      <div class="inner text-center py-4 flex-grow-1">
+        <h3><i class="fas fa-shopping-cart fa-2x mb-2"></i></h3>
+        <h4>Compras</h4>
+      </div>
+      <a href="?route=ordenes_compra/index" class="small-box-footer rounded-bottom">Entrar al Módulo <i class="fas fa-arrow-circle-right"></i></a>
+    </div>
+  </div>
 
-<h3>Directorios Creados:</h3>
-<ul>
-    <li><strong>public/</strong>: index.php (Front Controller) y archivos estáticos.</li>
-    <li><strong>src/</strong>: Código fuente (Controllers, Models, Database).</li>
-    <li><strong>views/</strong>: Plantillas PHTML.</li>
-</ul>
+  <!-- Cuentas por Pagar -->
+  <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+    <div class="small-box bg-warning h-100 mb-0 d-flex flex-column">
+      <div class="inner text-center py-4 flex-grow-1">
+        <h3><i class="fas fa-file-invoice-dollar fa-2x mb-2 text-white"></i></h3>
+        <h4 class="text-white">Cuentas por Pagar</h4>
+      </div>
+      <a href="#" class="small-box-footer rounded-bottom">Entrar al Módulo <i class="fas fa-arrow-circle-right text-white"></i></a>
+    </div>
+  </div>
 
-<p>Usa la URL modificando el parámetro <code>?route=controlador/accion</code> para navegar.</p>
+  <!-- Banco -->
+  <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+    <div class="small-box bg-danger h-100 mb-0 d-flex flex-column">
+      <div class="inner text-center py-4 flex-grow-1">
+        <h3><i class="fas fa-piggy-bank fa-2x mb-2"></i></h3>
+        <h4>Banco</h4>
+      </div>
+      <a href="#" class="small-box-footer rounded-bottom">Entrar al Módulo <i class="fas fa-arrow-circle-right"></i></a>
+    </div>
+  </div>
+
+  <!-- Contabilidad -->
+  <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+    <div class="small-box bg-primary h-100 mb-0 d-flex flex-column">
+      <div class="inner text-center py-4 flex-grow-1">
+        <h3><i class="fas fa-book fa-2x mb-2"></i></h3>
+        <h4>Contabilidad</h4>
+      </div>
+      <a href="#" class="small-box-footer rounded-bottom">Entrar al Módulo <i class="fas fa-arrow-circle-right"></i></a>
+    </div>
+  </div>
+
+  <!-- Nómina -->
+  <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+    <div class="small-box bg-secondary h-100 mb-0 d-flex flex-column">
+      <div class="inner text-center py-4 flex-grow-1">
+        <h3><i class="fas fa-users fa-2x mb-2"></i></h3>
+        <h4>Nómina</h4>
+      </div>
+      <a href="#" class="small-box-footer rounded-bottom">Entrar al Módulo <i class="fas fa-arrow-circle-right"></i></a>
+    </div>
+  </div>
+
+  <!-- Inventario -->
+  <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+    <div class="small-box h-100 mb-0 d-flex flex-column" style="background-color: #17a2b8 !important; color: white;">
+      <div class="inner text-center py-4 flex-grow-1">
+        <h3><i class="fas fa-boxes fa-2x mb-2"></i></h3>
+        <h4>Inventario</h4>
+      </div>
+      <a href="#" class="small-box-footer rounded-bottom">Entrar al Módulo <i class="fas fa-arrow-circle-right"></i></a>
+    </div>
+  </div>
+
+  <!-- Proveedores -->
+  <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+    <div class="small-box bg-dark h-100 mb-0 d-flex flex-column">
+      <div class="inner text-center py-4 flex-grow-1">
+        <h3><i class="fas fa-truck fa-2x mb-2"></i></h3>
+        <h4>Proveedores / Ben.</h4>
+      </div>
+      <a href="#" class="small-box-footer rounded-bottom">Entrar al Módulo <i class="fas fa-arrow-circle-right"></i></a>
+    </div>
+  </div>
+</div>

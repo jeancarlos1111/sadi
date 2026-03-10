@@ -1,64 +1,84 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card card-outline card-primary">
+            <div class="card-header">
+                <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+            </div>
+            <div class="card-body">
+                <?php if (isset($error)): ?>
+                    <div class="alert alert-danger alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                        <h5><i class="icon fas fa-ban"></i> Error</h5>
+                        <?= htmlspecialchars($error) ?>
+                    </div>
+                <?php endif; ?>
 
-<?php if (isset($error)): ?>
-    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
-        <?= htmlspecialchars($error) ?>
+                <form method="POST" action="?route=articulos/guardar">
+                    <?php if ($articulo && $articulo->id): ?>
+                        <input type="hidden" name="id" value="<?= htmlspecialchars((string)$articulo->id) ?>">
+                    <?php endif; ?>
+
+                    <div class="form-group">
+                        <label>Denominación <span class="text-danger">*</span></label>
+                        <input type="text" name="denominacion" class="form-control" value="<?= htmlspecialchars($articulo->denominacion ?? '') ?>" required maxlength="50" placeholder="Ej: Resma de papel carta">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Observación</label>
+                        <textarea name="observacion" class="form-control" rows="3" placeholder="Detalles adicionales..."><?= htmlspecialchars($articulo->observacion ?? '') ?></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Tipo de Artículo <span class="text-danger">*</span></label>
+                                <select name="id_tipo_de_articulo" class="form-control" required>
+                                    <option value="">-- SELECCIONE --</option>
+                                    <?php foreach ($tiposArticulo as $tipo): ?>
+                                        <option value="<?= $tipo->id ?>" <?= ($articulo && $articulo->idTipoDeArticulo === $tipo->id) ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($tipo->denominacion) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Unidad de Medida <span class="text-danger">*</span></label>
+                                <select name="id_unidades_de_medida" class="form-control" required>
+                                    <option value="">-- SELECCIONE --</option>
+                                    <?php foreach ($unidadesMedida as $udm): ?>
+                                        <option value="<?= $udm->id ?>" <?= ($articulo && $articulo->idUnidadesDeMedida === $udm->id) ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($udm->denominacion) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>ID Código Plan Único (Cuenta)</label>
+                        <input type="number" name="id_codigo_plan_unico" class="form-control" value="<?= htmlspecialchars((string)($articulo->idCodigoPlanUnico ?? '')) ?>">
+                        <small class="form-text text-muted">Aplica si el artículo se asocia directamente a una cuenta contable o presupuestaria específica.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="custom-control custom-checkbox border p-2 rounded bg-light">
+                            <input class="custom-control-input" type="checkbox" id="aplicar_iva" name="aplicar_iva" value="1" <?= ($articulo && $articulo->aplicarIva) ? 'checked' : '' ?>>
+                            <label for="aplicar_iva" class="custom-control-label font-weight-bold" style="cursor: pointer;">
+                                ¿Aplica I.V.A.?
+                            </label>
+                            <span class="d-block text-muted small mt-1">Marque si este artículo está sujeto a retención de impuestos.</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Artículo</button>
+                        <a href="?route=articulos/index" class="btn btn-default ml-2"><i class="fas fa-times"></i> Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-<?php endif; ?>
-
-<form method="POST" action="?route=articulos/guardar" style="max-width: 600px;">
-    <?php if ($articulo && $articulo->id): ?>
-        <input type="hidden" name="id" value="<?= htmlspecialchars((string)$articulo->id) ?>">
-    <?php endif; ?>
-
-    <div style="margin-bottom: 10px;">
-        <label>Denominación (*):</label><br>
-        <input type="text" name="denominacion" value="<?= htmlspecialchars($articulo->denominacion ?? '') ?>" required maxlength="50" style="width: 100%; padding: 5px;">
-    </div>
-
-    <div style="margin-bottom: 10px;">
-        <label>Observación:</label><br>
-        <textarea name="observacion" rows="3" style="width: 100%; padding: 5px;"><?= htmlspecialchars($articulo->observacion ?? '') ?></textarea>
-    </div>
-
-    <div style="margin-bottom: 10px;">
-        <label>Tipo de Artículo (*):</label><br>
-        <select name="id_tipo_de_articulo" required style="width: 100%; padding: 5px;">
-            <option value="">SELECCIONE</option>
-            <?php foreach ($tiposArticulo as $tipo): ?>
-                <option value="<?= $tipo->id ?>" <?= ($articulo && $articulo->idTipoDeArticulo === $tipo->id) ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($tipo->denominacion) ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
-    </div>
-
-    <div style="margin-bottom: 10px;">
-        <label>Unidad de Medida (*):</label><br>
-        <select name="id_unidades_de_medida" required style="width: 100%; padding: 5px;">
-            <option value="">SELECCIONE</option>
-            <?php foreach ($unidadesMedida as $udm): ?>
-                <option value="<?= $udm->id ?>" <?= ($articulo && $articulo->idUnidadesDeMedida === $udm->id) ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($udm->denominacion) ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
-    </div>
-
-    <div style="margin-bottom: 10px;">
-        <label>ID Código Plan Único (Cuenta):</label><br>
-        <input type="number" name="id_codigo_plan_unico" value="<?= htmlspecialchars((string)($articulo->idCodigoPlanUnico ?? '')) ?>" style="width: 100%; padding: 5px;">
-    </div>
-
-    <div style="margin-bottom: 20px;">
-        <label>
-            <input type="checkbox" name="aplicar_iva" value="1" <?= ($articulo && $articulo->aplicarIva) ? 'checked' : '' ?>>
-            Aplicar I.V.A.
-        </label>
-    </div>
-
-    <div>
-        <button type="submit" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; cursor: pointer;">Guardar Artículo</button>
-        <a href="?route=articulos/index" style="margin-left: 10px; color: #dc3545; text-decoration: none;">Cancelar</a>
-    </div>
-</form>
+</div>

@@ -1,71 +1,81 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card card-outline card-primary">
+            <div class="card-header">
+                <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+            </div>
+            <form method="POST" action="?route=presupuesto/guardar">
+                <div class="card-body">
+                    <?php if (isset($error)): ?>
+                        <div class="alert alert-danger alert-dismissible">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                            <h5><i class="icon fas fa-ban"></i> Error</h5>
+                            <?= htmlspecialchars($error) ?>
+                        </div>
+                    <?php endif; ?>
 
-<?php if (isset($error)): ?>
-    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px; border-radius: 4px;">
-        <?= htmlspecialchars($error) ?>
+                    <?php if ($partida && $partida->id): ?>
+                        <input type="hidden" name="id" value="<?= $partida->id ?>">
+                    <?php endif; ?>
+
+                    <div class="form-group row">
+                        <label class="col-sm-4 col-form-label font-weight-bold">Estructura Presupuestaria:</label>
+                        <div class="col-sm-8">
+                            <select name="id_estruc_presupuestaria" class="form-control select2" required>
+                                <option value="">-- Seleccione --</option>
+                                <?php foreach ($estructuras as $e): ?>
+                                    <option value="<?= $e['id_estruc_presupuestaria'] ?>"
+                                        <?= ($partida && $partida->idEstructura == $e['id_estruc_presupuestaria']) ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($e['descripcion_ep']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-sm-4 col-form-label font-weight-bold">Partida Presupuestaria:</label>
+                        <div class="col-sm-8">
+                            <select name="id_codigo_plan_unico" class="form-control select2" required>
+                                <option value="">-- Seleccione --</option>
+                                <?php foreach ($planUnico as $p): ?>
+                                    <option value="<?= $p['id_codigo_plan_unico'] ?>"
+                                        <?= ($partida && $partida->idPlanUnico == $p['id_codigo_plan_unico']) ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($p['codigo_plan_unico']) ?> — <?= htmlspecialchars($p['denominacion']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-sm-4 col-form-label font-weight-bold">Monto Asignado (Bs):</label>
+                        <div class="col-sm-8">
+                            <input type="number" class="form-control form-control-lg text-primary font-weight-bold" name="monto_asignado" step="0.01" min="0.01" required
+                                value="<?= $partida ? number_format($partida->montoAsignado, 2, '.', '') : '' ?>">
+                            <small class="form-text text-muted">Solo se puede modificar el Monto Asignado original. Comprometidos y Causados se calculan automáticamente.</small>
+                        </div>
+                    </div>
+
+                    <?php if ($partida && $partida->id): ?>
+                    <div class="alert alert-secondary mt-4">
+                        <h5><i class="icon fas fa-chart-pie"></i> Estado de Ejecución Actual</h5>
+                        <ul class="list-unstyled mb-0">
+                            <li><strong>Comprometido:</strong> Bs <?= number_format($partida->montoComprometido, 2, ',', '.') ?></li>
+                            <li><strong>Causado:</strong> Bs <?= number_format($partida->montoCausado, 2, ',', '.') ?></li>
+                            <li><strong>Pagado:</strong> Bs <?= number_format($partida->montoPagado, 2, ',', '.') ?></li>
+                        </ul>
+                    </div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="card-footer text-right">
+                    <a href="?route=presupuesto/formulacion" class="btn btn-default mr-2">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Guardar Partida
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
-<?php endif; ?>
-
-<div style="max-width: 650px;">
-    <form method="POST" action="?route=presupuesto/guardar">
-        <?php if ($partida && $partida->id): ?>
-            <input type="hidden" name="id" value="<?= $partida->id ?>">
-        <?php endif; ?>
-
-        <table style="width: 100%; border-collapse: collapse;">
-            <tr>
-                <td style="padding: 10px 0; width: 220px;"><label><b>Estructura Presupuestaria:</b></label></td>
-                <td>
-                    <select name="id_estruc_presupuestaria" required style="padding: 8px; width: 100%;">
-                        <option value="">-- Seleccione --</option>
-                        <?php foreach ($estructuras as $e): ?>
-                            <option value="<?= $e['id_estruc_presupuestaria'] ?>"
-                                <?= ($partida && $partida->idEstructura == $e['id_estruc_presupuestaria']) ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($e['descripcion_ep']) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td style="padding: 10px 0;"><label><b>Partida Presupuestaria:</b></label></td>
-                <td>
-                    <select name="id_codigo_plan_unico" required style="padding: 8px; width: 100%;">
-                        <option value="">-- Seleccione --</option>
-                        <?php foreach ($planUnico as $p): ?>
-                            <option value="<?= $p['id_codigo_plan_unico'] ?>"
-                                <?= ($partida && $partida->idPlanUnico == $p['id_codigo_plan_unico']) ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($p['codigo_plan_unico']) ?> — <?= htmlspecialchars($p['denominacion']) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td style="padding: 10px 0;"><label><b>Monto Asignado (Bs):</b></label></td>
-                <td>
-                    <input type="number" name="monto_asignado" step="0.01" min="0.01" required
-                        value="<?= $partida ? number_format($partida->montoAsignado, 2, '.', '') : '' ?>"
-                        style="padding: 8px; width: 220px; font-size: 1.1em;">
-                    <small style="color: gray; display: block; margin-top: 3px;">Solo se puede modificar el Monto Asignado original. Comprometidos y Causados se calculan automáticamente.</small>
-                </td>
-            </tr>
-        </table>
-
-        <?php if ($partida && $partida->id): ?>
-        <div style="background: #f8f9fa; padding: 12px; border-radius: 4px; border: 1px solid #ddd; margin: 15px 0;">
-            <strong>Estado de Ejecución Actual:</strong><br>
-            Comprometido: <b>Bs <?= number_format($partida->montoComprometido, 2, ',', '.') ?></b> |
-            Causado: <b>Bs <?= number_format($partida->montoCausado, 2, ',', '.') ?></b> |
-            Pagado: <b>Bs <?= number_format($partida->montoPagado, 2, ',', '.') ?></b>
-        </div>
-        <?php endif; ?>
-
-        <div style="margin-top: 20px;">
-            <button type="submit" style="background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 1em;">
-                💾 Guardar Partida
-            </button>
-            <a href="?route=presupuesto/formulacion" style="margin-left: 15px; color: #6c757d;">Cancelar</a>
-        </div>
-    </form>
 </div>

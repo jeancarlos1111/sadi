@@ -1,234 +1,104 @@
+<?php
+$isLoginPage = ($viewPath === 'auth/login');
+$isHomePage = ($viewPath === 'home/index');
+
+$bodyClass = 'hold-transition';
+if ($isLoginPage) {
+    $bodyClass .= ' login-page';
+} elseif ($isHomePage) {
+    $bodyClass .= ' layout-top-nav';
+} else {
+    $bodyClass .= ' sidebar-mini layout-fixed';
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($titulo ?? 'SADI') ?></title>
-    <!-- Basic minimal styles to make it look a bit cleaner -->
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-            color: #333;
-        }
-        header {
-            background-color: #0056b3;
-            color: #fff;
-            padding: 1rem;
-        /* display: flex; justifies alignment */
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    header h1 {
-        margin: 0;
-        font-size: 1.5rem;
-    }
-    nav {
-        display: flex;
-        align-items: center;
-    }
-    nav a {
-        color: #fff;
-        text-decoration: none;
-        padding: 8px 12px;
-        font-weight: bold;
-    }
-    nav a:hover {
-        background-color: rgba(255,255,255,0.1);
-        border-radius: 4px;
-    }
-    /* Estilos para Dropdowns por Módulo */
-    .dropdown {
-        position: relative;
-        display: inline-block;
-        margin-left: 5px;
-    }
-    .dropdown-btn {
-        background: none;
-        border: none;
-        color: #fff;
-        font-weight: bold;
-        font-size: 1rem;
-        cursor: pointer;
-        padding: 8px 12px;
-    }
-    .dropdown-btn:hover {
-        background-color: rgba(255,255,255,0.1);
-        border-radius: 4px;
-    }
-    .dropdown-content {
-        display: none;
-        position: absolute;
-        background-color: #f9f9f9;
-        min-width: 200px;
-        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-        z-index: 1;
-        border-radius: 4px;
-        overflow: hidden;
-    }
-    .dropdown-content a {
-        color: #333;
-        padding: 10px 16px;
-        text-decoration: none;
-        display: block;
-        margin-left: 0;
-        font-weight: normal;
-        border-bottom: 1px solid #eee;
-    }
-    .dropdown-content a:hover {
-        background-color: #e9ecef;
-        color: #0056b3;
-        border-radius: 0;
-    }
-    .dropdown:hover .dropdown-content {
-        display: block;
-    }
-    main {
-            padding: 2rem;
-            max-width: 1200px;
-            margin: auto;
-            background: #fff;
-            min-height: 80vh;
-            border-radius: 4px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            margin-top: 2rem;
-        }
-        a {
-            color: #0056b3;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><?= htmlspecialchars($titulo ?? 'SADI') ?></title>
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <!-- Bootstrap 4 (Requiere cargar antes de AdminLTE si hay fallos) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.2/css/bootstrap.min.css">
+  <!-- DataTables -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap4.min.css">
+  <!-- Theme style plugin - AdminLTE -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/css/adminlte.min.css">
 </head>
-<body>
-    <header>
-    <h1>SADI</h1>
-    <nav>
-        <a href="?route=home/index">Inicio</a>
-        
-        <div class="dropdown">
-            <button class="dropdown-btn">Presupuesto ▼</button>
-            <div class="dropdown-content">
-                <a href="?route=proyectos/index" style="color: #0b5ed7; font-weight: bold;">📋 Catálogo de Proyectos</a>
-                <a href="?route=acciones_centralizadas/index" style="color: #0b5ed7; font-weight: bold;">🏛️ Acciones Centralizadas</a>
-                <a href="?route=presupuestoIngreso/index" style="border-top:1px solid #ccc;">Presupuesto de Ingresos</a>
-                <a href="?route=estruc_presupuestaria/index" style="color: #198754; font-weight: bold;">⚙ Estructuras Presupuestarias</a>
-                <a href="?route=presupuesto/formulacion">Formulación (Gastos)</a>
-                <a href="?route=presupuesto/index">Ejecución del Gasto</a>
-                <a href="?route=plan_unico_cuentas/index" style="border-top:1px solid #ccc;">Plan Único de Cuentas</a>
-                <a href="?route=tipos_operacion_presupuesto/index">Tipos de Operación</a>
-                <a href="?route=apertura_cuentas/index" style="color:#198754; font-weight:bold; border-top:1px solid #ccc;">📂 Apertura de Cuentas</a>
-                <a href="?route=comprobante_presupuesto/index" style="border-top:1px solid #ccc;">📑 Comprobantes (CG / CA / TR)</a>
-                <a href="?route=comprobante_presupuesto/form&tipo=CG" style="padding-left:20px;">↳ Nuevo Gasto (CG)</a>
-                <a href="?route=comprobante_presupuesto/form&tipo=CA" style="padding-left:20px;">↳ Crédito Adicional (CA)</a>
-                <a href="?route=comprobante_presupuesto/form&tipo=TR" style="padding-left:20px;">↳ Traspaso / Reducción (TR)</a>
-                <a href="?route=periodos_presupuesto/index" style="color:#dc3545; font-weight:bold; border-top:1px solid #ccc;">🔒 Cierre / Apertura de Meses</a>
-                <a href="?route=disponibilidad_presupuesto/index" style="color:#0056b3; font-weight:bold; border-top:1px solid #ccc;">📊 Consulta de Disponibilidad</a>
-                <a href="?route=ajustes_presupuesto/index" style="color:#6f42c1; font-weight:bold; border-top:1px solid #ccc;">🔄 Ajuste a Reformulación</a>
-                <a href="?route=mayor_analitico/index" style="color:#dc3545; font-weight:bold; border-top:1px solid #ccc;">📄 Mayor Analítico (PDF)</a>
-                <a href="?route=unidades_administrativas/index">Unidades Administrativas</a>
-            </div>
-        </div>
+<body class="<?= $bodyClass ?>">
 
-        <div class="dropdown">
-            <button class="dropdown-btn">Compras ▼</button>
-            <div class="dropdown-content">
-                <a href="?route=proveedores/index">Catálogo Proveedores</a>
-                <a href="?route=articulos/index">Catálogo Artículos</a>
-                <a href="?route=tipos_articulos/index">Tipos de Artículos</a>
-                <a href="?route=unidades_medida/index">Unidades de Medida</a>
-                <a href="?route=servicios/index" style="border-top:1px solid #ccc;">Catálogo Servicios</a>
-                <a href="?route=tipos_servicios/index">Tipos de Servicios</a>
-                <a href="?route=requisiciones_bienes/index" style="border-top:1px solid #ccc;">Requisiciones de Bienes</a>
-                <a href="?route=requisiciones_servicios/index">Requisiciones de Servicios</a>
-                <a href="?route=ordenes_compra/index" style="border-top:1px solid #ccc;">Órdenes de Compra</a>
-                <a href="?route=ordenes_servicio/index">Órdenes de Servicio</a>
-            </div>
-        </div>
+<?php if ($isLoginPage): ?>
+  <?php require_once $viewsPath . $viewPath . '.phtml'; ?>
+<?php else: ?>
+<div class="wrapper">
+  <!-- Navbar -->
+  <?php require_once __DIR__ . '/navbar.phtml'; ?>
+  <!-- /.navbar -->
 
-        <div class="dropdown">
-            <button class="dropdown-btn">Almacén ▼</button>
-            <div class="dropdown-content">
-                <a href="?route=inventario/index">Existencias (Inventario)</a>
-                <a href="?route=inventario/entradas">Recepción de Órdenes</a>
-            </div>
-        </div>
+  <?php if (!$isHomePage): ?>
+  <!-- Main Sidebar Container -->
+  <?php require_once __DIR__ . '/sidebar.phtml'; ?>
+  <?php endif; ?>
 
-        <div class="dropdown">
-            <button class="dropdown-btn">Cuentas por Pagar ▼</button>
-            <div class="dropdown-content">
-                <a href="?route=beneficiarios/index">Beneficiarios</a>
-                <a href="?route=tipo_documentos/index">Tipos de Documento</a>
-                <a href="?route=deducciones_cxp/index">Deducciones y Retenciones</a>
-                <a href="?route=cuentas_por_pagar/recepcion_facturas" style="border-top:1px solid #ccc;">Recepción Facturas</a>
-                <a href="?route=retenciones/index">Listar Comprobantes</a>
-                <a href="?route=retenciones/declarar" style="font-weight:bold; color:#d63384;">📤 Declaración SENIAT (TXT/XML)</a>
-                <a href="?route=solicitudes_pago/index">Aprobaciones de Pago (Tesorería)</a>
-                <a href="?route=reportes_cxp/pendientes" style="border-top:1px solid #ccc; font-weight:bold; color:#0056b3;">📊 CxP Pendientes</a>
-                <a href="?route=reportes_cxp/saldosProveedores" style="font-weight:bold; color:#0b5ed7;">💎 Saldos por Proveedor</a>
-                <a href="?route=reportes_cxp/estado_cuenta" style="font-weight:bold; color:#0056b3;">📈 Estado de Cuenta Prov.</a>
-                <a href="?route=reportes_cxp/libroIva" style="font-weight:bold; color:#198754;">📑 Libro de IVA (Compras)</a>
-                <a href="?route=reportes_cxp/listadoRetenciones" style="font-weight:bold; color:#0056b3;">📋 Maestro de Retenciones</a>
-            </div>
-        </div>
-
-        <div class="dropdown">
-            <button class="dropdown-btn">Finanzas ▼</button>
-            <div class="dropdown-content">
-                <a href="?route=bancos/index">Maestro de Bancos</a>
-                <a href="?route=cuentas_bancarias/index">Cuentas Bancarias</a>
-                <a href="?route=tipos_operaciones_bancarias/index">Tipos de Operación</a>
-                <a href="?route=banco/index">Movimientos Bancarios</a>
-                <a href="?route=banco/emitirPago" style="font-weight:bold; color: #198754;">💰 Emisión de Pagos Generales</a>
-                <a href="?route=cheques/emisionDirecta" style="font-weight:bold; color: #d63384;">✍️ Emisión de Cheque Directo</a>
-                <a href="?route=cheques/listado" style="color: #6f42c1;">📑 Listado de Cheques Emitidos</a>
-                <a href="?route=banco/estadoCuenta" style="color: #0d6efd;">📊 Reporte: Estado de Cuenta</a>
-                <a href="?route=caja/index">Caja Chica</a>
-            </div>
-        </div>
-
-        <div class="dropdown">
-            <button class="dropdown-btn">Contabilidad ▼</button>
-            <div class="dropdown-content">
-                <a href="?route=convertidor/index" style="background-color:#e9ecef;">Convertidor Cuentas-Presupuesto</a>
-                <a href="?route=contabilidad/planCuentas">Plan Único de Cuentas</a>
-                <a href="?route=contabilidad/asientos">Comprobantes de Diario</a>
-                <a href="?route=reportes/estadoResultados" style="border-top:1px solid #ccc;">Estado de Resultados (ONAPRE)</a>
-                <a href="?route=reportes/balanceGeneral">Balance General (ONAPRE)</a>
-            </div>
-        </div>
-
-        <div class="dropdown">
-            <button class="dropdown-btn">RRHH ▼</button>
-            <div class="dropdown-content">
-                <a href="?route=nomina/cargos">Administrar Cargos</a>
-                <a href="?route=nomina_conceptos/index" style="color: #198754; font-weight: bold;">⚙ Conceptos de Nómina</a>
-                <a href="?route=nomina/trabajadores">Trabajadores (Personal)</a>
-                <a href="?route=nomina/index">Histórico de Planillas</a>
-                <a href="?route=nomina/emitir">Generar Nómina (Lote)</a>
-            </div>
-        </div>
-
-        <div class="dropdown">
-            <button class="dropdown-btn">Config ▼</button>
-            <div class="dropdown-content">
-                <a href="?route=administrador/usuarios">Usuarios y Roles</a>
-            </div>
-        </div>
-
-        <div style="margin-left: 20px; display: flex; align-items: center; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 15px;">
-            <span style="margin-right: 15px; font-size: 0.9em;">👤 <?= htmlspecialchars($_SESSION['usuario'] ?? '') ?></span>
-            <a href="?route=auth/logout" style="background-color: #dc3545; padding: 5px 10px; border-radius: 4px; font-size: 0.9em;">Salir</a>
-        </div>
-    </nav>
-</header>
-    <main>
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Main content -->
+    <section class="content <?= $isHomePage ? 'pt-5' : 'pt-3' ?>">
+      <div class="<?= $isHomePage ? 'container' : 'container-fluid' ?>">
         <?php require_once $viewsPath . $viewPath . '.phtml'; ?>
-    </main>
+      </div>
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+
+  <footer class="main-footer">
+    <strong>SADI</strong> - Sistema Administrativo Integrado.
+    <div class="float-right d-none d-sm-inline-block">
+      <b>Versión</b> 2.0
+    </div>
+  </footer>
+</div>
+<!-- ./wrapper -->
+<?php endif; ?>
+
+<!-- jQuery -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
+<!-- DataTables & Plugins -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap4.min.js"></script>
+<!-- AdminLTE App -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/js/adminlte.min.js"></script>
+
+<!-- Initialize Global Components -->
+<script>
+  $(function () {
+    // Inicializar DataTables
+    if ($('.dataTable').length > 0) {
+      $('.dataTable').each(function() {
+          if (!$.fn.DataTable.isDataTable(this)) {
+              $(this).DataTable({
+                "pageLength": 20,
+                "responsive": true,
+                "lengthChange": false,
+                "autoWidth": false,
+                "language": {
+                    "url": "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
+                }
+              });
+          }
+      });
+    }
+  });
+</script>
 </body>
 </html>

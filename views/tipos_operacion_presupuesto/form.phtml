@@ -1,20 +1,35 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
-
-<?php if (isset($error)): ?><div style="color:red; padding:10px; border:1px solid red; margin-bottom:20px;"><?= htmlspecialchars($error) ?></div><?php endif; ?>
-
-<form method="POST" action="?route=tipos_operacion_presupuesto/guardar" style="max-width:500px;">
-    <?php if ($item && $item->id): ?><input type="hidden" name="id" value="<?= $item->id ?>"><?php endif; ?>
-
-    <div style="margin-bottom:10px;">
-        <label>Denominación (*):</label><br>
-        <input type="text" name="denominacion" value="<?= htmlspecialchars($item->denominacion ?? '') ?>" required maxlength="100" style="width:100%; padding:5px;">
+<div class="card card-outline card-primary" style="max-width: 600px; margin: 0 auto;">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
     </div>
-    <div style="margin-bottom:20px;">
-        <label>Descripción:</label><br>
-        <input type="text" name="descripcion" value="<?= htmlspecialchars($item->descripcion ?? '') ?>" maxlength="200" style="width:100%; padding:5px;">
-    </div>
-    <div>
-        <button type="submit" style="padding:10px 20px; background-color:#28a745; color:white; border:none; cursor:pointer;">Guardar</button>
-        <a href="?route=tipos_operacion_presupuesto/index" style="margin-left:10px; color:#dc3545;">Cancelar</a>
-    </div>
-</form>
+    <form method="POST" action="?route=tipos_operacion_presupuesto/guardar">
+        <div class="card-body">
+            <?php if (isset($error)): ?>
+                <div class="alert alert-danger alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    <h5><i class="icon fas fa-ban"></i> Error</h5>
+                    <?= htmlspecialchars($error) ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($item && $item->id): ?>
+                <input type="hidden" name="id" value="<?= $item->id ?>">
+            <?php endif; ?>
+
+            <div class="form-group">
+                <label>Denominación (*)</label>
+                <input type="text" class="form-control" name="denominacion" value="<?= htmlspecialchars($item->denominacion ?? '') ?>" required maxlength="100" placeholder="Ingrese denominación">
+            </div>
+            
+            <div class="form-group">
+                <label>Descripción</label>
+                <input type="text" class="form-control" name="descripcion" value="<?= htmlspecialchars($item->descripcion ?? '') ?>" maxlength="200" placeholder="Ingrese descripción">
+            </div>
+        </div>
+        
+        <div class="card-footer">
+            <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Guardar</button>
+            <a href="?route=tipos_operacion_presupuesto/index" class="btn btn-default float-right">Cancelar</a>
+        </div>
+    </form>
+</div>

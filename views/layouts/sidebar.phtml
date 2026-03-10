@@ -1,0 +1,211 @@
+<?php
+$isPresupuesto = strpos($viewPath, 'presupuesto') !== false || 
+                 strpos($viewPath, 'proyectos') !== false || 
+                 strpos($viewPath, 'acciones_centralizadas') !== false || 
+                 strpos($viewPath, 'plan_unico_cuentas') !== false || 
+                 strpos($viewPath, 'tipos_operacion') !== false || 
+                 strpos($viewPath, 'apertura_cuentas') !== false || 
+                 strpos($viewPath, 'convertidor') !== false || 
+                 strpos($viewPath, 'comprobante') !== false || 
+                 strpos($viewPath, 'periodos') !== false || 
+                 strpos($viewPath, 'disponibilidad') !== false || 
+                 strpos($viewPath, 'ajustes') !== false || 
+                 strpos($viewPath, 'mayor') !== false || 
+                 strpos($viewPath, 'unidades_administrativas') !== false;
+
+$isCompras = strpos($viewPath, 'articulos') !== false ||
+             strpos($viewPath, 'ordenes_compra') !== false ||
+             strpos($viewPath, 'ordenes_servicio') !== false ||
+             strpos($viewPath, 'requisiciones_bienes') !== false ||
+             strpos($viewPath, 'requisiciones_servicios') !== false ||
+             strpos($viewPath, 'proveedores') !== false;
+?>
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+  <!-- Brand Logo -->
+  <a href="?route=home/index" class="brand-link text-center">
+    <span class="brand-text font-weight-bold">SADI</span>
+  </a>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <!-- Sidebar Menu -->
+    <nav class="mt-2">
+      <ul class="nav nav-pills nav-sidebar flex-column text-sm" data-widget="treeview" role="menu" data-accordion="false">
+        
+        <?php if ($isPresupuesto): ?>
+
+        <li class="nav-item">
+          <a href="?route=home/index" class="nav-link">
+            <i class="nav-icon fas fa-home text-info"></i>
+            <p>INICIO</p>
+          </a>
+        </li>
+
+        <li class="nav-header mt-2 text-primary font-weight-bold">MÓDULO PRESUPUESTO</li>
+
+        <!-- DEFINICIONES -->
+        <li class="nav-item <?= strpos($viewPath, 'tipos_operacion') !== false || strpos($viewPath, 'estruc_presupuestaria') !== false || strpos($viewPath, 'unidades_administrativas') !== false || strpos($viewPath, 'plan_unico_cuentas') !== false || strpos($viewPath, 'convertidor') !== false || strpos($viewPath, 'proyectos') !== false || strpos($viewPath, 'acciones_centralizadas') !== false ? 'menu-open' : '' ?>">
+          <a href="#" class="nav-link">
+            <i class="nav-icon fas fa-book"></i>
+            <p>DEFINICIONES <i class="right fas fa-angle-left"></i></p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="?route=tipos_operacion_presupuesto/index" class="nav-link <?= strpos($viewPath, 'tipos_operacion') !== false ? 'active' : '' ?>">
+                <i class="far fa-circle nav-icon"></i><p>Tipos de operación</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="?route=estruc_presupuestaria/index" class="nav-link <?= strpos($viewPath, 'estruc_presupuestaria') !== false ? 'active' : '' ?>">
+                <i class="far fa-circle nav-icon"></i><p>Estructura presupuestaria</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="?route=unidades_administrativas/index" class="nav-link <?= strpos($viewPath, 'unidades_administrativas') !== false ? 'active' : '' ?>">
+                <i class="far fa-circle nav-icon"></i><p>Unidades administrativas</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="?route=plan_unico_cuentas/index" class="nav-link <?= strpos($viewPath, 'plan_unico_cuentas') !== false ? 'active' : '' ?>">
+                <i class="far fa-circle nav-icon"></i><p>Plan único de cuentas</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="?route=convertidor/index" class="nav-link <?= strpos($viewPath, 'convertidor') !== false ? 'active' : '' ?>">
+                <i class="far fa-circle nav-icon"></i><p>Convertidor</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="?route=proyectos/index" class="nav-link <?= (strpos($viewPath, 'proyectos') !== false || strpos($viewPath, 'acciones_centralizadas') !== false) ? 'active' : '' ?>">
+                <i class="far fa-circle nav-icon"></i><p>Metas Trimestrales Proyec.</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+
+        <!-- PROCESOS -->
+        <li class="nav-item <?= strpos($viewPath, 'apertura_cuentas') !== false || strpos($viewPath, 'comprobante_presupuesto') !== false || strpos($viewPath, 'periodos') !== false || strpos($viewPath, 'disponibilidad') !== false || strpos($viewPath, 'ajustes') !== false ? 'menu-open' : '' ?>">
+          <a href="#" class="nav-link">
+            <i class="nav-icon fas fa-cogs"></i>
+            <p>PROCESOS <i class="right fas fa-angle-left"></i></p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="?route=apertura_cuentas/index" class="nav-link <?= strpos($viewPath, 'apertura_cuentas') !== false ? 'active' : '' ?>">
+                <i class="far fa-circle nav-icon"></i><p>Aperturar cuentas</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="?route=comprobante_presupuesto/index" class="nav-link <?= $viewPath === 'comprobante_presupuesto/index' ? 'active' : '' ?>">
+                <i class="far fa-circle nav-icon"></i><p>Comprobante</p>
+              </a>
+            </li>
+            <li class="nav-item <?= strpos($viewPath, 'comprobante_presupuesto/form') !== false ? 'menu-open' : '' ?>">
+              <a href="#" class="nav-link">
+                <i class="far fa-circle nav-icon"></i><p>Modificaciones <i class="right fas fa-angle-left"></i></p>
+              </a>
+              <ul class="nav nav-treeview" style="padding-left: 15px;">
+                  <li class="nav-item"><a href="?route=comprobante_presupuesto/form&tipo=CA" class="nav-link <?= (isset($_GET['tipo']) && $_GET['tipo'] === 'CA') ? 'active' : '' ?>"><i class="fas fa-plus nav-icon"></i><p>Crédito adicional</p></a></li>
+                  <li class="nav-item"><a href="?route=comprobante_presupuesto/form&tipo=TR" class="nav-link <?= (isset($_GET['tipo']) && $_GET['tipo'] === 'TR') ? 'active' : '' ?>"><i class="fas fa-minus nav-icon"></i><p>Reducción</p></a></li>
+                  <li class="nav-item"><a href="?route=comprobante_presupuesto/form&tipo=TR" class="nav-link"><i class="fas fa-exchange-alt nav-icon"></i><p>Traspaso</p></a></li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <a href="?route=periodos_presupuesto/index" class="nav-link <?= strpos($viewPath, 'periodos') !== false ? 'active' : '' ?>">
+                <i class="far fa-circle nav-icon"></i><p>Cierre de meses</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="?route=disponibilidad_presupuesto/index" class="nav-link <?= strpos($viewPath, 'disponibilidad') !== false ? 'active' : '' ?>">
+                <i class="far fa-circle nav-icon"></i><p>Disponibilidad presup.</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="?route=ajustes_presupuesto/index" class="nav-link <?= strpos($viewPath, 'ajustes') !== false ? 'active' : '' ?>">
+                <i class="far fa-circle nav-icon"></i><p>Ajustar presupuesto refor...</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+
+        <!-- REPORTES -->
+        <li class="nav-item <?= strpos($viewPath, 'presupuesto/index') !== false || strpos($viewPath, 'mayor_analitico') !== false ? 'menu-open' : '' ?>">
+          <a href="#" class="nav-link">
+            <i class="nav-icon fas fa-chart-bar"></i>
+            <p>REPORTES <i class="right fas fa-angle-left"></i></p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="far fa-circle nav-icon"></i><p>Instructivo n°4</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="?route=presupuesto/index" class="nav-link <?= $viewPath === 'presupuesto/index' ? 'active' : '' ?>">
+                <i class="far fa-circle nav-icon"></i><p>Ejecución</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="?route=mayor_analitico/index" class="nav-link <?= strpos($viewPath, 'mayor_analitico') !== false ? 'active' : '' ?>">
+                <i class="far fa-circle nav-icon"></i><p>Mayor analítico</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+
+        <?php elseif ($isCompras): ?>
+        
+        <li class="nav-item">
+          <a href="?route=home/index" class="nav-link">
+            <i class="nav-icon fas fa-home text-info"></i>
+            <p>INICIO</p>
+          </a>
+        </li>
+
+        <li class="nav-header mt-2 text-success font-weight-bold">MÓDULO COMPRAS</li>
+
+        <li class="nav-item">
+          <a href="?route=articulos/index" class="nav-link <?= strpos($viewPath, 'articulos') !== false ? 'active' : '' ?>">
+            <i class="nav-icon fas fa-box"></i>
+            <p>Catálogo de Artículos</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="?route=requisiciones_bienes/index" class="nav-link <?= strpos($viewPath, 'requisiciones_bienes') !== false ? 'active' : '' ?>">
+            <i class="nav-icon fas fa-file-alt"></i>
+            <p>Requisiciones Bienes</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="?route=requisiciones_servicios/index" class="nav-link <?= strpos($viewPath, 'requisiciones_servicios') !== false ? 'active' : '' ?>">
+            <i class="nav-icon fas fa-file-contract"></i>
+            <p>Requisiciones Servicios</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="?route=ordenes_compra/index" class="nav-link <?= strpos($viewPath, 'ordenes_compra') !== false ? 'active' : '' ?>">
+            <i class="nav-icon fas fa-shopping-cart"></i>
+            <p>Órdenes de Compra</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="?route=ordenes_servicio/index" class="nav-link <?= strpos($viewPath, 'ordenes_servicio') !== false ? 'active' : '' ?>">
+            <i class="nav-icon fas fa-hands-helping"></i>
+            <p>Órdenes de Servicio</p>
+          </a>
+        </li>
+
+        <?php else: ?>
+          <a href="?route=home/index" class="nav-link">
+            <i class="nav-icon fas fa-th text-info"></i>
+            <p>Selector de Módulos</p>
+          </a>
+        </li>
+        <?php endif; ?>
+
+      </ul>
+    </nav>
+    <!-- /.sidebar-menu -->
+  </div>
+  <!-- /.sidebar -->
+</aside>

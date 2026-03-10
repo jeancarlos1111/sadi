@@ -163,35 +163,68 @@ class MiEntidad
 
 Las vistas están en `views/[modulo]/[accion].phtml`. El layout `main.phtml` las incluye.
 
-### Estilo UI de SADI (NO usar Bootstrap)
+### Estilo UI de SADI (AdminLTE v3)
 
-SADI usa **HTML nativo con estilos inline**. Patrón de las vistas:
+SADI ahora utiliza **AdminLTE v3 (basado en Bootstrap 4)** para todas sus vistas. **Está totalmente prohibido el uso de estilos inline (`style="..."`)** salvo casos extremadamente excepcionales.
+
+Patrón estándar de las vistas (Tarjetas y Tablas):
 
 ```html
-<!-- Listados -->
-<h2><?= htmlspecialchars($titulo) ?></h2>
-<table border="1" cellpadding="8" cellspacing="0" style="width:100%; border-collapse:collapse;">
-    <thead style="background-color:#0056b3; color:white;">
-        <tr><th>...</th></tr>
-    </thead>
-    <tbody>...</tbody>
-</table>
-
-<!-- Formularios -->
-<fieldset style="margin-bottom:15px; padding:15px; border:1px solid #ccc;">
-    <legend style="font-weight:bold;">Datos del Registro</legend>
-    ...
-</fieldset>
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+        <div class="card-tools">
+            <a href="?route=modulo/form" class="btn btn-sm btn-success">
+                <i class="fas fa-plus"></i> Nuevo Registro
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <table class="table table-bordered table-striped dataTable w-100">
+            <thead class="thead-dark">
+                <tr><th>...</th></tr>
+            </thead>
+            <tbody>...</tbody>
+        </table>
+    </div>
+</div>
 ```
 
-**Reglas de UI:**
+Patrón estándar para Formularios:
 
-- Color principal: `#0056b3` (azul SADI)
-- Color éxito: `#28a745` / `#198754`
-- Color peligro: `#dc3545`
-- Siempre usar `htmlspecialchars()` al imprimir variables en vistas
-- Formularios siempre con `method="GET"` usando `<input type="hidden" name="route" value="...">` para preservar la ruta
-- Formularios de creación/edición: `method="POST" action="?route=modulo/guardar"`
+```html
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card card-outline card-primary">
+            <div class="card-header">
+                <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+            </div>
+            <form method="POST" action="?route=modulo/guardar">
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Campo: <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="campo" required>
+                    </div>
+                </div>
+                <div class="card-footer text-right">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar</button>
+                    <a href="?route=modulo/index" class="btn btn-default">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+```
+
+**Reglas de UI & Componentes Adicionales:**
+
+- **Prohibición de estilos inline:** Nunca usar `style="..."`. Sustituir por clases utilitarias de Bootstrap 4 (`mt-2`, `mb-3`, `text-center`, `align-middle`, `d-flex`, etc.).
+- **Diseño de Formularios:** Utilizar siempre el sistema de grillas de Bootstrap (`row`, `col-md-*`) para estructurar formularios organizados. Agrupar labels e inputs envolviéndolos en `div.form-group` y aplicar la clase `form-control` (o `form-control-sm`) a los campos correspondientes.
+- **Botones de acción (Tablas y Formularios):** Usar siempre iconos de FontAwesome (`<i class="fas fa-edit"></i>`, `<i class="fas fa-trash"></i>`) dentro de botones pequeños (`btn-sm`). Ej: `btn-info` para editar, `btn-danger` para eliminar, `btn-success` para guardar.
+- **Alertas de Sistema y Validaciones:** Usar las clases `alert alert-success alert-dismissible` y `alert alert-danger alert-dismissible` de Bootstrap/AdminLTE para notificaciones (ej. `$error` o `$success`).
+- **Responsive:** Envolver las tablas muy anchas en un div con clase `table-responsive`. Asegurarse de utilizar la clase `dataTable` en todas las tablas para permitir la paginación y ordenamiento en cliente.
+- Siempre usar `htmlspecialchars()` al imprimir variables en vistas.
+- Formularios de búsqueda/filtro: `method="GET"` usando `<input type="hidden" name="route" value="...">` y clases `form-inline mb-4`.
 
 ---
 
@@ -255,6 +288,10 @@ Cuando migremos funcionalidad de SIGAFS:
 - ✅ Fase 5.1: Catálogos de Presupuesto (Proyectos, Acciones Centralizadas, Plan Único de Cuentas)
 - ✅ Fase 5.2: Procesos Presupuestarios (Apertura de Cuentas, CG/CA/TR, Períodos, Disponibilidad, Reformulación)
 - ✅ Fase 5.3: Reportes (Mayor Analítico PDF)
+- ✅ **Rediseño UI Completo (AdminLTE v3):** Se aplicó el estándar estructural (layouts cards, formularios responsivos form-groups, grids, fontawesome, datatables) a:
+    - Autenticación y Layout Base (Navbar, Sidebar)
+    - Módulo Presupuesto
+    - Módulo Compras (Artículos, Requisiciones, Órdenes)
 
 ---
 

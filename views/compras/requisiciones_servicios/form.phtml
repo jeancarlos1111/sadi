@@ -1,67 +1,122 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card card-outline card-primary">
+            <div class="card-header">
+                <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+            </div>
+            <div class="card-body">
+                <?php if (isset($error)): ?>
+                    <div class="alert alert-danger alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                        <h5><i class="icon fas fa-ban"></i> Error</h5>
+                        <?= htmlspecialchars($error) ?>
+                    </div>
+                <?php endif; ?>
 
-<?php if (isset($error)): ?><div style="color:red; padding:10px; border:1px solid red; margin-bottom:15px;"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+                <form method="POST" action="?route=requisiciones_servicios/guardar">
+                    <?php if ($requisicion && $requisicion->id): ?>
+                        <input type="hidden" name="id" value="<?= $requisicion->id ?>">
+                    <?php endif; ?>
 
-<form method="POST" action="?route=requisiciones_servicios/guardar">
-    <?php if ($requisicion && $requisicion->id): ?><input type="hidden" name="id" value="<?= $requisicion->id ?>"><?php endif; ?>
+                    <h5 class="mb-3 text-primary border-bottom pb-2">Datos Generales</h5>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Fecha <span class="text-danger">*</span></label>
+                                <input type="date" name="fecha" class="form-control" value="<?= htmlspecialchars($requisicion->fecha ?? date('Y-m-d')) ?>" required>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="form-group">
+                                <label>Estructura Presupuestaria</label>
+                                <select name="id_estructura_presupuestaria" class="form-control">
+                                    <option value="0">-- Ninguna --</option>
+                                    <?php foreach ($estructuras as $ep): ?>
+                                        <option value="<?= $ep['id_estruc_presupuestaria'] ?>" <?= ($requisicion && $requisicion->idEstructura == $ep['id_estruc_presupuestaria']) ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($ep['descripcion_ep']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
 
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; max-width:800px; margin-bottom:20px;">
-        <div>
-            <label>Fecha (*):</label><br>
-            <input type="date" name="fecha" value="<?= htmlspecialchars($requisicion->fecha ?? date('Y-m-d')) ?>" required style="width:100%; padding:5px;">
-        </div>
-        <div>
-            <label>Estructura Presupuestaria:</label><br>
-            <select name="id_estructura_presupuestaria" style="width:100%; padding:5px;">
-                <option value="0">-- Ninguna --</option>
-                <?php foreach ($estructuras as $ep): ?>
-                    <option value="<?= $ep['id_estruc_presupuestaria'] ?>" <?= ($requisicion && $requisicion->idEstructura == $ep['id_estruc_presupuestaria']) ? 'selected' : '' ?>>
-                        <?= htmlspecialchars($ep['descripcion_ep']) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-        </div>
-        <div style="grid-column:span 2;">
-            <label>Concepto (*):</label><br>
-            <input type="text" name="concepto" value="<?= htmlspecialchars($requisicion->concepto ?? '') ?>" required maxlength="200" style="width:100%; padding:5px;">
+                    <div class="form-group">
+                        <label>Concepto <span class="text-danger">*</span></label>
+                        <input type="text" name="concepto" class="form-control" value="<?= htmlspecialchars($requisicion->concepto ?? '') ?>" required maxlength="200" placeholder="Descripción resumida del requerimiento">
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-end mb-3 mt-4 border-bottom pb-2">
+                        <h5 class="text-primary m-0">Servicios Solicitados</h5>
+                        <button type="button" id="btnAgregar" class="btn btn-sm btn-info">
+                            <i class="fas fa-plus"></i> Agregar Servicio
+                        </button>
+                    </div>
+
+                    <div class="table-responsive mb-4">
+                        <table class="table table-bordered table-sm table-striped" id="tablaServicios">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Servicio</th>
+                                    <th style="width: 150px;" class="text-center">Cantidad</th>
+                                    <th style="width: 80px;" class="text-center">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cuerpoServicios">
+                                <tr>
+                                    <td>
+                                        <select name="servicios[]" class="form-control form-control-sm select2" required>
+                                            <option value="">-- Seleccione --</option>
+                                            <?php foreach ($serviciosCatalogo as $sd): $s = $sd['entity']; ?>
+                                                <option value="<?= $s->id ?>"><?= htmlspecialchars($s->denominacion) ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="number" name="cantidades[]" class="form-control form-control-sm text-center" value="1" min="0.01" step="0.01" required>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="this.closest('tr').remove()" title="Quitar">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-4 border-top pt-3 text-right">
+                        <a href="?route=requisiciones_servicios/index" class="btn btn-default"><i class="fas fa-times"></i> Cancelar</a>
+                        <button type="submit" class="btn btn-success ml-2">
+                            <i class="fas fa-save"></i> Guardar Requisición
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-
-    <h3>Servicios Solicitados</h3>
-    <table border="1" cellpadding="6" cellspacing="0" style="width:100%; border-collapse:collapse; margin-bottom:12px;" id="tablaServicios">
-        <thead style="background-color:#0056b3; color:white;">
-            <tr><th>Servicio</th><th>Cantidad</th><th></th></tr>
-        </thead>
-        <tbody id="cuerpoServicios">
-            <tr>
-                <td>
-                    <select name="servicios[]" style="width:100%; padding:4px;">
-                        <option value="">-- Seleccione --</option>
-                        <?php foreach ($serviciosCatalogo as $sd): $s = $sd['entity']; ?>
-                            <option value="<?= $s->id ?>"><?= htmlspecialchars($s->denominacion) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </td>
-                <td><input type="number" name="cantidades[]" value="1" min="0.01" step="0.01" style="width:90px; padding:4px;"></td>
-                <td><button type="button" onclick="this.closest('tr').remove()" style="color:red; border:none; background:none; cursor:pointer; font-size:18px;">✕</button></td>
-            </tr>
-        </tbody>
-    </table>
-    <button type="button" id="btnAgregar" style="background:#17a2b8; color:white; padding:6px 14px; border:none; border-radius:4px; cursor:pointer; margin-bottom:20px;">+ Agregar Servicio</button>
-
-    <div>
-        <button type="submit" style="padding:10px 20px; background-color:#28a745; color:white; border:none; cursor:pointer; border-radius:4px;">Guardar Requisición</button>
-        <a href="?route=requisiciones_servicios/index" style="margin-left:10px; color:#dc3545;">Cancelar</a>
-    </div>
-</form>
+</div>
 
 <script>
 const opcionesServicios = `<?php foreach ($serviciosCatalogo as $sd): $s = $sd['entity']; ?><option value="<?= $s->id ?>"><?= htmlspecialchars($s->denominacion) ?></option><?php endforeach; ?>`;
 document.getElementById('btnAgregar').addEventListener('click', function() {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td><select name="servicios[]" style="width:100%; padding:4px;"><option value="">-- Seleccione --</option>${opcionesServicios}</select></td>
-        <td><input type="number" name="cantidades[]" value="1" min="0.01" step="0.01" style="width:90px; padding:4px;"></td>
-        <td><button type="button" onclick="this.closest('tr').remove()" style="color:red; border:none; background:none; cursor:pointer; font-size:18px;">✕</button></td>`;
+    tr.innerHTML = `
+        <td>
+            <select name="servicios[]" class="form-control form-control-sm select2" required>
+                <option value="">-- Seleccione --</option>
+                ${opcionesServicios}
+            </select>
+        </td>
+        <td>
+            <input type="number" name="cantidades[]" class="form-control form-control-sm text-center" value="1" min="0.01" step="0.01" required>
+        </td>
+        <td class="text-center align-middle">
+            <button type="button" class="btn btn-sm btn-danger" onclick="this.closest('tr').remove()" title="Quitar">
+                <i class="fas fa-times"></i>
+            </button>
+        </td>
+    `;
     document.getElementById('cuerpoServicios').appendChild(tr);
 });
 </script>

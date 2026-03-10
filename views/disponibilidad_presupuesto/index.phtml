@@ -1,57 +1,68 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+    </div>
+    <div class="card-body">
+        <p class="text-muted">Consulte el estado presupuestario de cada partida: monto asignado, gastos ejecutados y saldo disponible en tiempo real.</p>
 
-<p style="color:#555;">Consulte el estado presupuestario de cada partida: monto asignado, gastos ejecutados y saldo disponible en tiempo real.</p>
-
-<form method="GET" action="" style="margin-bottom:20px; display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
-    <input type="hidden" name="route" value="disponibilidad_presupuesto/index">
-    <div>
-        <label style="display:block; font-weight:bold; margin-bottom:3px;">Estructura Presupuestaria:</label>
-        <select name="id_estruc" style="padding:5px; min-width:220px;">
-            <option value="">-- Todas las Estructuras --</option>
-            <?php foreach ($estructuras as $ep): ?>
-                <option value="<?= htmlspecialchars((string)$ep->id) ?>" <?= ($id_estruc === $ep->id) ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($ep->descripcion) ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
-    </div>
-    <div>
-        <label style="display:block; font-weight:bold; margin-bottom:3px;">Partida (Cuenta):</label>
-        <select name="id_cuenta" style="padding:5px; min-width:220px;">
-            <option value="">-- Todas las Cuentas --</option>
-            <?php foreach ($planCuentas as $cpu): ?>
-                <option value="<?= htmlspecialchars((string)$cpu->id) ?>" <?= ($id_cuenta === $cpu->id) ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($cpu->codigo . ' – ' . $cpu->denominacion) ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
-    </div>
-    <div>
-        <button type="submit" style="padding:7px 16px; background-color:#0056b3; color:white; border:none; cursor:pointer;">🔍 Consultar</button>
-        <a href="?route=disponibilidad_presupuesto/index" style="margin-left:8px; text-decoration:none; color:#dc3545;">Limpiar</a>
-    </div>
-</form>
+        <form method="GET" action="" class="mb-4">
+            <input type="hidden" name="route" value="disponibilidad_presupuesto/index">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Estructura Presupuestaria</label>
+                        <select class="form-control" name="id_estruc">
+                            <option value="">-- Todas las Estructuras --</option>
+                            <?php foreach ($estructuras as $ep): ?>
+                                <option value="<?= htmlspecialchars((string)$ep->id) ?>" <?= ($id_estruc === $ep->id) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($ep->descripcion) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Partida (Cuenta)</label>
+                        <select class="form-control" name="id_cuenta">
+                            <option value="">-- Todas las Cuentas --</option>
+                            <?php foreach ($planCuentas as $cpu): ?>
+                                <option value="<?= htmlspecialchars((string)$cpu->id) ?>" <?= ($id_cuenta === $cpu->id) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($cpu->codigo . ' – ' . $cpu->denominacion) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4 d-flex align-items-end mb-3">
+                    <button type="submit" class="btn btn-primary mr-2"><i class="fas fa-search"></i> Consultar</button>
+                    <a href="?route=disponibilidad_presupuesto/index" class="btn btn-default">Limpiar</a>
+                </div>
+            </div>
+        </form>
 
 <?php if (empty($resumen)): ?>
-    <div style="padding:12px; border:1px solid #ccc; background:#f9f9f9; text-align:center; color:#555;">
+    <div class="alert alert-info">
+        <h5><i class="icon fas fa-info"></i> Atención</h5>
         No se encontraron partidas aperturadas con los filtros seleccionados.
     </div>
 <?php else: ?>
 
-<table border="1" cellpadding="7" cellspacing="0" style="width:100%; border-collapse:collapse; font-size:13px;">
-    <thead style="background-color:#0056b3; color:white;">
-        <tr>
-            <th>Estructura Presupuestaria</th>
-            <th>Código Cuenta</th>
-            <th>Denominación Partida</th>
-            <th style="text-align:right;">Asignado Inicial</th>
-            <th style="text-align:right;">Créditos Ad. (CA)</th>
-            <th style="text-align:right;">Gastos (CG)</th>
-            <th style="text-align:right;">Traspasos (TR)</th>
-            <th style="text-align:right; background-color:#003d80;">💰 Disponible</th>
-        </tr>
-    </thead>
-    <tbody>
+<div class="table-responsive">
+    <table class="table table-bordered table-striped dataTable w-100 table-sm">
+        <thead class="thead-light">
+            <tr>
+                <th>Estructura Presupuestaria</th>
+                <th>Código Cuenta</th>
+                <th>Denominación Partida</th>
+                <th class="text-right">Asignado Inicial</th>
+                <th class="text-right">Créditos Ad. (CA)</th>
+                <th class="text-right">Gastos (CG)</th>
+                <th class="text-right">Traspasos (TR)</th>
+                <th class="text-right bg-primary">💰 Disponible</th>
+            </tr>
+        </thead>
+        <tbody>
         <?php
         $ep_anterior = null;
         foreach ($resumen as $fila):
@@ -59,8 +70,8 @@
             if ($fila['descripcion_ep'] !== $ep_anterior):
                 $ep_anterior = $fila['descripcion_ep'];
         ?>
-            <tr style="background-color:#dde8f7;">
-                <td colspan="8" style="font-weight:bold; padding:5px 8px;">
+            <tr class="table-secondary">
+                <td colspan="8" class="font-weight-bold p-2">
                     📁 <?= htmlspecialchars($fila['descripcion_ep']) ?>
                 </td>
             </tr>
@@ -69,33 +80,36 @@
             <td></td>
             <td><strong><?= htmlspecialchars($fila['codigo_plan_unico']) ?></strong></td>
             <td><?= htmlspecialchars($fila['denominacion_cuenta']) ?></td>
-            <td style="text-align:right;"><?= number_format((float)$fila['asignado_inicial'], 2, ',', '.') ?></td>
-            <td style="text-align:right; color:#198754;"><?= number_format((float)$fila['creditos_adicionales'], 2, ',', '.') ?></td>
-            <td style="text-align:right; color:#dc3545;"><?= number_format((float)$fila['gastos_causados'], 2, ',', '.') ?></td>
-            <td style="text-align:right; color:#dc3545;"><?= number_format((float)$fila['traspasos_reduccion'], 2, ',', '.') ?></td>
-            <td style="text-align:right; font-weight:bold; <?= (float)$fila['disponible'] < 0 ? 'color:#dc3545; background:#ffe6e6;' : 'color:#198754; background:#e6f9ed;' ?>">
+            <td class="text-right"><?= number_format((float)$fila['asignado_inicial'], 2, ',', '.') ?></td>
+            <td class="text-right text-success"><?= number_format((float)$fila['creditos_adicionales'], 2, ',', '.') ?></td>
+            <td class="text-right text-danger"><?= number_format((float)$fila['gastos_causados'], 2, ',', '.') ?></td>
+            <td class="text-right text-danger"><?= number_format((float)$fila['traspasos_reduccion'], 2, ',', '.') ?></td>
+            <td class="text-right font-weight-bold <?= (float)$fila['disponible'] < 0 ? 'table-danger text-danger' : 'table-success text-success' ?>">
                 <?= number_format((float)$fila['disponible'], 2, ',', '.') ?>
             </td>
         </tr>
         <?php endforeach; ?>
     </tbody>
-    <tfoot style="background-color:#f4f4f4; font-weight:bold; border-top:2px solid #0056b3;">
+    <tfoot class="thead-light font-weight-bold">
         <tr>
-            <td colspan="3" style="text-align:right; padding-right:10px;">TOTALES:</td>
-            <td style="text-align:right;"><?= number_format((float)$totales['asignado_inicial'], 2, ',', '.') ?></td>
-            <td style="text-align:right; color:#198754;"><?= number_format((float)$totales['creditos_adicionales'], 2, ',', '.') ?></td>
-            <td style="text-align:right; color:#dc3545;"><?= number_format((float)$totales['gastos_causados'], 2, ',', '.') ?></td>
-            <td style="text-align:right; color:#dc3545;"><?= number_format((float)$totales['traspasos_reduccion'], 2, ',', '.') ?></td>
-            <td style="text-align:right; <?= (float)$totales['disponible'] < 0 ? 'color:#dc3545;' : 'color:#198754;' ?>">
+            <td colspan="3" class="text-right pr-3">TOTALES:</td>
+            <td class="text-right"><?= number_format((float)$totales['asignado_inicial'], 2, ',', '.') ?></td>
+            <td class="text-right text-success"><?= number_format((float)$totales['creditos_adicionales'], 2, ',', '.') ?></td>
+            <td class="text-right text-danger"><?= number_format((float)$totales['gastos_causados'], 2, ',', '.') ?></td>
+            <td class="text-right text-danger"><?= number_format((float)$totales['traspasos_reduccion'], 2, ',', '.') ?></td>
+            <td class="text-right <?= (float)$totales['disponible'] < 0 ? 'text-danger' : 'text-success' ?>">
                 <?= number_format((float)$totales['disponible'], 2, ',', '.') ?>
             </td>
         </tr>
     </tfoot>
-</table>
+    </table>
+</div>
 
-<p style="margin-top:8px; font-size:12px; color:#777;">
-    <span style="color:#dc3545;">●</span> Valores en rojo indican déficit presupuestario.
-    <span style="color:#198754; margin-left:10px;">●</span> Valores en verde indican saldo disponible positivo.
-</p>
+<div class="mt-3 small text-muted">
+    <span class="text-danger"><i class="fas fa-circle"></i></span> Valores en rojo indican déficit presupuestario.
+    <span class="text-success ml-3"><i class="fas fa-circle"></i></span> Valores en verde indican saldo disponible positivo.
+</div>
 
 <?php endif; ?>
+    </div>
+</div>

@@ -1,87 +1,108 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card card-outline card-primary">
+            <div class="card-header">
+                <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+            </div>
+            <div class="card-body">
+                <?php if (isset($error)): ?>
+                    <div class="alert alert-danger alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                        <h5><i class="icon fas fa-ban"></i> Error</h5>
+                        <?= htmlspecialchars($error) ?>
+                    </div>
+                <?php endif; ?>
 
-<?php if (isset($error)): ?>
-    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
-        <?= htmlspecialchars($error) ?>
+                <form method="POST" action="?route=requisiciones_bienes/guardar">
+                    <?php if ($requisicion && $requisicion->id): ?>
+                        <input type="hidden" name="id" value="<?= htmlspecialchars((string)$requisicion->id) ?>">
+                    <?php endif; ?>
+
+                    <h5 class="mb-3 text-primary border-bottom pb-2">Datos Generales</h5>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Fecha <span class="text-danger">*</span></label>
+                                <input type="date" name="fecha" class="form-control" value="<?= htmlspecialchars($requisicion->fecha ?? date('Y-m-d')) ?>" required>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="form-group">
+                                <label>ID Estructura Presupuestaria <span class="text-danger">*</span></label>
+                                <input type="number" name="id_estructura_presupuestaria" class="form-control" value="<?= htmlspecialchars((string)($requisicion->idEstructuraPresupuestaria ?? '')) ?>" required placeholder="ID numérico de la estructura">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Concepto <span class="text-danger">*</span></label>
+                        <textarea name="concepto" class="form-control" required rows="3" placeholder="Detalle la justificación de la requisición..."><?= htmlspecialchars($requisicion->concepto ?? '') ?></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-end mb-3 mt-4 border-bottom pb-2">
+                        <h5 class="text-primary m-0">Artículos Solicitados</h5>
+                        <button type="button" class="btn btn-sm btn-info" onclick="agregarArticulo()">
+                            <i class="fas fa-plus"></i> Añadir Fila
+                        </button>
+                    </div>
+
+                    <div class="table-responsive mb-4">
+                        <table class="table table-bordered table-sm table-striped" id="tabla-articulos">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Artículo</th>
+                                    <th style="width: 150px;" class="text-center">Cantidad</th>
+                                    <th style="width: 80px;" class="text-center">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php 
+                                $listaArticulosRow = $requisicion ? $requisicion->articulos : [['id_articulo' => '', 'cantidad' => '']];
+                                foreach ($listaArticulosRow as $index => $art): 
+                                ?>
+                                <tr>
+                                    <td>
+                                        <select name="articulos[]" class="form-control form-control-sm select2" required>
+                                            <option value="">-- SELECCIONE UN ARTICULO --</option>
+                                            <?php foreach($articulosCatalogo as $catData): $cat = $catData['entity']; ?>
+                                                <option value="<?= $cat->id ?>" <?= ($cat->id == $art['id_articulo']) ? 'selected' : '' ?>>
+                                                    <?= htmlspecialchars($cat->denominacion) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="number" step="0.01" name="cantidades[]" class="form-control form-control-sm text-center" value="<?= htmlspecialchars((string)($art['cantidad'] ?? '')) ?>" required>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.parentElement.remove()" title="Quitar">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-4 border-top pt-3 text-right">
+                        <a href="?route=requisiciones_bienes/index" class="btn btn-default"><i class="fas fa-times"></i> Cancelar</a>
+                        <button type="submit" class="btn btn-success ml-2">
+                            <i class="fas fa-save"></i> Guardar Requisición
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-<?php endif; ?>
+</div>
 
-<form method="POST" action="?route=requisiciones_bienes/guardar" style="max-width: 800px;">
-    <?php if ($requisicion && $requisicion->id): ?>
-        <input type="hidden" name="id" value="<?= htmlspecialchars((string)$requisicion->id) ?>">
-    <?php endif; ?>
-
-    <fieldset style="margin-bottom: 20px;">
-        <legend>Datos Generales</legend>
-        
-        <div style="margin-bottom: 10px;">
-            <label>Fecha (*):</label><br>
-            <input type="date" name="fecha" value="<?= htmlspecialchars($requisicion->fecha ?? date('Y-m-d')) ?>" required style="width: 100%; padding: 5px;">
-        </div>
-
-        <div style="margin-bottom: 10px;">
-            <label>Concepto (*):</label><br>
-            <textarea name="concepto" required rows="3" style="width: 100%; padding: 5px;"><?= htmlspecialchars($requisicion->concepto ?? '') ?></textarea>
-        </div>
-
-        <div style="margin-bottom: 10px;">
-            <label>ID Estructura Presupuestaria (*):</label><br>
-            <!-- In SIGAFS this was selected via an Ajax popup, but keeping it simple as ID for the MVC example -->
-            <input type="number" name="id_estructura_presupuestaria" value="<?= htmlspecialchars((string)($requisicion->idEstructuraPresupuestaria ?? '')) ?>" required style="width: 100%; padding: 5px;">
-        </div>
-    </fieldset>
-
-    <fieldset style="margin-bottom: 20px;">
-        <legend>Artículos Solicitados</legend>
-        <table border="1" style="width: 100%; border-collapse: collapse; margin-bottom: 10px;" id="tabla-articulos">
-            <thead style="background-color: #eee;">
-                <tr>
-                    <th>Artículo</th>
-                    <th>Cantidad</th>
-                    <th>Acción</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php 
-                $listaArticulosRow = $requisicion ? $requisicion->articulos : [['id_articulo' => '', 'cantidad' => '']];
-                foreach ($listaArticulosRow as $index => $art): 
-                ?>
-                <tr>
-                    <td>
-                        <select name="articulos[]" required style="width: 100%; padding: 5px;">
-                            <option value="">SELECCIONE UN ARTICULO</option>
-                            <?php foreach($articulosCatalogo as $catData): $cat = $catData['entity']; ?>
-                                <option value="<?= $cat->id ?>" <?= ($cat->id == $art['id_articulo']) ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($cat->denominacion) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </td>
-                    <td>
-                        <input type="number" step="0.01" name="cantidades[]" value="<?= htmlspecialchars((string)($art['cantidad'] ?? '')) ?>" required style="width: 100%; padding: 5px;">
-                    </td>
-                    <td>
-                        <button type="button" onclick="this.parentElement.parentElement.remove()" style="color: red; cursor:pointer;">Quitar</button>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-        <button type="button" onclick="agregarArticulo()">+ Añadir Fila</button>
-
-        <script>
-        function agregarArticulo() {
-            var tbody = document.querySelector("#tabla-articulos tbody");
-            var firstRow = tbody.querySelector("tr").cloneNode(true);
-            firstRow.querySelector('select').value = "";
-            firstRow.querySelector('input').value = "";
-            tbody.appendChild(firstRow);
-        }
-        </script>
-    </fieldset>
-
-    <div>
-        <button type="submit" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; cursor: pointer;">Guardar Requisición</button>
-        <a href="?route=requisiciones_bienes/index" style="margin-left: 10px; color: #dc3545; text-decoration: none;">Cancelar</a>
-    </div>
-</form>
+<script>
+function agregarArticulo() {
+    var tbody = document.querySelector("#tabla-articulos tbody");
+    var firstRow = tbody.querySelector("tr").cloneNode(true);
+    firstRow.querySelector('select').value = "";
+    firstRow.querySelector('input').value = "";
+    tbody.appendChild(firstRow);
+}
+</script>

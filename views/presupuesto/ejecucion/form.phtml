@@ -1,12 +1,23 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
-
-<?php if (isset($error)): ?>
-    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
-        <?= htmlspecialchars($error) ?>
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
     </div>
-<?php else: ?>
-    <p>El formulario para formulación de partidas, traslados y créditos adicionales está en proceso de diseño e implementación SADI.</p>
-    <div>
-        <a href="?route=presupuesto/index" style="padding: 10px 20px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 4px;">Volver a Ejecución</a>
+    <div class="card-body">
+        <?php if (isset($error)): ?>
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-ban"></i> Error</h5>
+                <?= htmlspecialchars($error) ?>
+            </div>
+        <?php else: ?>
+            <div class="alert alert-info">
+                <h5><i class="icon fas fa-info"></i> En desarrollo</h5>
+                El formulario para formulación de partidas, traslados y créditos adicionales está en proceso de diseño e implementación SADI.
+            </div>
+            
+            <a href="?route=presupuesto/index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver a Ejecución
+            </a>
+        <?php endif; ?>
     </div>
-<?php endif; ?>
+</div>

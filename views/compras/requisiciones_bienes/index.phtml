@@ -1,63 +1,93 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
-
-<?php if (isset($error)): ?>
-    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
-        <?= htmlspecialchars($error) ?>
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+        <div class="card-tools">
+            <a href="?route=requisiciones_bienes/form" class="btn btn-sm btn-success">
+                <i class="fas fa-plus"></i> Nueva Requisición
+            </a>
+        </div>
     </div>
-<?php endif; ?>
-
-<div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-    <form method="GET" action="" style="margin: 0;">
-        <input type="hidden" name="route" value="requisiciones_bienes/index">
-        <input type="text" name="search" placeholder="Buscar Requisición..." value="<?= htmlspecialchars($search) ?>" style="padding: 5px; width: 250px;">
-        <select name="mes" style="padding: 5px;">
-            <option value="">Todos los Meses</option>
-            <?php for($i=1; $i<=12; $i++): $m = str_pad((string)$i, 2, '0', STR_PAD_LEFT); ?>
-                <option value="<?= $m ?>" <?= ($mes === $m) ? 'selected' : '' ?>>Mes <?= $m ?></option>
-            <?php endfor; ?>
-        </select>
-        <button type="submit" style="padding: 5px;">Buscar</button>
-        <a href="?route=requisiciones_bienes/index" style="margin-left: 10px;">Limpiar</a>
-    </form>
-    <a href="?route=requisiciones_bienes/form" style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">+ Nueva Requisición</a>
-</div>
-
-<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
-    <thead style="background-color: #0056b3; color: white;">
-        <tr>
-            <th>Documento</th>
-            <th>Fecha</th>
-            <th>Concepto</th>
-            <th>Estructura Presupuestaria</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php if (empty($requisiciones)): ?>
-            <tr>
-                <td colspan="5" style="text-align: center;">No se encontraron requisiciones.</td>
-            </tr>
-        <?php else: ?>
-            <?php foreach ($requisiciones as $data): ?>
-                <?php 
-                    $req = $data['entity']; 
-                    $prog = $data['programatica'];
-                ?>
-                <tr>
-                    <td><?= htmlspecialchars((string)$req->id) ?></td>
-                    <td><?= htmlspecialchars($req->fecha) ?></td>
-                    <td><?= htmlspecialchars($req->concepto) ?></td>
-                    <td><?= htmlspecialchars($prog) ?></td>
-                    <td>
-                        <a href="?route=documental/requisicionBienes&id=<?= urlencode((string)$req->id) ?>" target="_blank" style="margin-right: 10px; color: #198754; font-weight: bold;">[ PDF ]</a>
-                        <a href="?route=requisiciones_bienes/form&id=<?= urlencode((string)$req->id) ?>" style="margin-right: 10px;">Editar</a>
-                        <form method="POST" action="?route=requisiciones_bienes/eliminar" onsubmit="return confirm('¿Seguro de eliminar esta requisición?');" style="display:inline;">
-                            <input type="hidden" name="id" value="<?= htmlspecialchars((string)$req->id) ?>">
-                            <button type="submit" style="color: red; border:none; background:none; cursor:pointer;">Eliminar</button>
-                        </form>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
+    <div class="card-body">
+        <?php if (isset($error)): ?>
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-ban"></i> Error</h5>
+                <?= htmlspecialchars($error) ?>
+            </div>
         <?php endif; ?>
-    </tbody>
-</table>
+
+        <?php if (isset($_SESSION['success'])): ?>
+            <div class="alert alert-success alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-check"></i> Éxito</h5>
+                <?= htmlspecialchars($_SESSION['success']) ?>
+            </div>
+            <?php unset($_SESSION['success']); ?>
+        <?php endif; ?>
+
+        <form method="GET" action="" class="form-inline mb-4">
+            <input type="hidden" name="route" value="requisiciones_bienes/index">
+            <div class="form-group mr-2">
+                <input type="text" name="search" class="form-control" placeholder="Buscar Requisición..." value="<?= htmlspecialchars($search) ?>" style="width: 250px;">
+            </div>
+            <div class="form-group mr-2">
+                <select name="mes" class="form-control">
+                    <option value="">Todos los Meses</option>
+                    <?php for($i=1; $i<=12; $i++): $m = str_pad((string)$i, 2, '0', STR_PAD_LEFT); ?>
+                        <option value="<?= $m ?>" <?= ($mes === $m) ? 'selected' : '' ?>>Mes <?= $m ?></option>
+                    <?php endfor; ?>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
+            <a href="?route=requisiciones_bienes/index" class="btn btn-default ml-2">Limpiar</a>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped dataTable w-100 table-sm">
+                <thead class="thead-dark">
+                    <tr>
+                        <th class="text-center">Documento</th>
+                        <th class="text-center">Fecha</th>
+                        <th>Concepto</th>
+                        <th>Estructura Presupuestaria</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($requisiciones)): ?>
+                        <tr>
+                            <td colspan="5" class="text-center">No se encontraron requisiciones.</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($requisiciones as $data): ?>
+                            <?php 
+                                $req = $data['entity']; 
+                                $prog = $data['programatica'];
+                            ?>
+                            <tr>
+                                <td class="text-center align-middle"><strong><?= htmlspecialchars((string)$req->id) ?></strong></td>
+                                <td class="text-center align-middle"><?= htmlspecialchars($req->fecha) ?></td>
+                                <td class="align-middle"><?= htmlspecialchars($req->concepto) ?></td>
+                                <td class="align-middle"><?= htmlspecialchars($prog) ?></td>
+                                <td class="text-center align-middle text-nowrap">
+                                    <a href="?route=documental/requisicionBienes&id=<?= urlencode((string)$req->id) ?>" target="_blank" class="btn btn-sm btn-secondary" title="Imprimir PDF">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </a>
+                                    <a href="?route=requisiciones_bienes/form&id=<?= urlencode((string)$req->id) ?>" class="btn btn-sm btn-info" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="POST" action="?route=requisiciones_bienes/eliminar" onsubmit="return confirm('¿Seguro de eliminar esta requisición?');" style="display:inline;">
+                                        <input type="hidden" name="id" value="<?= htmlspecialchars((string)$req->id) ?>">
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

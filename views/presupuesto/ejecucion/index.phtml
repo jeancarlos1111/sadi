@@ -1,53 +1,66 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
-
 <?php if (isset($error)): ?>
-    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
+    <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <h5><i class="icon fas fa-ban"></i> Error!</h5>
         <?= htmlspecialchars($error) ?>
     </div>
 <?php endif; ?>
 
-<div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-    <form method="GET" action="" style="margin: 0;">
-        <input type="hidden" name="route" value="presupuesto/index">
-        <input type="text" name="search" placeholder="Buscar Partida o Estructura..." value="<?= htmlspecialchars($search) ?>" style="padding: 5px; width: 300px;">
-        <button type="submit" style="padding: 5px;">Buscar</button>
-        <a href="?route=presupuesto/index" style="margin-left: 10px;">Limpiar</a>
-    </form>
-    <a href="?route=presupuesto/form" style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">+ Ajustes</a>
-</div>
+<div class="card card-primary card-outline">
+    <div class="card-header">
+        <h3 class="card-title mt-1"><i class="fas fa-chart-line mr-1"></i> <?= htmlspecialchars($titulo) ?></h3>
+        <div class="card-tools">
+            <a href="?route=presupuesto/form" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> Ajustes</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <form method="GET" action="" class="form-inline">
+                <input type="hidden" name="route" value="presupuesto/index">
+                <div class="input-group input-group-sm">
+                    <input type="text" name="search" class="form-control" placeholder="Buscar Partida o Estructura..." value="<?= htmlspecialchars($search ?? '') ?>" style="width: 300px;">
+                    <span class="input-group-append">
+                        <button type="submit" class="btn btn-primary btn-flat"><i class="fas fa-search"></i></button>
+                    </span>
+                </div>
+                <a href="?route=presupuesto/index" class="btn btn-default btn-sm ml-2">Limpiar</a>
+            </form>
+        </div>
 
-<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
-    <thead style="background-color: #0056b3; color: white;">
-        <tr>
-            <th>Estructura</th>
-            <th>Partida (Plan de Cuentas)</th>
-            <th>Monto Asignado</th>
-            <th>Comprometido</th>
-            <th>Causado</th>
-            <th>Pagado</th>
-            <th>Disponibilidad</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php if (empty($partidas)): ?>
-            <tr>
-                <td colspan="7" style="text-align: center;">No se encontraron partidas.</td>
-            </tr>
-        <?php else: ?>
-            <?php foreach ($partidas as $data): ?>
-                <?php $pg = $data['entity']; ?>
+        <table class="table table-bordered table-striped dataTable w-100">
+            <thead class="thead-dark">
                 <tr>
-                    <td><?= htmlspecialchars($data['estructura_desc']) ?></td>
-                    <td><strong><?= htmlspecialchars($data['partida_codigo']) ?></strong> - <?= htmlspecialchars($data['partida_desc']) ?></td>
-                    <td><?= number_format($pg->montoAsignado, 2, ',', '.') ?></td>
-                    <td><?= number_format($pg->montoComprometido, 2, ',', '.') ?></td>
-                    <td><?= number_format($pg->montoCausado, 2, ',', '.') ?></td>
-                    <td><?= number_format($pg->montoPagado, 2, ',', '.') ?></td>
-                    <td style="font-weight: bold; color: <?= $data['disponibilidad'] > 0 ? 'green' : 'red' ?>;">
-                        <?= number_format($data['disponibilidad'], 2, ',', '.') ?>
-                    </td>
+                    <th>Estructura</th>
+                    <th>Partida (Plan de Cuentas)</th>
+                    <th class="text-right">Monto Asignado</th>
+                    <th class="text-right">Comprometido</th>
+                    <th class="text-right">Causado</th>
+                    <th class="text-right">Pagado</th>
+                    <th class="text-right">Disponibilidad</th>
                 </tr>
-            <?php endforeach; ?>
-        <?php endif; ?>
-    </tbody>
-</table>
+            </thead>
+            <tbody>
+                <?php if (empty($partidas)): ?>
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">No se encontraron partidas.</td>
+                    </tr>
+                <?php else: ?>
+                    <?php foreach ($partidas as $data): ?>
+                        <?php $pg = $data['entity']; ?>
+                        <tr>
+                            <td class="align-middle"><?= htmlspecialchars($data['estructura_desc']) ?></td>
+                            <td class="align-middle"><strong><?= htmlspecialchars($data['partida_codigo']) ?></strong> - <?= htmlspecialchars($data['partida_desc']) ?></td>
+                            <td class="text-right align-middle"><?= number_format($pg->montoAsignado, 2, ',', '.') ?></td>
+                            <td class="text-right align-middle text-warning"><?= number_format($pg->montoComprometido, 2, ',', '.') ?></td>
+                            <td class="text-right align-middle text-danger"><?= number_format($pg->montoCausado, 2, ',', '.') ?></td>
+                            <td class="text-right align-middle text-success"><?= number_format($pg->montoPagado, 2, ',', '.') ?></td>
+                            <td class="text-right align-middle font-weight-bold" style="color: <?= $data['disponibilidad'] > 0 ? 'green' : 'red' ?>;">
+                                <?= number_format($data['disponibilidad'], 2, ',', '.') ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
