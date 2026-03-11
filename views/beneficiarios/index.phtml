@@ -30,7 +30,7 @@
             </thead>
             <tbody>
         <?php if (empty($beneficiarios)): ?>
-            <tr><td colspan="7" style="text-align:center;">No se encontraron beneficiarios.</td></tr>
+            <tr><td colspan="7" class="text-center">No se encontraron beneficiarios.</td></tr>
         <?php else: ?>
             <?php foreach ($beneficiarios as $b): ?>
                 <tr>
@@ -44,7 +44,7 @@
                         <a href="?route=beneficiarios/form&id=<?= urlencode((string)$b->id) ?>" class="btn btn-sm btn-info" title="Editar">
                             <i class="fas fa-edit"></i>
                         </a>
-                        <form method="POST" action="?route=beneficiarios/eliminar" onsubmit="return confirm('¿Eliminar este beneficiario?');" style="display:inline;">
+                        <form method="POST" action="?route=beneficiarios/eliminar" onsubmit="return confirm('¿Eliminar este beneficiario?');" class="d-inline">
                             <input type="hidden" name="id" value="<?= htmlspecialchars((string)$b->id) ?>">
                             <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
                                 <i class="fas fa-trash-alt"></i>

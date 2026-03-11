@@ -1,91 +1,99 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
-
-<div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end;">
-    <form method="GET" action="index.php" style="margin: 0; display: flex; gap: 10px; align-items: center;">
-        <input type="hidden" name="route" value="reportes_cxp/listadoRetenciones">
-        
-        <div>
-            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Fecha Desde</label>
-            <input type="date" name="desde" value="<?= htmlspecialchars($desde) ?>" style="padding: 5px;">
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+        <div class="card-tools">
+            <a href="?route=retenciones/index" class="btn btn-sm btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
         </div>
+    </div>
+    <div class="card-body">
+        <form method="GET" action="index.php" class="mb-4">
+            <input type="hidden" name="route" value="reportes_cxp/listadoRetenciones">
+            <div class="row align-items-end">
+                <div class="col-md-3">
+                    <div class="form-group mb-0">
+                        <label>Fecha Desde</label>
+                        <input type="date" class="form-control" name="desde" value="<?= htmlspecialchars($desde) ?>">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group mb-0">
+                        <label>Fecha Hasta</label>
+                        <input type="date" class="form-control" name="hasta" value="<?= htmlspecialchars($hasta) ?>">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group mb-0">
+                        <label>Tipo de Retención</label>
+                        <select class="form-control" name="tipo">
+                            <option value="TODOS" <?= $tipo === 'TODOS' ? 'selected' : '' ?>>TODOS (IVA e ISLR)</option>
+                            <option value="IVA" <?= $tipo === 'IVA' ? 'selected' : '' ?>>Solo IVA</option>
+                            <option value="ISLR" <?= $tipo === 'ISLR' ? 'selected' : '' ?>>Solo ISLR</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Filtrar</button>
+                    <button type="submit" name="pdf" value="1" class="btn btn-danger ml-1"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
+                </div>
+            </div>
+        </form>
 
-        <div>
-            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Fecha Hasta</label>
-            <input type="date" name="hasta" value="<?= htmlspecialchars($hasta) ?>" style="padding: 5px;">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped dataTable w-100 table-sm">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Emisión</th>
+                        <th>Comprobante</th>
+                        <th>RIF / Proveedor</th>
+                        <th>Nº Factura</th>
+                        <th class="text-right">Base Imponible</th>
+                        <th class="text-center">Alícuota</th>
+                        <th class="text-right">Monto Retenido</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($retenciones)): ?>
+                        <tr><td colspan="7" class="text-center">No se encontraron registros en el periodo seleccionado.</td></tr>
+                    <?php else: ?>
+                        <?php 
+                        $totalR = 0;
+                        foreach ($retenciones as $r): 
+                            $totalR += $r['monto_retenido'];
+                            $isIva = (strpos($r['tipo_retencion'] ?? '', 'IVA') !== false);
+                        ?>
+                            <tr>
+                                <td><?= date('d/m/Y', strtotime($r['fecha_emision'])) ?></td>
+                                <td>
+                                    <strong><?= htmlspecialchars($r['numero_comprobante']) ?></strong><br>
+                                    <small><?= htmlspecialchars($r['tipo_retencion']) ?></small>
+                                </td>
+                                <td>
+                                    <strong><?= htmlspecialchars($r['rif_proveedor']) ?></strong><br>
+                                    <?= htmlspecialchars($r['compania_proveedor']) ?>
+                                </td>
+                                <td><?= htmlspecialchars($r['numero_factura']) ?></td>
+                                <td class="text-right"><?= number_format($r['monto_base'], 2, ',', '.') ?></td>
+                                <td class="text-center font-weight-bold <?= $isIva ? 'text-primary' : 'text-success' ?>">
+                                    <?= number_format($r['porcentaje'], 1) ?>%
+                                </td>
+                                <td class="text-right font-weight-bold">
+                                    <?= number_format($r['monto_retenido'], 2, ',', '.') ?> Bs.
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+                <tfoot class="thead-light font-weight-bold">
+                    <tr>
+                        <td colspan="6" class="text-right pr-3">Resumen Total Retenido:</td>
+                        <td class="text-right text-primary h5 pr-2 mb-0">
+                            <?= number_format($totalR ?? 0, 2, ',', '.') ?> Bs.
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
         </div>
-
-        <div>
-            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Tipo de Retención</label>
-            <select name="tipo" style="padding: 5px;">
-                <option value="TODOS" <?= $tipo === 'TODOS' ? 'selected' : '' ?>>TODOS (IVA e ISLR)</option>
-                <option value="IVA" <?= $tipo === 'IVA' ? 'selected' : '' ?>>Solo IVA</option>
-                <option value="ISLR" <?= $tipo === 'ISLR' ? 'selected' : '' ?>>Solo ISLR</option>
-            </select>
-        </div>
-
-        <div>
-            <button type="submit" style="padding: 6px 15px; cursor: pointer;">Filtrar</button>
-            <button type="submit" name="pdf" value="1" style="background-color: #dc3545; color: white; border: none; padding: 6px 15px; margin-left: 5px; cursor: pointer;">Exportar PDF</button>
-        </div>
-    </form>
-    
-    <div>
-        <a href="?route=retenciones/index" style="background-color: #6c757d; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">Volver</a>
     </div>
 </div>
-
-<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
-    <thead style="background-color: #343a40; color: white;">
-        <tr>
-            <th>Emisión</th>
-            <th>Comprobante</th>
-            <th>RIF / Proveedor</th>
-            <th>Nº Factura</th>
-            <th style="text-align: right;">Base Imponible</th>
-            <th style="text-align: center;">Alícuota</th>
-            <th style="text-align: right;">Monto Retenido</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php if (empty($retenciones)): ?>
-            <tr>
-                <td colspan="7" style="text-align: center;">No se encontraron registros en el periodo seleccionado.</td>
-            </tr>
-        <?php else: ?>
-            <?php 
-            $totalR = 0;
-            foreach ($retenciones as $r): 
-                $totalR += $r['monto_retenido'];
-                $isIva = (strpos($r['tipo_retencion'] ?? '', 'IVA') !== false);
-            ?>
-                <tr>
-                    <td><?= date('d/m/Y', strtotime($r['fecha_emision'])) ?></td>
-                    <td>
-                        <strong><?= htmlspecialchars($r['numero_comprobante']) ?></strong><br>
-                        <small><?= htmlspecialchars($r['tipo_retencion']) ?></small>
-                    </td>
-                    <td>
-                        <strong><?= htmlspecialchars($r['rif_proveedor']) ?></strong><br>
-                        <?= htmlspecialchars($r['compania_proveedor']) ?>
-                    </td>
-                    <td><?= htmlspecialchars($r['numero_factura']) ?></td>
-                    <td style="text-align: right;"><?= number_format($r['monto_base'], 2, ',', '.') ?></td>
-                    <td style="text-align: center; color: <?= $isIva ? '#0056b3' : '#28a745' ?>;">
-                        <?= number_format($r['porcentaje'], 1) ?>%
-                    </td>
-                    <td style="text-align: right; font-weight: bold;">
-                        <?= number_format($r['monto_retenido'], 2, ',', '.') ?> Bs.
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        <?php endif; ?>
-    </tbody>
-    <tfoot>
-        <tr style="background-color: #f8f9fa;">
-            <td colspan="6" style="text-align: right; font-weight: bold;">Resumen Total Retenido:</td>
-            <td style="text-align: right; font-weight: bold; color: #0056b3; font-size: 1.1em;">
-                <?= number_format($totalR ?? 0, 2, ',', '.') ?> Bs.
-            </td>
-        </tr>
-    </tfoot>
-</table>

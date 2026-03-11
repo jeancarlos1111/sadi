@@ -1,50 +1,65 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
-
-<?php if (isset($error)): ?>
-    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
-        <?= htmlspecialchars($error) ?>
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+        <div class="card-tools">
+            <a href="?route=administrador/configuracion" class="btn btn-sm btn-warning font-weight-bold text-dark">
+                <i class="fas fa-cogs"></i> Ir a Configuración Global
+            </a>
+        </div>
     </div>
-<?php endif; ?>
+    <div class="card-body">
+        <?php if (isset($error)): ?>
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-ban"></i> Error</h5>
+                <?= htmlspecialchars($error) ?>
+            </div>
+        <?php endif; ?>
 
-<div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-    <form method="GET" action="" style="margin: 0;">
-        <input type="hidden" name="route" value="administrador/usuarios">
-        <input type="text" name="search" placeholder="Nombre de usuario o empleado..." value="<?= htmlspecialchars($search) ?>" style="padding: 5px; width: 300px;">
-        <button type="submit" style="padding: 5px;">Buscar</button>
-        <a href="?route=administrador/usuarios" style="margin-left: 10px;">Limpiar</a>
-    </form>
-    <div>
-        <a href="?route=administrador/configuracion" style="background-color: #ffc107; color: black; padding: 10px 15px; text-decoration: none; border-radius: 4px;">Ir a Configuración Global</a>
+        <form method="GET" action="" class="form-inline mb-4">
+            <input type="hidden" name="route" value="administrador/usuarios">
+            <div class="input-group mr-2">
+                <input type="text" class="form-control" name="search" placeholder="Nombre de usuario o empleado..." value="<?= htmlspecialchars($search) ?>" style="width: 300px;">
+                <span class="input-group-append">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
+                    <a href="?route=administrador/usuarios" class="btn btn-default">Limpiar</a>
+                </span>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped dataTable w-100 table-sm">
+                <thead class="thead-dark">
+                    <tr>
+                        <th class="text-center" width="10%">ID</th>
+                        <th>Nombre de Usuario</th>
+                        <th>Personal Asignado</th>
+                        <th class="text-center" width="20%">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($usuarios)): ?>
+                        <tr><td colspan="4" class="text-center">No hay usuarios registrados.</td></tr>
+                    <?php else: ?>
+                        <?php foreach ($usuarios as $data): ?>
+                            <?php $usr = $data['entity']; ?>
+                            <tr>
+                                <td class="text-center font-weight-bold"><?= $usr->id ?></td>
+                                <td class="font-weight-bold text-primary"><i class="fas fa-user-circle text-muted mr-1"></i> <?= htmlspecialchars($usr->usuario) ?></td>
+                                <td><?= htmlspecialchars($data['nombre_completo']) ?></td>
+                                <td class="text-center text-nowrap">
+                                    <a href="#" class="btn btn-sm btn-info" title="Editar">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </a>
+                                    <a href="#" class="btn btn-sm btn-outline-danger ml-1" title="Restablecer Clave">
+                                        <i class="fas fa-key"></i> Clave
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
-
-<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
-    <thead style="background-color: #0056b3; color: white;">
-        <tr>
-            <th>ID</th>
-            <th>Nombre de Usuario</th>
-            <th>Personal Asignado</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php if (empty($usuarios)): ?>
-            <tr>
-                <td colspan="4" style="text-align: center;">No hay usuarios registrados.</td>
-            </tr>
-        <?php else: ?>
-            <?php foreach ($usuarios as $data): ?>
-                <?php $usr = $data['entity']; ?>
-                <tr>
-                    <td><?= $usr->id ?></td>
-                    <td style="font-weight: bold;"><?= htmlspecialchars($usr->usuario) ?></td>
-                    <td><?= htmlspecialchars($data['nombre_completo']) ?></td>
-                    <td>
-                        <a href="#">Editar</a> | 
-                        <a href="#" style="color: red;">Restablecer Clave</a>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        <?php endif; ?>
-    </tbody>
-</table>

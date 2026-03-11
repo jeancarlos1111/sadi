@@ -1,74 +1,103 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
-
-<?php if (isset($error)): ?>
-    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
-        <?= htmlspecialchars($error) ?>
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+        <div class="card-tools">
+            <a href="?route=solicitudes_pago/form" class="btn btn-sm btn-success">
+                <i class="fas fa-plus"></i> Nueva Solicitud
+            </a>
+        </div>
     </div>
-<?php endif; ?>
-
-<div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-    <form method="GET" action="" style="margin: 0;">
-        <input type="hidden" name="route" value="solicitudes_pago/index">
-        <input type="text" name="search" placeholder="Buscar Solicitud..." value="<?= htmlspecialchars($search) ?>" style="padding: 5px; width: 250px;">
-        <select name="mes" style="padding: 5px;">
-            <option value="">Todos los Meses</option>
-            <?php for($i=1; $i<=12; $i++): $m = str_pad((string)$i, 2, '0', STR_PAD_LEFT); ?>
-                <option value="<?= $m ?>" <?= ($mes === $m) ? 'selected' : '' ?>>Mes <?= $m ?></option>
-            <?php endfor; ?>
-        </select>
-        <button type="submit" style="padding: 5px;">Buscar</button>
-        <a href="?route=solicitudes_pago/index" style="margin-left: 10px;">Limpiar</a>
-    </form>
-    <a href="?route=solicitudes_pago/form" style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">+ Nueva Solicitud</a>
-</div>
-
-<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
-    <thead style="background-color: #0056b3; color: white;">
-        <tr>
-            <th>Documento Nº</th>
-            <th>Fecha</th>
-            <th>Concepto</th>
-            <th>Monto a Pagar</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php if (empty($solicitudes)): ?>
-            <tr>
-                <td colspan="6" style="text-align: center;">No se encontraron solicitudes de pago.</td>
-            </tr>
-        <?php else: ?>
-            <?php foreach ($solicitudes as $data): ?>
-                <?php $sp = $data['entity']; ?>
-                <tr>
-                    <td><?= htmlspecialchars((string)$sp->id) ?></td>
-                    <td><?= htmlspecialchars($sp->fecha) ?></td>
-                    <td><?= htmlspecialchars($sp->concepto) ?></td>
-                    <td><?= number_format($sp->montoPagar, 2, ',', '.') ?></td>
-                    <td style="font-weight: bold; color: <?= $sp->estado === 'Aprobada/Contabilizada' ? 'green' : 'orange' ?>;">
-                        <?= htmlspecialchars($sp->estado) ?>
-                    </td>
-                    <td>
-                        <a href="?route=documental/solicitudPago&id=<?= urlencode((string)$sp->id) ?>" target="_blank" style="margin-right: 10px; color: #198754; font-weight: bold;">[ PDF ]</a>
-                        
-                        <?php if ($sp->estado !== 'Aprobada/Contabilizada'): ?>
-                            <a href="?route=solicitudes_pago/pagar&id=<?= urlencode((string)$sp->id) ?>" style="color: green; text-decoration: none; font-weight: bold; margin-right: 10px;">Pagar / Emitir</a>
-                            <a href="?route=solicitudes_pago/desprogramar&id=<?= urlencode((string)$sp->id) ?>" onclick="return confirm('¿Está seguro de DESPROGRAMAR (detener y anular) esta solicitud de pago?');" style="color: #dc3545; text-decoration: none; font-weight: bold; margin-right: 10px;">[ Desprogramar ]</a>
-                        <?php else: ?>
-                            <a href="?route=solicitudes_pago/reversar&id=<?= urlencode((string)$sp->id) ?>" 
-                               onclick="return confirm('¿Está seguro de REVERSAR este pago? Se eliminarán los movimientos de banco y contabilidad, y se restaurará el presupuesto.')"
-                               style="color: #dc3545; text-decoration: none; font-weight: bold; margin-right: 10px;">[ Reversar ]</a>
-                        <?php endif; ?>
-                        
-                        <a href="?route=solicitudes_pago/form&id=<?= urlencode((string)$sp->id) ?>" style="margin-right: 10px;">Editar</a>
-                        <form method="POST" action="?route=solicitudes_pago/eliminar" onsubmit="return confirm('¿Seguro de eliminar esta solicitud?');" style="display:inline;">
-                            <input type="hidden" name="id" value="<?= htmlspecialchars((string)$sp->id) ?>">
-                            <button type="submit" style="color: red; border:none; background:none; cursor:pointer;">Eliminar</button>
-                        </form>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
+    <div class="card-body">
+        <?php if (isset($error)): ?>
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-ban"></i> Error</h5>
+                <?= htmlspecialchars($error) ?>
+            </div>
         <?php endif; ?>
-    </tbody>
-</table>
+
+        <form method="GET" action="" class="form-inline mb-4">
+            <input type="hidden" name="route" value="solicitudes_pago/index">
+            <div class="input-group mr-2">
+                <input type="text" class="form-control" name="search" placeholder="Buscar Solicitud..." value="<?= htmlspecialchars($search) ?>" style="width: 250px;">
+                <select class="form-control" name="mes">
+                    <option value="">Todos los Meses</option>
+                    <?php for($i=1; $i<=12; $i++): $m = str_pad((string)$i, 2, '0', STR_PAD_LEFT); ?>
+                        <option value="<?= $m ?>" <?= ($mes === $m) ? 'selected' : '' ?>>Mes <?= $m ?></option>
+                    <?php endfor; ?>
+                </select>
+                <span class="input-group-append">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
+                </span>
+            </div>
+            <a href="?route=solicitudes_pago/index" class="btn btn-default">Limpiar</a>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped dataTable w-100 table-sm">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Documento Nº</th>
+                        <th>Fecha</th>
+                        <th>Concepto</th>
+                        <th class="text-right">Monto a Pagar</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($solicitudes)): ?>
+                        <tr><td colspan="6" class="text-center">No se encontraron solicitudes de pago.</td></tr>
+                    <?php else: ?>
+                        <?php foreach ($solicitudes as $data): ?>
+                            <?php $sp = $data['entity']; ?>
+                            <tr>
+                                <td><strong><?= htmlspecialchars((string)$sp->id) ?></strong></td>
+                                <td><?= htmlspecialchars($sp->fecha) ?></td>
+                                <td><?= htmlspecialchars($sp->concepto) ?></td>
+                                <td class="text-right font-weight-bold"><?= number_format($sp->montoPagar, 2, ',', '.') ?></td>
+                                <td>
+                                    <?php if ($sp->estado === 'Aprobada/Contabilizada'): ?>
+                                        <span class="badge badge-success"><?= htmlspecialchars($sp->estado) ?></span>
+                                    <?php else: ?>
+                                        <span class="badge badge-warning"><?= htmlspecialchars($sp->estado) ?></span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="text-center text-nowrap">
+                                    <a href="?route=documental/solicitudPago&id=<?= urlencode((string)$sp->id) ?>" target="_blank" class="btn btn-sm btn-success" title="Ver PDF">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </a>
+                                    
+                                    <?php if ($sp->estado !== 'Aprobada/Contabilizada'): ?>
+                                        <a href="?route=solicitudes_pago/pagar&id=<?= urlencode((string)$sp->id) ?>" class="btn btn-sm btn-success" title="Pagar / Emitir">
+                                            <i class="fas fa-money-check-alt"></i>
+                                        </a>
+                                        <a href="?route=solicitudes_pago/desprogramar&id=<?= urlencode((string)$sp->id) ?>" onclick="return confirm('¿Está seguro de DESPROGRAMAR (detener y anular) esta solicitud de pago?');" class="btn btn-sm btn-warning" title="Desprogramar">
+                                            <i class="fas fa-ban"></i>
+                                        </a>
+                                    <?php else: ?>
+                                        <a href="?route=solicitudes_pago/reversar&id=<?= urlencode((string)$sp->id) ?>" 
+                                           onclick="return confirm('¿Está seguro de REVERSAR este pago? Se eliminarán los movimientos de banco y contabilidad, y se restaurará el presupuesto.')"
+                                           class="btn btn-sm btn-danger" title="Reversar">
+                                            <i class="fas fa-undo-alt"></i>
+                                        </a>
+                                    <?php endif; ?>
+                                    
+                                    <a href="?route=solicitudes_pago/form&id=<?= urlencode((string)$sp->id) ?>" class="btn btn-sm btn-info" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="POST" action="?route=solicitudes_pago/eliminar" onsubmit="return confirm('¿Seguro de eliminar esta solicitud?');" class="d-inline">
+                                        <input type="hidden" name="id" value="<?= htmlspecialchars((string)$sp->id) ?>">
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

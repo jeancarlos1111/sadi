@@ -1,54 +1,62 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
-
-<div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-    <div>
-        <a href="?route=reportes_cxp/saldosProveedores&pdf=1" target="_blank" style="background-color: #dc3545; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">Exportar PDF</a>
-        <span style="font-size: 0.9em; color: #666; margin-left: 10px;">Información sincronizada con Presupuesto y Tesorería</span>
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+        <span class="text-muted small ml-3"><i class="fas fa-info-circle"></i> Información sincronizada con Presupuesto y Tesorería</span>
+        <div class="card-tools">
+            <a href="?route=reportes_cxp/saldosProveedores&pdf=1" target="_blank" class="btn btn-sm btn-danger">
+                <i class="fas fa-file-pdf"></i> Exportar PDF
+            </a>
+            <a href="?route=cuentas_por_pagar/index" class="btn btn-sm btn-secondary ml-1">
+                <i class="fas fa-arrow-left"></i> Volver a CxP
+            </a>
+        </div>
     </div>
-    <a href="?route=cuentas_por_pagar/index" style="background-color: #6c757d; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">Volver a CxP</a>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped dataTable w-100 table-sm">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Referencia / RIF</th>
+                        <th>Proveedor Beneficiario</th>
+                        <th class="text-center">Volumen Facturas</th>
+                        <th class="text-right">Base Imponible</th>
+                        <th class="text-right">Impuestos (IVA)</th>
+                        <th class="text-right">Deuda Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($saldos)): ?>
+                        <tr><td colspan="6" class="text-center">No hay facturas pendientes de pago registradas por el momento. ¡Todo al día!</td></tr>
+                    <?php else: ?>
+                        <?php 
+                        $grandTotal = 0;
+                        foreach ($saldos as $s): 
+                            $grandTotal += $s['total_deuda'];
+                        ?>
+                            <tr>
+                                <td><strong><?= htmlspecialchars($s['rif_proveedor']) ?></strong></td>
+                                <td><?= htmlspecialchars($s['compania_proveedor']) ?></td>
+                                <td class="text-center">
+                                    <span class="badge badge-info"><?= $s['cantidad_facturas'] ?></span>
+                                </td>
+                                <td class="text-right"><?= number_format($s['total_base'], 2, ',', '.') ?></td>
+                                <td class="text-right"><?= number_format($s['total_iva'], 2, ',', '.') ?></td>
+                                <td class="text-right font-weight-bold text-danger">
+                                    <?= number_format($s['total_deuda'], 2, ',', '.') ?> Bs.
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+                <tfoot class="thead-light">
+                    <tr>
+                        <td colspan="5" class="text-right font-weight-bold pt-3 h6">TOTAL CARTERA PENDIENTE:</td>
+                        <td class="text-right font-weight-bold text-danger h5 pt-2 mb-0">
+                            <?= number_format($grandTotal ?? 0, 2, ',', '.') ?> Bs.
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
 </div>
-
-<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
-    <thead style="background-color: #343a40; color: white;">
-        <tr>
-            <th>Referencia / RIF</th>
-            <th>Proveedor Beneficiario</th>
-            <th style="text-align: center;">Volumen Facturas</th>
-            <th style="text-align: right;">Base Imponible</th>
-            <th style="text-align: right;">Impuestos (IVA)</th>
-            <th style="text-align: right;">Deuda Total</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php if (empty($saldos)): ?>
-            <tr>
-                <td colspan="6" style="text-align: center;">No hay facturas pendientes de pago registradas por el momento. ¡Todo al día!</td>
-            </tr>
-        <?php else: ?>
-            <?php 
-            $grandTotal = 0;
-            foreach ($saldos as $s): 
-                $grandTotal += $s['total_deuda'];
-            ?>
-                <tr>
-                    <td><strong><?= htmlspecialchars($s['rif_proveedor']) ?></strong></td>
-                    <td><?= htmlspecialchars($s['compania_proveedor']) ?></td>
-                    <td style="text-align: center;"><?= $s['cantidad_facturas'] ?></td>
-                    <td style="text-align: right;"><?= number_format($s['total_base'], 2, ',', '.') ?></td>
-                    <td style="text-align: right;"><?= number_format($s['total_iva'], 2, ',', '.') ?></td>
-                    <td style="text-align: right; font-weight: bold; color: red;">
-                        <?= number_format($s['total_deuda'], 2, ',', '.') ?> Bs.
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        <?php endif; ?>
-    </tbody>
-    <tfoot>
-        <tr style="background-color: #f8f9fa;">
-            <td colspan="5" style="text-align: right; font-weight: bold;">TOTAL CARTERA PENDIENTE:</td>
-            <td style="text-align: right; font-weight: bold; font-size: 1.2em; color: darkred;">
-                <?= number_format($grandTotal ?? 0, 2, ',', '.') ?> Bs.
-            </td>
-        </tr>
-    </tfoot>
-</table>

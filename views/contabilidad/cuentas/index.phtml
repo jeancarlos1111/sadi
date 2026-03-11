@@ -1,44 +1,55 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
-
-<?php if (isset($error)): ?>
-    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
-        <?= htmlspecialchars($error) ?>
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+        <div class="card-tools">
+            <a href="?route=contabilidad/asientos" class="btn btn-sm btn-secondary">
+                <i class="fas fa-book"></i> Ir a Comprobantes de Diario
+            </a>
+        </div>
     </div>
-<?php endif; ?>
+    <div class="card-body">
+        <?php if (isset($error)): ?>
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-ban"></i> Error</h5>
+                <?= htmlspecialchars($error) ?>
+            </div>
+        <?php endif; ?>
 
-<div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-    <form method="GET" action="" style="margin: 0;">
-        <input type="hidden" name="route" value="contabilidad/planCuentas">
-        <input type="text" name="search" placeholder="Código o Denominación..." value="<?= htmlspecialchars($search) ?>" style="padding: 5px; width: 300px;">
-        <button type="submit" style="padding: 5px;">Buscar</button>
-        <a href="?route=contabilidad/planCuentas" style="margin-left: 10px;">Limpiar</a>
-    </form>
-    <div>
-        <a href="?route=contabilidad/asientos" style="background-color: #6c757d; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">Ir a Comprobantes de Diario</a>
+        <form method="GET" action="" class="form-inline mb-4">
+            <input type="hidden" name="route" value="contabilidad/planCuentas">
+            <div class="input-group mr-2">
+                <input type="text" class="form-control" name="search" placeholder="Código o Denominación..." value="<?= htmlspecialchars($search) ?>" style="width: 300px;">
+                <span class="input-group-append">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
+                    <a href="?route=contabilidad/planCuentas" class="btn btn-default">Limpiar</a>
+                </span>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped dataTable w-100 table-sm">
+                <thead class="thead-dark">
+                    <tr>
+                        <th width="20%">Código Contable</th>
+                        <th>Denominación</th>
+                        <th width="20%">Tipo de Cuenta</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($cuentas)): ?>
+                        <tr><td colspan="3" class="text-center">No hay cuentas contables registradas.</td></tr>
+                    <?php else: ?>
+                        <?php foreach ($cuentas as $cuenta): ?>
+                            <tr>
+                                <td class="text-monospace font-weight-bold text-primary" style="font-size: 1.1em;"><?= htmlspecialchars($cuenta->codigoCuenta) ?></td>
+                                <td><?= htmlspecialchars($cuenta->denominacion) ?></td>
+                                <td class="align-middle"><span class="badge badge-info"><?= htmlspecialchars($cuenta->tipoCuenta) ?></span></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
-
-<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
-    <thead style="background-color: #0056b3; color: white;">
-        <tr>
-            <th>Código Contable</th>
-            <th>Denominación</th>
-            <th>Tipo de Cuenta</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php if (empty($cuentas)): ?>
-            <tr>
-                <td colspan="3" style="text-align: center;">No hay cuentas contables registradas.</td>
-            </tr>
-        <?php else: ?>
-            <?php foreach ($cuentas as $cuenta): ?>
-                <tr>
-                    <td style="font-family: monospace; font-size: 1.1em; font-weight: bold;"><?= htmlspecialchars($cuenta->codigoCuenta) ?></td>
-                    <td><?= htmlspecialchars($cuenta->denominacion) ?></td>
-                    <td><?= htmlspecialchars($cuenta->tipoCuenta) ?></td>
-                </tr>
-            <?php endforeach; ?>
-        <?php endif; ?>
-    </tbody>
-</table>

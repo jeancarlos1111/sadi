@@ -1,57 +1,72 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
-
-<?php if (isset($error)): ?>
-    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
-        <?= htmlspecialchars($error) ?>
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+        <div class="card-tools">
+            <a href="?route=contabilidad/planCuentas" class="btn btn-sm btn-info">
+                <i class="fas fa-list-ol"></i> Ver Plan de Cuentas
+            </a>
+            <a href="?route=contabilidad/form" class="btn btn-sm btn-success ml-1 font-weight-bold">
+                <i class="fas fa-plus"></i> Emitir Comprobante
+            </a>
+        </div>
     </div>
-<?php endif; ?>
+    <div class="card-body">
+        <?php if (isset($error)): ?>
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-ban"></i> Error</h5>
+                <?= htmlspecialchars($error) ?>
+            </div>
+        <?php endif; ?>
 
-<div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-    <form method="GET" action="" style="margin: 0;">
-        <input type="hidden" name="route" value="contabilidad/asientos">
-        <input type="text" name="search" placeholder="Nº Comprobante o Concepto..." value="<?= htmlspecialchars($search) ?>" style="padding: 5px; width: 300px;">
-        <button type="submit" style="padding: 5px;">Buscar</button>
-        <a href="?route=contabilidad/asientos" style="margin-left: 10px;">Limpiar</a>
-    </form>
-    <div>
-        <a href="?route=contabilidad/form" style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px; margin-right: 10px;">+ Emitir Comprobante</a>
-        <a href="?route=contabilidad/planCuentas" style="background-color: #17a2b8; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">Ver Plan de Cuentas</a>
+        <form method="GET" action="" class="form-inline mb-4">
+            <input type="hidden" name="route" value="contabilidad/asientos">
+            <div class="input-group mr-2">
+                <input type="text" class="form-control" name="search" placeholder="Nº Comprobante o Concepto..." value="<?= htmlspecialchars($search) ?>" style="width: 300px;">
+                <span class="input-group-append">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
+                    <a href="?route=contabilidad/asientos" class="btn btn-default">Limpiar</a>
+                </span>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped dataTable w-100 table-sm">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Nº Comprobante</th>
+                        <th>Concepto del Asiento</th>
+                        <th class="text-right">Total Debe</th>
+                        <th class="text-right">Total Haber</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($asientos)): ?>
+                        <tr><td colspan="6" class="text-center">No hay comprobantes de diario registrados.</td></tr>
+                    <?php else: ?>
+                        <?php foreach ($asientos as $asiento): ?>
+                            <tr>
+                                <td class="text-nowrap"><?= htmlspecialchars($asiento->fecha) ?></td>
+                                <td class="font-weight-bold text-primary"><?= htmlspecialchars($asiento->numeroComprobante) ?></td>
+                                <td><?= htmlspecialchars($asiento->concepto) ?></td>
+                                <td class="text-right text-primary font-weight-bold">
+                                    <?= number_format($asiento->totalDebe, 2, ',', '.') ?>
+                                </td>
+                                <td class="text-right text-danger font-weight-bold">
+                                    <?= number_format($asiento->totalHaber, 2, ',', '.') ?>
+                                </td>
+                                <td class="text-center">
+                                    <a href="?route=documental/comprobanteDiario&id=<?= urlencode((string)$asiento->id) ?>" target="_blank" class="btn btn-sm btn-outline-success font-weight-bold" title="Ver PDF">
+                                        <i class="fas fa-file-pdf"></i> PDF
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
-
-<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
-    <thead style="background-color: #0056b3; color: white;">
-        <tr>
-            <th>Fecha</th>
-            <th>Nº Comprobante</th>
-            <th>Concepto del Asiento</th>
-            <th>Total Debe</th>
-            <th>Total Haber</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php if (empty($asientos)): ?>
-            <tr>
-                <td colspan="6" style="text-align: center;">No hay comprobantes de diario registrados.</td>
-            </tr>
-        <?php else: ?>
-            <?php foreach ($asientos as $asiento): ?>
-                <tr>
-                    <td><?= htmlspecialchars($asiento->fecha) ?></td>
-                    <td style="font-weight: bold;"><?= htmlspecialchars($asiento->numeroComprobante) ?></td>
-                    <td><?= htmlspecialchars($asiento->concepto) ?></td>
-                    <td style="text-align: right; color: blue;">
-                        <?= number_format($asiento->totalDebe, 2, ',', '.') ?>
-                    </td>
-                    <td style="text-align: right; color: red;">
-                        <?= number_format($asiento->totalHaber, 2, ',', '.') ?>
-                    </td>
-                    <td>
-                        <a href="?route=documental/comprobanteDiario&id=<?= urlencode((string)$asiento->id) ?>" target="_blank" style="color: #198754; font-weight: bold;">[ PDF ]</a>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        <?php endif; ?>
-    </tbody>
-</table>

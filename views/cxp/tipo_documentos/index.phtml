@@ -1,42 +1,62 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
-
-<?php if (isset($_GET['success'])): ?>
-    <div style="color:green; padding:10px; border:1px solid green; margin-bottom:15px; border-radius:4px; background:#f0fff0;">
-        ✔ <?= htmlspecialchars($_GET['success']) ?>
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+        <div class="card-tools">
+            <a href="?route=tipo_documentos/form" class="btn btn-sm btn-success">
+                <i class="fas fa-plus"></i> Nuevo Tipo
+            </a>
+        </div>
     </div>
-<?php endif; ?>
+    <div class="card-body">
+        <?php if (isset($_GET['success'])): ?>
+            <div class="alert alert-success alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-check"></i> Éxito</h5>
+                <?= htmlspecialchars($_GET['success']) ?>
+            </div>
+        <?php endif; ?>
 
-<div style="margin-bottom:20px; display:flex; justify-content:flex-end;">
-    <a href="?route=tipo_documentos/form" style="background-color:#28a745; color:white; padding:10px 15px; text-decoration:none; border-radius:4px;">+ Nuevo Tipo</a>
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped dataTable w-100 table-sm">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Denominación</th>
+                        <th>Siglas</th>
+                        <th class="text-center">Afecta Presupuesto</th>
+                        <th class="text-center" width="15%">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($items)): ?>
+                        <tr><td colspan="5" class="text-center">No hay tipos de documento.</td></tr>
+                    <?php else: foreach ($items as $item): ?>
+                        <tr>
+                            <td><?= $item->id ?></td>
+                            <td><?= htmlspecialchars($item->denominacion) ?></td>
+                            <td><?= htmlspecialchars($item->siglas ?? '') ?></td>
+                            <td class="text-center">
+                                <?php if ($item->afectaPresupuesto): ?>
+                                    <span class="badge badge-success"><i class="fas fa-check"></i> Sí</span>
+                                <?php else: ?>
+                                    <span class="badge badge-secondary">No</span>
+                                <?php endif; ?>
+                            </td>
+                            <td class="text-center text-nowrap">
+                                <a href="?route=tipo_documentos/form&id=<?= $item->id ?>" class="btn btn-sm btn-info" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form method="POST" action="?route=tipo_documentos/eliminar" onsubmit="return confirm('¿Eliminar?');" class="d-inline">
+                                    <input type="hidden" name="id" value="<?= $item->id ?>">
+                                    <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    <?php endforeach; endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
-
-<table border="1" cellpadding="8" cellspacing="0" style="width:100%; border-collapse:collapse;">
-    <thead style="background-color:#0056b3; color:white;">
-        <tr>
-            <th>ID</th>
-            <th>Denominación</th>
-            <th>Siglas</th>
-            <th>Afecta Presupuesto</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php if (empty($items)): ?>
-            <tr><td colspan="5" style="text-align:center;">No hay tipos de documento.</td></tr>
-        <?php else: foreach ($items as $item): ?>
-            <tr>
-                <td><?= $item->id ?></td>
-                <td><?= htmlspecialchars($item->denominacion) ?></td>
-                <td><?= htmlspecialchars($item->siglas ?? '') ?></td>
-                <td><?= $item->afectaPresupuesto ? '✔ Sí' : 'No' ?></td>
-                <td>
-                    <a href="?route=tipo_documentos/form&id=<?= $item->id ?>" style="margin-right:8px;">Editar</a>
-                    <form method="POST" action="?route=tipo_documentos/eliminar" onsubmit="return confirm('¿Eliminar?');" style="display:inline;">
-                        <input type="hidden" name="id" value="<?= $item->id ?>">
-                        <button type="submit" style="color:red; border:none; background:none; cursor:pointer;">Eliminar</button>
-                    </form>
-                </td>
-            </tr>
-        <?php endforeach; endif; ?>
-    </tbody>
-</table>

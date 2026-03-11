@@ -26,7 +26,7 @@
             </thead>
             <tbody>
         <?php if (empty($items)): ?>
-            <tr><td colspan="3" style="text-align:center;">No hay cuentas registradas.</td></tr>
+            <tr><td colspan="3" class="text-center">No hay cuentas registradas.</td></tr>
         <?php else: foreach ($items as $item): ?>
             <tr>
                 <td><strong><?= htmlspecialchars($item->codigo) ?></strong></td>
@@ -35,7 +35,7 @@
                     <a href="?route=plan_unico_cuentas/form&id=<?= $item->id ?>" class="btn btn-sm btn-info" title="Editar">
                         <i class="fas fa-edit"></i>
                     </a>
-                    <form method="POST" action="?route=plan_unico_cuentas/eliminar" onsubmit="return confirm('¿Eliminar esta cuenta?');" style="display:inline;">
+                    <form method="POST" action="?route=plan_unico_cuentas/eliminar" onsubmit="return confirm('¿Eliminar esta cuenta?');" class="d-inline">
                         <input type="hidden" name="id" value="<?= $item->id ?>">
                         <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
                             <i class="fas fa-trash-alt"></i>

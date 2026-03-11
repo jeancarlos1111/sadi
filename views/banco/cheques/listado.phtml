@@ -1,98 +1,108 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
-
-<?php if (isset($_GET['success'])): ?>
-    <div style="background: #d4edda; color: #155724; padding: 12px 16px; border: 1px solid #c3e6cb; border-radius: 4px; margin-bottom: 20px;">
-        <?= htmlspecialchars($_GET['success']) ?>
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+        <div class="card-tools">
+            <a href="?route=cheques/emisionDirecta" class="btn btn-sm btn-success font-weight-bold">
+                <i class="fas fa-plus"></i> Emitir Cheque Directo
+            </a>
+        </div>
     </div>
-<?php endif; ?>
-
-<div style="margin-bottom: 20px;">
-    <form method="GET" action="" style="display: flex; gap: 15px; align-items: flex-end;">
-        <input type="hidden" name="route" value="cheques/listado">
-        
-        <div>
-            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Filtrar por Cuenta</label>
-            <select name="id_cta_bancaria" style="padding: 6px; min-width: 250px;">
-                <option value="">--- Todas las cuentas ---</option>
-                <?php foreach ($cuentas as $cta): ?>
-                    <option value="<?= $cta['id_cta_bancaria'] ?>" <?= ($idCuenta == $cta['id_cta_bancaria']) ? 'selected' : '' ?>>
-                        <?= htmlspecialchars($cta['nombre_banco']) ?> - <?= htmlspecialchars($cta['numero_cta_bancaria']) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-        </div>
-
-        <div>
-            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Desde</label>
-            <input type="date" name="desde" value="<?= htmlspecialchars($desde) ?>" style="padding: 5px;">
-        </div>
-
-        <div>
-            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Hasta</label>
-            <input type="date" name="hasta" value="<?= htmlspecialchars($hasta) ?>" style="padding: 5px;">
-        </div>
-
-        <div>
-            <button type="submit" style="padding: 6px 15px; cursor: pointer;">Buscar</button>
-            <button type="submit" name="pdf" value="1" style="background-color: #dc3545; color: white; border: none; padding: 6px 15px; margin-left: 5px; cursor: pointer;">Exportar PDF</button>
-        </div>
-    </form>
-</div>
-
-<div style="margin-bottom: 15px; text-align: right;">
-    <a href="?route=cheques/emisionDirecta" style="background-color: #28a745; color: white; padding: 8px 15px; text-decoration: none; border-radius: 4px; font-weight: bold;">+ Emitir Cheque Directo</a>
-</div>
-
-<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
-    <thead style="background-color: #343a40; color: white;">
-        <tr>
-            <th>Fecha</th>
-            <th>Nro. Cheque</th>
-            <th>Banco / Cuenta</th>
-            <th>A La Orden De</th>
-            <th style="text-align: right;">Monto (Bs)</th>
-            <th style="text-align: center;">Voucher</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php 
-        $total = 0;
-        if (empty($cheques)): 
-        ?>
-            <tr>
-                <td colspan="6" style="text-align: center;">No se encontraron cheques emitidos en este periodo.</td>
-            </tr>
-        <?php else: ?>
-            <?php foreach ($cheques as $ch): 
-                $total += $ch['monto'];
-            ?>
-                <tr>
-                    <td><?= date('d/m/Y', strtotime($ch['fecha'])) ?></td>
-                    <td style="font-weight: bold;"><?= htmlspecialchars($ch['nro_cheque']) ?></td>
-                    <td>
-                        <?= htmlspecialchars($ch['banco']) ?><br>
-                        <small style="color: #666;"><?= htmlspecialchars($ch['cuenta']) ?></small>
-                    </td>
-                    <td><?= htmlspecialchars($ch['beneficiario']) ?></td>
-                    <td style="text-align: right; color: darkred; font-weight: bold;">
-                        <?= number_format($ch['monto'], 2, ',', '.') ?>
-                    </td>
-                    <td style="text-align: center;">
-                        <a href="?route=cheques/voucher&id=<?= $ch['id'] ?>" target="_blank" style="background-color: #0056b3; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px; font-size: 0.9em;">
-                            Ver Voucher
-                        </a>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
+    <div class="card-body">
+        <?php if (isset($_GET['success'])): ?>
+            <div class="alert alert-success alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-check"></i> Éxito</h5>
+                <?= htmlspecialchars($_GET['success']) ?>
+            </div>
         <?php endif; ?>
-    </tbody>
-    <tfoot>
-        <tr style="background-color: #f1f1f1;">
-            <td colspan="4" style="text-align: right; font-weight: bold;">TOTAL CHEQUES EMITIDOS:</td>
-            <td style="text-align: right; font-weight: bold; color: darkred; font-size: 1.1em;">
-                <?= number_format($total, 2, ',', '.') ?> Bs.
-            </td>
-            <td></td>
-        </tr>
-    </tfoot>
-</table>
+
+        <form method="GET" action="" class="mb-4">
+            <input type="hidden" name="route" value="cheques/listado">
+            <div class="row align-items-end">
+                <div class="col-md-5">
+                    <div class="form-group mb-0">
+                        <label>Filtrar por Cuenta</label>
+                        <select class="form-control" name="id_cta_bancaria">
+                            <option value="">--- Todas las cuentas ---</option>
+                            <?php foreach ($cuentas as $cta): ?>
+                                <option value="<?= $cta['id_cta_bancaria'] ?>" <?= ($idCuenta == $cta['id_cta_bancaria']) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($cta['nombre_banco']) ?> - <?= htmlspecialchars($cta['numero_cta_bancaria']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group mb-0">
+                        <label>Desde</label>
+                        <input type="date" class="form-control" name="desde" value="<?= htmlspecialchars($desde) ?>">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group mb-0">
+                        <label>Hasta</label>
+                        <input type="date" class="form-control" name="hasta" value="<?= htmlspecialchars($hasta) ?>">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
+                    <button type="submit" name="pdf" value="1" class="btn btn-danger ml-1"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
+                </div>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped dataTable w-100 table-sm">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Nro. Cheque</th>
+                        <th>Banco / Cuenta</th>
+                        <th>A La Orden De</th>
+                        <th class="text-right">Monto (Bs)</th>
+                        <th class="text-center">Voucher</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php 
+                    $total = 0;
+                    if (empty($cheques)): 
+                    ?>
+                        <tr><td colspan="6" class="text-center">No se encontraron cheques emitidos en este periodo.</td></tr>
+                    <?php else: ?>
+                        <?php foreach ($cheques as $ch): 
+                            $total += $ch['monto'];
+                        ?>
+                            <tr>
+                                <td><?= date('d/m/Y', strtotime($ch['fecha'])) ?></td>
+                                <td class="font-weight-bold"><?= htmlspecialchars($ch['nro_cheque']) ?></td>
+                                <td>
+                                    <?= htmlspecialchars($ch['banco']) ?><br>
+                                    <small class="text-muted"><?= htmlspecialchars($ch['cuenta']) ?></small>
+                                </td>
+                                <td><?= htmlspecialchars($ch['beneficiario']) ?></td>
+                                <td class="text-right font-weight-bold text-danger">
+                                    <?= number_format($ch['monto'], 2, ',', '.') ?>
+                                </td>
+                                <td class="text-center">
+                                    <a href="?route=cheques/voucher&id=<?= $ch['id'] ?>" target="_blank" class="btn btn-sm btn-info" title="Ver Voucher">
+                                        <i class="fas fa-print"></i> Ver Voucher
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+                <tfoot class="thead-light">
+                    <tr>
+                        <th colspan="4" class="text-right font-weight-bold pt-3 h6">TOTAL CHEQUES EMITIDOS:</th>
+                        <th class="text-right font-weight-bold text-danger h5 pt-2 mb-0">
+                            <?= number_format($total, 2, ',', '.') ?> Bs.
+                        </th>
+                        <th></th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>

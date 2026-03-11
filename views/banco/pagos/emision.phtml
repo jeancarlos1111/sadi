@@ -1,163 +1,171 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
-
-<?php if (isset($success)): ?>
-    <div style="background: #d4edda; color: #155724; padding: 12px 16px; border: 1px solid #c3e6cb; border-radius: 4px; margin-bottom: 20px;">
-        ✅ <?= htmlspecialchars($success) ?>
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
     </div>
-<?php endif; ?>
+    <div class="card-body">
+        <?php if (isset($success)): ?>
+            <div class="alert alert-success alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-check"></i> Éxito</h5>
+                <?= htmlspecialchars($success) ?>
+            </div>
+        <?php endif; ?>
 
-<?php if (isset($error)): ?>
-    <div style="color: red; padding: 12px; border: 1px solid red; border-radius: 4px; margin-bottom: 20px;">
-        ⚠ <?= htmlspecialchars($error) ?>
-    </div>
-<?php endif; ?>
+        <?php if (isset($error)): ?>
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-ban"></i> Error</h5>
+                <?= htmlspecialchars($error) ?>
+            </div>
+        <?php endif; ?>
 
-<?php if (empty($solicitudes)): ?>
-    <div style="background: #e9ecef; border: 1px solid #ccc; padding: 16px; border-radius: 4px; text-align: center; color: #333;">
-        <strong>¡Todo procesado!</strong><br>
-        <small>No hay solicitudes de pago pendientes en este momento.</small><br><br>
-        <a href="?route=banco/index">Ir a Movimientos</a>
-    </div>
-<?php else: ?>
+        <?php if (empty($solicitudes)): ?>
+            <div class="alert alert-info text-center">
+                <h5><i class="icon fas fa-info-circle"></i> ¡Todo procesado!</h5>
+                No hay solicitudes de pago pendientes en este momento.<br><br>
+                <a href="?route=banco/index" class="btn btn-outline-info text-dark">Ir a Movimientos</a>
+            </div>
+        <?php else: ?>
+            <div class="row">
+                <!-- Columna Izquierda: Listado de Solicitudes Pendientes -->
+                <div class="col-md-7">
+                    <div class="card card-info">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-clipboard-list"></i> Solicitudes Pendientes de Pago</h3>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover w-100 table-sm m-0">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>ID / Fecha</th>
+                                            <th>Concepto</th>
+                                            <th class="text-right">Monto (Bs)</th>
+                                            <th class="text-center">Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($solicitudes as $sol): ?>
+                                        <tr id="sol-<?= $sol['id_solicitud_pago'] ?>" style="cursor: pointer;">
+                                            <td>
+                                                <strong class="text-primary">#<?= $sol['id_solicitud_pago'] ?></strong><br>
+                                                <small class="text-muted"><?= date('d/m/Y', strtotime($sol['fecha_solicitud_pago'])) ?></small>
+                                            </td>
+                                            <td><?= htmlspecialchars($sol['concepto_solicitud_pago']) ?></td>
+                                            <td class="text-right font-weight-bold text-danger align-middle">
+                                                <?= number_format($sol['monto_pagar_solicitud_pago'], 2, ',', '.') ?>
+                                            </td>
+                                            <td class="text-center align-middle">
+                                                <button type="button" class="btn btn-sm btn-primary"
+                                                    onclick="seleccionarSolicitud(<?= $sol['id_solicitud_pago'] ?>, '<?= htmlspecialchars(addslashes($sol['concepto_solicitud_pago'])) ?>', <?= $sol['monto_pagar_solicitud_pago'] ?>)">
+                                                    Pagar <i class="fas fa-arrow-right"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start;">
+                <!-- Columna Derecha: Formulario de Pago -->
+                <div class="col-md-5">
+                    <div class="card card-success">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-credit-card"></i> Emitir Pago / Cheque</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="pago-placeholder" class="alert alert-secondary text-center border-dashed">
+                                <i class="fas fa-arrow-circle-left fa-2x mb-2 text-muted"></i><br>
+                                Selecciona una solicitud de pago para continuar
+                            </div>
 
-    <!-- Columna Izquierda: Listado de Solicitudes Pendientes -->
-    <div>
-        <h3 style="color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 6px;">
-            📋 Solicitudes Pendientes de Pago
-        </h3>
-        <table border="1" cellpadding="7" cellspacing="0" style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
-            <thead style="background-color: #343a40; color: white;">
-                <tr>
-                    <th>ID / Fecha</th>
-                    <th>Concepto</th>
-                    <th style="text-align: right;">Monto (Bs)</th>
-                    <th style="text-align: center;">Acción</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($solicitudes as $sol): ?>
-                <tr id="sol-<?= $sol['id_solicitud_pago'] ?>" style="cursor: pointer;">
-                    <td>
-                        <strong>#<?= $sol['id_solicitud_pago'] ?></strong><br>
-                        <small><?= date('d/m/Y', strtotime($sol['fecha_solicitud_pago'])) ?></small>
-                    </td>
-                    <td><?= htmlspecialchars($sol['concepto_solicitud_pago']) ?></td>
-                    <td style="text-align: right; font-weight: bold;">
-                        <?= number_format($sol['monto_pagar_solicitud_pago'], 2, ',', '.') ?>
-                    </td>
-                    <td style="text-align: center;">
-                        <button type="button"
-                            onclick="seleccionarSolicitud(<?= $sol['id_solicitud_pago'] ?>, '<?= htmlspecialchars(addslashes($sol['concepto_solicitud_pago'])) ?>', <?= $sol['monto_pagar_solicitud_pago'] ?>)"
-                            style="background: #0056b3; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
-                            Pagar →
-                        </button>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
+                            <form id="pago-form" method="POST" action="?route=banco/procesarPago" style="display: none;">
+                                <input type="hidden" name="id_solicitud_pago" id="inp_id_solicitud">
 
-    <!-- Columna Derecha: Formulario de Pago -->
-    <div>
-        <h3 style="color: #198754; border-bottom: 2px solid #198754; padding-bottom: 6px;">
-            💳 Emitir Pago / Cheque
-        </h3>
+                                <div class="callout callout-success">
+                                    <strong>Solicitud seleccionada:</strong><br>
+                                    <span id="lbl_concepto" class="small text-muted d-block mb-1"></span>
+                                    <span class="h4 font-weight-bold text-success">Bs <span id="lbl_monto"></span></span>
+                                </div>
 
-        <div id="pago-placeholder" style="background: #f8f9fa; padding: 20px; border-radius: 4px; text-align: center; color: gray; border: 2px dashed #dee2e6;">
-            ← Selecciona una solicitud de pago para continuar
-        </div>
+                                <div class="form-group">
+                                    <label>Cuenta Bancaria:</label>
+                                    <select class="form-control" name="id_cta_bancaria" required>
+                                        <option value="">-- Seleccione Cuenta --</option>
+                                        <?php foreach ($cuentas as $cta): ?>
+                                            <option value="<?= $cta['id_cta_bancaria'] ?>">
+                                                <?= htmlspecialchars($cta['nombre_banco']) ?> — <?= htmlspecialchars($cta['numero_cta_bancaria']) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
 
-        <form id="pago-form" method="POST" action="?route=banco/procesarPago" style="display: none; padding: 15px; border: 1px solid #ccc; background: #fff;">
-            <input type="hidden" name="id_solicitud_pago" id="inp_id_solicitud">
+                                <div class="form-group">
+                                    <label>Tipo de Operación:</label>
+                                    <select class="form-control" name="id_tipo_operacion" required>
+                                        <option value="">-- Seleccione Tipo --</option>
+                                        <?php foreach ($tiposOp as $t): ?>
+                                            <option value="<?= $t['id_tipo_operacion_bancaria'] ?>">
+                                                <?= htmlspecialchars($t['nombre_tipo_operacion_bancaria']) ?>
+                                                (<?= htmlspecialchars($t['acronimo_tipo_operacion_bancaria']) ?>)
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
 
-            <div style="background: #e9f5ff; border: 1px solid #bee5eb; padding: 12px; border-radius: 4px; margin-bottom: 16px;">
-                <strong>Solicitud seleccionada:</strong><br>
-                <span id="lbl_concepto" style="font-size: 0.95em;"></span><br>
-                <span style="font-size: 1.2em; font-weight: bold; color: #0056b3;">Bs <span id="lbl_monto"></span></span>
+                                <div class="form-group">
+                                    <label>Nro. de Referencia:</label>
+                                    <input type="text" class="form-control" name="referencia" maxlength="80" placeholder="Nro. de cheque, transferencia, etc.">
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Fecha de Pago:</label>
+                                    <input type="date" class="form-control" name="fecha" required value="<?= date('Y-m-d') ?>">
+                                </div>
+
+                                <hr>
+                                
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-outline-danger" onclick="cancelarSeleccion()">
+                                        <i class="fas fa-times"></i> Cancelar
+                                    </button>
+                                    <button type="submit" class="btn btn-success font-weight-bold" onclick="return confirm('¿Confirmar el pago? Esta acción registrará el egreso bancario y cerrará la solicitud.');">
+                                        <i class="fas fa-check-double"></i> Emisión Definitiva
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <table style="width: 100%; border-collapse: collapse;">
-                <tr>
-                    <td style="padding: 8px 0; width: 160px;"><label><b>Cuenta Bancaria:</b></label></td>
-                    <td>
-                        <select name="id_cta_bancaria" required style="padding: 7px; width: 100%;">
-                            <option value="">-- Seleccione Cuenta --</option>
-                            <?php foreach ($cuentas as $cta): ?>
-                                <option value="<?= $cta['id_cta_bancaria'] ?>">
-                                    <?= htmlspecialchars($cta['nombre_banco']) ?> — <?= htmlspecialchars($cta['numero_cta_bancaria']) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding: 8px 0;"><label><b>Tipo de Operación:</b></label></td>
-                    <td>
-                        <select name="id_tipo_operacion" required style="padding: 7px; width: 100%;">
-                            <option value="">-- Seleccione Tipo --</option>
-                            <?php foreach ($tiposOp as $t): ?>
-                                <option value="<?= $t['id_tipo_operacion_bancaria'] ?>">
-                                    <?= htmlspecialchars($t['nombre_tipo_operacion_bancaria']) ?>
-                                    (<?= htmlspecialchars($t['acronimo_tipo_operacion_bancaria']) ?>)
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding: 8px 0;"><label><b>Nro. de Referencia:</b></label></td>
-                    <td>
-                        <input type="text" name="referencia" maxlength="80"
-                            style="padding: 7px; width: 100%;"
-                            placeholder="Nro. de cheque, transferencia, etc.">
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding: 8px 0;"><label><b>Fecha de Pago:</b></label></td>
-                    <td>
-                        <input type="date" name="fecha" required
-                            value="<?= date('Y-m-d') ?>"
-                            style="padding: 7px; width: 100%;">
-                    </td>
-                </tr>
-            </table>
-
-            <div style="margin-top: 16px;">
-                <button type="submit"
-                    onclick="return confirm('¿Confirmar el pago? Esta acción registrará el egreso bancario y cerrará la solicitud.');"
-                    style="background-color: #198754; color: white; padding: 10px 22px; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; font-weight: bold;">
-                    Emisión Definitiva
-                </button>
-                <button type="button" onclick="cancelarSeleccion()"
-                    style="margin-left: 12px; background: none; border: 1px solid #dc3545; color: #dc3545; padding: 10px 16px; border-radius: 4px; cursor: pointer;">
-                    Cancelar
-                </button>
-            </div>
-        </form>
+            <script>
+            function seleccionarSolicitud(id, concepto, monto) {
+                document.getElementById('inp_id_solicitud').value = id;
+                document.getElementById('lbl_concepto').textContent = concepto;
+                document.getElementById('lbl_monto').textContent = monto.toLocaleString('es-VE', {minimumFractionDigits: 2});
+                document.getElementById('pago-placeholder').style.display = 'none';
+                document.getElementById('pago-form').style.display = 'block';
+                // Resaltar fila seleccionada
+                document.querySelectorAll('tr[id^="sol-"]').forEach(r => r.classList.remove('table-active'));
+                const row = document.getElementById('sol-' + id);
+                if (row) row.classList.add('table-active');
+            }
+            function cancelarSeleccion() {
+                document.getElementById('pago-placeholder').style.display = 'block';
+                document.getElementById('pago-form').style.display = 'none';
+                document.querySelectorAll('tr[id^="sol-"]').forEach(r => r.classList.remove('table-active'));
+            }
+            </script>
+        <?php endif; ?>
     </div>
-
 </div>
 
-<script>
-function seleccionarSolicitud(id, concepto, monto) {
-    document.getElementById('inp_id_solicitud').value = id;
-    document.getElementById('lbl_concepto').textContent = concepto;
-    document.getElementById('lbl_monto').textContent = monto.toLocaleString('es-VE', {minimumFractionDigits: 2});
-    document.getElementById('pago-placeholder').style.display = 'none';
-    document.getElementById('pago-form').style.display = 'block';
-    // Resaltar fila seleccionada
-    document.querySelectorAll('tr[id^="sol-"]').forEach(r => r.style.background = '');
-    const row = document.getElementById('sol-' + id);
-    if (row) row.style.background = '#e2e3e5';
+<style>
+.border-dashed {
+    border: 2px dashed #dee2e6;
 }
-function cancelarSeleccion() {
-    document.getElementById('pago-placeholder').style.display = 'block';
-    document.getElementById('pago-form').style.display = 'none';
-    document.querySelectorAll('tr[id^="sol-"]').forEach(r => r.style.background = '');
-}
-</script>
-
-<?php endif; ?>
+</style>
