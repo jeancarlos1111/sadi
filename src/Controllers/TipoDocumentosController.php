@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Models\TipoDocumento;
@@ -16,10 +18,13 @@ class TipoDocumentosController extends HomeController
 
     public function index(): void
     {
-        $items = $this->repo->all();
+        $page = (int)($_GET['page'] ?? 1);
+        $paginator = $this->repo->paginate('', $page, 15);
+        $items = $paginator['data'];
         $this->renderView('cxp/tipo_documentos/index', [
             'titulo' => 'Tipos de Documento (CxP)',
             'items'  => $items,
+                    'paginator' => $paginator,
         ]);
     }
 

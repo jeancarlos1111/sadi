@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Models\Servicio;
@@ -29,7 +31,9 @@ class ServiciosController extends HomeController
         $search = $_GET['search'] ?? '';
 
         try {
-            $items = $this->repo->all($search);
+            $page = (int)($_GET['page'] ?? 1);
+            $paginator = $this->repo->paginate($search, $page, 15);
+            $items = $paginator['data'];
         } catch (PDOException | \Exception $e) {
             $items = [];
             $error = "Error: " . $e->getMessage();
@@ -39,6 +43,7 @@ class ServiciosController extends HomeController
             'items'  => $items,
             'search' => $search,
             'error'  => $error ?? null,
+                    'paginator' => $paginator,
         ]);
     }
 

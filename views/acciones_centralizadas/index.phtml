@@ -1,67 +1,70 @@
 <?php if (isset($error)): ?>
-    <div class="alert alert-danger alert-dismissible">
-        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-        <h5><i class="icon fas fa-ban"></i> Error!</h5>
-        <?= htmlspecialchars($error) ?>
-    </div>
+  <div class="alert alert-danger alert-dismissible">
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+    <h5><i class="icon fas fa-ban"></i> Error!</h5>
+    <?= htmlspecialchars($error) ?>
+  </div>
 <?php endif; ?>
 
 <div class="card card-primary card-outline">
-    <div class="card-header">
-        <h3 class="card-title mt-1"><i class="fas fa-landmark mr-1"></i> <?= htmlspecialchars($titulo) ?></h3>
-        <div class="card-tools">
-            <a href="?route=acciones_centralizadas/form" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> Nueva Acción Centralizada</a>
-        </div>
+  <div class="card-header">
+    <h3 class="card-title mt-1"><i class="fas fa-landmark mr-1"></i> <?= htmlspecialchars($titulo) ?></h3>
+    <div class="card-tools">
+      <a href="?route=acciones_centralizadas/form" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> Nueva Acción Centralizada</a>
     </div>
-    <div class="card-body">
-        <div class="mb-3">
-            <form method="GET" action="" class="form-inline">
-                <input type="hidden" name="route" value="acciones_centralizadas/index">
-                <div class="input-group input-group-sm">
-                    <input type="text" name="search" class="form-control" placeholder="Buscar por código..." value="<?= htmlspecialchars($search ?? '') ?>" style="width: 250px;">
-                    <span class="input-group-append">
-                        <button type="submit" class="btn btn-primary btn-flat"><i class="fas fa-search"></i></button>
-                    </span>
-                </div>
-                <a href="?route=acciones_centralizadas/index" class="btn btn-default btn-sm ml-2">Limpiar</a>
-            </form>
+  </div>
+  <div class="card-body">
+    <div class="mb-3">
+      <form method="GET" action="" class="form-inline">
+        <input type="hidden" name="route" value="acciones_centralizadas/index">
+        <div class="input-group input-group-sm">
+          <input type="text" name="search" class="form-control" placeholder="Buscar por código..." value="<?= htmlspecialchars($search ?? '') ?>" style="width: 250px;">
+          <span class="input-group-append">
+            <button type="submit" class="btn btn-primary btn-flat"><i class="fas fa-search"></i></button>
+          </span>
         </div>
+        <a href="?route=acciones_centralizadas/index" class="btn btn-default btn-sm ml-2">Limpiar</a>
+      </form>
+    </div>
 
-        <table class="table table-bordered table-striped dataTable w-100">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Código A.C.</th>
-                    <th>Denominación</th>
-                    <th>Unidad Medida</th>
-                    <th class="text-center">Año Inicio</th>
-                    <th class="text-center">Año Culminación</th>
-                    <th class="text-center" width="150">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (!empty($items)): ?>
-                    <?php foreach ($items as $item): ?>
-                        <tr>
-                            <td class="align-middle"><strong><?= htmlspecialchars($item->codigo_accion_centralizada) ?></strong></td>
-                            <td class="align-middle"><?= htmlspecialchars($item->denominacion) ?></td>
-                            <td class="align-middle"><?= htmlspecialchars($item->unidad_medida) ?></td>
-                            <td class="text-center align-middle"><?= htmlspecialchars($item->anio_inicio) ?></td>
-                            <td class="text-center align-middle"><?= htmlspecialchars($item->anio_culm) ?></td>
-                            <td class="text-center align-middle">
-                                <a href="?route=acciones_centralizadas/form&id=<?= urlencode((string)$item->id_accion_centralizada) ?>" class="btn btn-sm btn-info" title="Editar / Metas">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <form method="POST" action="?route=acciones_centralizadas/eliminar" onsubmit="return confirm('¿Eliminar esta acción centralizada?');" class="d-inline">
-                                    <input type="hidden" name="id" value="<?= htmlspecialchars((string)$item->id_accion_centralizada) ?>">
-                                    <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </tbody>
-        </table>
-    </div>
+    <table class="table table-bordered table-striped w-100">
+      <thead class="thead-dark">
+        <tr>
+          <th>Código A.C.</th>
+          <th>Denominación</th>
+          <th>Unidad Medida</th>
+          <th class="text-center">Año Inicio</th>
+          <th class="text-center">Año Culminación</th>
+          <th class="text-center" width="150">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php if (!empty($items)): ?>
+          <?php foreach ($items as $item): ?>
+            <tr>
+              <td class="align-middle"><strong><?= htmlspecialchars($item->codigo_accion_centralizada) ?></strong></td>
+              <td class="align-middle"><?= htmlspecialchars($item->denominacion) ?></td>
+              <td class="align-middle"><?= htmlspecialchars($item->unidad_medida) ?></td>
+              <td class="text-center align-middle"><?= htmlspecialchars($item->anio_inicio) ?></td>
+              <td class="text-center align-middle"><?= htmlspecialchars($item->anio_culm) ?></td>
+              <td class="text-center align-middle">
+                <a href="?route=acciones_centralizadas/form&id=<?= urlencode((string)$item->id_accion_centralizada) ?>" class="btn btn-sm btn-info" title="Editar / Metas">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <form method="POST" action="?route=acciones_centralizadas/eliminar" onsubmit="return confirm('¿Eliminar esta acción centralizada?');" class="d-inline">
+                  <input type="hidden" name="id" value="<?= htmlspecialchars((string)$item->id_accion_centralizada) ?>">
+                  <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+          <?php endforeach; ?>
+        <?php endif; ?>
+      </tbody>
+    </table>
+    <?php if (isset($paginator)): ?>
+      <?php include $partialsPath . 'pagination.phtml'; ?>
+    <?php endif; ?>
+  </div>
 </div>

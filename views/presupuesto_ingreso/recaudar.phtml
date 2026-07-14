@@ -17,7 +17,7 @@
                         <select name="id_presupuesto_ingreso" class="form-control" required>
                             <option value="">Seleccione dónde se deposita lo recaudado...</option>
                             <?php foreach ($formulado as $f): ?>
-                                <option value="<?= $f['id_presupuesto_ingreso'] ?>">
+                                <option value="<?= htmlspecialchars((string)$f['id_presupuesto_ingreso']) ?>">
                                     <?= htmlspecialchars($f['codigo_ramo'] . ' - ' . $f['denominacion_ramo']) ?>
                                 </option>
                             <?php endforeach; ?>

@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
-use App\Repositories\PeriodoPresupuestarioRepository;
 use App\Models\PeriodoPresupuestario;
+use App\Repositories\PeriodoPresupuestarioRepository;
 
 class PeriodosPresupuestoController extends HomeController
 {

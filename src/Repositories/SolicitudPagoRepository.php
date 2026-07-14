@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -71,7 +73,7 @@ class SolicitudPagoRepository extends Repository
 
     public function find(int $id): ?SolicitudPago
     {
-        $row = $this->query()->where('id_solicitud_pago', '=', $id)->where('eliminado', '=', 0)->first();
+        $row = $this->query()->where('id_solicitud_pago', '=', $id)->where('eliminado', '=', 'false')->first();
         if (!$row) {
             return null;
         }
@@ -182,7 +184,7 @@ class SolicitudPagoRepository extends Repository
                         $args = $esOs ? [$idOrden, $idOrden] : [$idOrden];
                         $stmtC->execute($args);
 
-                        $convRepo = new ConvertidorCuentaRepository();
+                        $convRepo = new VinculacionPucContableRepository();
 
                         foreach ($stmtC->fetchAll(PDO::FETCH_ASSOC) as $row) {
                             $idPartida = $row['id_codigo_plan_unico'];
@@ -198,8 +200,8 @@ class SolicitudPagoRepository extends Repository
                             $idCuentaDebe = $convRepo->getCuentaContableId($idPartida, 'PAGADO');
                             $idCuentaHaber = $convRepo->getCuentaContableId($idPartida, 'PAGADO_BANCO');
 
-                            $asientoDetalles[] = ['id_cuenta' => $idCuentaDebe ?: 3, 'tipo' => 'D', 'monto' => $montoFase];
-                            $asientoDetalles[] = ['id_cuenta' => $idCuentaHaber ?: 2, 'tipo' => 'H', 'monto' => $montoFase];
+                            $asientoDetalles[] = ['id_cuenta_contable' => $idCuentaDebe ?: 3, 'tipo' => 'D', 'monto' => $montoFase];
+                            $asientoDetalles[] = ['id_cuenta_contable' => $idCuentaHaber ?: 2, 'tipo' => 'H', 'monto' => $montoFase];
                         }
                     }
                 }
@@ -208,8 +210,8 @@ class SolicitudPagoRepository extends Repository
             // 4. Integrar con Contabilidad
             if (empty($asientoDetalles)) {
                 $asientoDetalles = [
-                   ['id_cuenta' => 3, 'tipo' => 'D', 'monto' => $req->montoPagar],
-                   ['id_cuenta' => 2, 'tipo' => 'H', 'monto' => $req->montoPagar],
+                   ['id_cuenta_contable' => 3, 'tipo' => 'D', 'monto' => $req->montoPagar],
+                   ['id_cuenta_contable' => 2, 'tipo' => 'H', 'monto' => $req->montoPagar],
                 ];
             }
 
@@ -292,9 +294,9 @@ class SolicitudPagoRepository extends Repository
             }
 
             // 2. Soft-delete de movimientos vinculados
-            $db->prepare("UPDATE movimiento_bancario SET eliminado = 1 WHERE id_solicitud_pago = ?")->execute([$idSolicitud]);
-            $db->prepare("UPDATE comprobante_diario SET eliminado = 1 WHERE id_solicitud_pago = ?")->execute([$idSolicitud]);
-            $db->prepare("UPDATE movimiento_contable SET eliminado = 1 WHERE id_comprobante_diario IN (SELECT id_comprobante_diario FROM comprobante_diario WHERE id_solicitud_pago = ?)")->execute([$idSolicitud]);
+            $db->prepare("UPDATE movimiento_bancario SET eliminado = true WHERE id_solicitud_pago = ?")->execute([$idSolicitud]);
+            $db->prepare("UPDATE comprobante_diario SET eliminado = true WHERE id_solicitud_pago = ?")->execute([$idSolicitud]);
+            $db->prepare("UPDATE movimiento_contable SET eliminado = true WHERE id_comprobante_diario IN (SELECT id_comprobante_diario FROM comprobante_diario WHERE id_solicitud_pago = ?)")->execute([$idSolicitud]);
 
             // 3. Resetear estado de la solicitud
             $db->prepare("UPDATE solicitud_pago SET contabilizada = false WHERE id_solicitud_pago = ?")->execute([$idSolicitud]);
@@ -314,7 +316,7 @@ class SolicitudPagoRepository extends Repository
         $db = $this->getPdo();
         $stmt = $db->prepare("
             SELECT * FROM solicitud_pago
-            WHERE contabilizada = 0 AND eliminado = 0
+            WHERE contabilizada = false AND eliminado = false
             ORDER BY fecha_solicitud_pago ASC
         ");
         $stmt->execute();

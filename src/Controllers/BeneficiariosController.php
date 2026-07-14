@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Models\Beneficiario;
@@ -20,7 +22,9 @@ class BeneficiariosController extends HomeController
         $search = $_GET['search'] ?? '';
 
         try {
-            $beneficiarios = $this->repo->all($search);
+            $page = (int)($_GET['page'] ?? 1);
+            $paginator = $this->repo->paginate($search, $page, 15);
+            $beneficiarios = $paginator['data'];
         } catch (PDOException | \Exception $e) {
             $beneficiarios = [];
             $error = "Error al obtener beneficiarios: " . $e->getMessage();
@@ -30,6 +34,7 @@ class BeneficiariosController extends HomeController
             'beneficiarios' => $beneficiarios,
             'search'        => $search,
             'error'         => $error ?? null,
+                    'paginator' => $paginator,
         ]);
     }
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -16,7 +18,7 @@ class NominaRepository extends Repository
     public function all(): array
     {
         $db = $this->getPdo();
-        $stmt = $db->query("SELECT * FROM nomina WHERE eliminado = 0");
+        $stmt = $db->query("SELECT * FROM nomina WHERE eliminado = false");
 
         $results = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
@@ -28,7 +30,7 @@ class NominaRepository extends Repository
 
     public function find(int $id): ?Nomina
     {
-        $row = $this->query()->where('cod_nomina', '=', $id)->where('eliminado', '=', 0)->first();
+        $row = $this->query()->where('cod_nomina', '=', $id)->where('eliminado', '=', 'false')->first();
         if (!$row) {
             return null;
         }

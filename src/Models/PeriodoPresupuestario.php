@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
-class PeriodoPresupuestario
+readonly class PeriodoPresupuestario
 {
     public const MESES = [
         1  => 'Enero',   2  => 'Febrero',  3  => 'Marzo',
@@ -32,5 +34,29 @@ class PeriodoPresupuestario
     public function nombreMes(): string
     {
         return self::MESES[$this->mes] ?? "Mes $this->mes";
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id_periodo' => $this->id_periodo,
+            'anio' => $this->anio,
+            'mes' => $this->mes,
+            'estado' => $this->estado,
+            'fecha_cierre' => $this->fecha_cierre,
+            'observacion' => $this->observacion,
+        ];
+    }
+
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            $data['anio'] ?? null,
+            $data['mes'] ?? null,
+            $data['estado'] ?? null,
+            $data['fecha_cierre'] ?? null,
+            $data['observacion'] ?? null,
+            $data['id_periodo'] ?? null,
+        );
     }
 }

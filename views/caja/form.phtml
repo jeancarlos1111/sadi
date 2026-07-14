@@ -6,7 +6,7 @@
 
 <div style="max-width: 560px;">
 <form method="POST" action="?route=caja/guardar">
-    <?php if ($caja && $caja->id): ?><input type="hidden" name="id" value="<?= $caja->id ?>"><?php endif; ?>
+    <?php if ($caja && $caja->id): ?><input type="hidden" name="id" value="<?= htmlspecialchars((string)$caja->id) ?>"><?php endif; ?>
     <table style="width:100%; border-collapse:collapse;">
         <tr>
             <td style="padding:9px 0; width:180px;"><label><b>Denominación:</b></label></td>

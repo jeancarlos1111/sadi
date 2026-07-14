@@ -46,9 +46,9 @@
                                     </thead>
                                     <tbody>
                                         <?php foreach ($solicitudes as $sol): ?>
-                                        <tr id="sol-<?= $sol['id_solicitud_pago'] ?>" style="cursor: pointer;">
+                                        <tr id="sol-<?= htmlspecialchars((string)$sol['id_solicitud_pago']) ?>" style="cursor: pointer;">
                                             <td>
-                                                <strong class="text-primary">#<?= $sol['id_solicitud_pago'] ?></strong><br>
+                                                <strong class="text-primary">#<?= htmlspecialchars((string)$sol['id_solicitud_pago']) ?></strong><br>
                                                 <small class="text-muted"><?= date('d/m/Y', strtotime($sol['fecha_solicitud_pago'])) ?></small>
                                             </td>
                                             <td><?= htmlspecialchars($sol['concepto_solicitud_pago']) ?></td>
@@ -57,7 +57,7 @@
                                             </td>
                                             <td class="text-center align-middle">
                                                 <button type="button" class="btn btn-sm btn-primary"
-                                                    onclick="seleccionarSolicitud(<?= $sol['id_solicitud_pago'] ?>, '<?= htmlspecialchars(addslashes($sol['concepto_solicitud_pago'])) ?>', <?= $sol['monto_pagar_solicitud_pago'] ?>)">
+                                                    onclick="seleccionarSolicitud(<?= htmlspecialchars((string)$sol['id_solicitud_pago']) ?>, '<?= htmlspecialchars(addslashes($sol['concepto_solicitud_pago'])) ?>', <?= htmlspecialchars((string)$sol['monto_pagar_solicitud_pago']) ?>)">
                                                     Pagar <i class="fas fa-arrow-right"></i>
                                                 </button>
                                             </td>
@@ -96,7 +96,7 @@
                                     <select class="form-control" name="id_cta_bancaria" required>
                                         <option value="">-- Seleccione Cuenta --</option>
                                         <?php foreach ($cuentas as $cta): ?>
-                                            <option value="<?= $cta['id_cta_bancaria'] ?>">
+                                            <option value="<?= htmlspecialchars((string)$cta['id_cta_bancaria']) ?>">
                                                 <?= htmlspecialchars($cta['nombre_banco']) ?> — <?= htmlspecialchars($cta['numero_cta_bancaria']) ?>
                                             </option>
                                         <?php endforeach; ?>
@@ -108,7 +108,7 @@
                                     <select class="form-control" name="id_tipo_operacion" required>
                                         <option value="">-- Seleccione Tipo --</option>
                                         <?php foreach ($tiposOp as $t): ?>
-                                            <option value="<?= $t['id_tipo_operacion_bancaria'] ?>">
+                                            <option value="<?= htmlspecialchars((string)$t['id_tipo_operacion_bancaria']) ?>">
                                                 <?= htmlspecialchars($t['nombre_tipo_operacion_bancaria']) ?>
                                                 (<?= htmlspecialchars($t['acronimo_tipo_operacion_bancaria']) ?>)
                                             </option>

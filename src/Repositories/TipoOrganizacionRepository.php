@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -19,7 +21,7 @@ class TipoOrganizacionRepository extends Repository
     {
         $rows = $this->query()
                      ->select('id_tipo_organizacion', 'nombre_tipo_organizacion')
-                     ->where('eliminado', '=', 0)
+                     ->where('eliminado', '=', 'false')
                      ->orderBy('nombre_tipo_organizacion', 'ASC')
                      ->get();
 

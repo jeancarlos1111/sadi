@@ -36,7 +36,7 @@
                 <select class="form-control" name="id_tipo_organizacion" required>
                     <option value="">SELECCIONE</option>
                     <?php foreach ($tiposOrganizacion as $tipo): ?>
-                        <option value="<?= $tipo->id ?>" <?= ($proveedor && $proveedor->idTipoOrganizacion === $tipo->id) ? 'selected' : '' ?>>
+                        <option value="<?= htmlspecialchars((string)$tipo->id) ?>" <?= ($proveedor && $proveedor->idTipoOrganizacion === $tipo->id) ? 'selected' : '' ?>>
                             <?= htmlspecialchars($tipo->nombre) ?>
                         </option>
                     <?php endforeach; ?>

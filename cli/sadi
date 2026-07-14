@@ -1,0 +1,33 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+// Bootstrap: autoload del proyecto y del propio CLI
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use Sadi\Application;
+use Sadi\Commands\MakeSectionCommand;
+use Sadi\Commands\MakeControllerCommand;
+use Sadi\Commands\MakeModelCommand;
+use Sadi\Commands\MakeRepositoryCommand;
+use Sadi\Commands\MakeTestCommand;
+use Sadi\Commands\DbMigrateCommand;
+use Sadi\Commands\DbSeedCommand;
+use Sadi\Commands\RouteListCommand;
+use Sadi\Commands\TestCommand;
+
+$app = new Application();
+
+$app
+    ->register(new MakeSectionCommand())
+    ->register(new MakeControllerCommand())
+    ->register(new MakeModelCommand())
+    ->register(new MakeRepositoryCommand())
+    ->register(new MakeTestCommand())
+    ->register(new DbMigrateCommand())
+    ->register(new DbSeedCommand())
+    ->register(new RouteListCommand())
+    ->register(new TestCommand());
+
+exit($app->run($argv));

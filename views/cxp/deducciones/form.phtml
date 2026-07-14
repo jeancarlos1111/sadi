@@ -1,7 +1,7 @@
 <h2><?= htmlspecialchars($titulo) ?></h2>
 
 <form method="POST" action="?route=deducciones_cxp/guardar" style="max-width:500px;">
-    <?php if ($item && $item->id): ?><input type="hidden" name="id" value="<?= $item->id ?>"><?php endif; ?>
+    <?php if ($item && $item->id): ?><input type="hidden" name="id" value="<?= htmlspecialchars((string)$item->id) ?>"><?php endif; ?>
 
     <div style="margin-bottom:10px;">
         <label>Código (*):</label><br>

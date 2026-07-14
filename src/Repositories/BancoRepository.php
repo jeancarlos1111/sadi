@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -16,7 +18,7 @@ class BancoRepository extends Repository
     public function all(): array
     {
         $db = $this->getPdo();
-        $stmt = $db->query("SELECT * FROM banco WHERE eliminado = 0 ORDER BY nombre_banco ASC");
+        $stmt = $db->query("SELECT * FROM banco WHERE eliminado = false ORDER BY nombre_banco ASC");
 
         $results = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
@@ -29,7 +31,7 @@ class BancoRepository extends Repository
     public function find(int $id): ?Banco
     {
         $db = $this->getPdo();
-        $stmt = $db->prepare("SELECT * FROM banco WHERE id_banco = ? AND eliminado = 0");
+        $stmt = $db->prepare("SELECT * FROM banco WHERE id_banco = ? AND eliminado = false");
         $stmt->execute([$id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -63,7 +65,7 @@ class BancoRepository extends Repository
     public function delete(int $id): bool
     {
         $db = $this->getPdo();
-        $stmt = $db->prepare("UPDATE banco SET eliminado = 1 WHERE id_banco = ?");
+        $stmt = $db->prepare("UPDATE banco SET eliminado = true WHERE id_banco = ?");
 
         return $stmt->execute([$id]);
     }

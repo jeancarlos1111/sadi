@@ -1,60 +1,63 @@
 <div class="card card-outline card-primary">
-    <div class="card-header">
-        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
-        <div class="card-tools">
-            <a href="?route=beneficiarios/form" class="btn btn-sm btn-success">
-                <i class="fas fa-plus"></i> Nuevo Beneficiario
-            </a>
-        </div>
+  <div class="card-header">
+    <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+    <div class="card-tools">
+      <a href="?route=beneficiarios/form" class="btn btn-sm btn-success">
+        <i class="fas fa-plus"></i> Nuevo Beneficiario
+      </a>
     </div>
-    <div class="card-body">
-        <?php if (isset($error)): ?>
-            <div class="alert alert-danger alert-dismissible">
-                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                <h5><i class="icon fas fa-ban"></i> Error</h5>
-                <?= htmlspecialchars($error) ?>
-            </div>
-        <?php endif; ?>
+  </div>
+  <div class="card-body">
+    <?php if (isset($error)): ?>
+      <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <h5><i class="icon fas fa-ban"></i> Error</h5>
+        <?= htmlspecialchars($error) ?>
+      </div>
+    <?php endif; ?>
 
-        <table class="table table-bordered table-striped dataTable w-100">
-            <thead>
-                <tr>
-                    <th>Cédula</th>
-                    <th>Nombres</th>
-                    <th>Apellidos</th>
-                    <th>Teléfono</th>
-                    <th>Email</th>
-                    <th>Dirección</th>
-                    <th width="15%">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-        <?php if (empty($beneficiarios)): ?>
-            <tr><td colspan="7" class="text-center">No se encontraron beneficiarios.</td></tr>
-        <?php else: ?>
-            <?php foreach ($beneficiarios as $b): ?>
-                <tr>
-                    <td><?= htmlspecialchars($b->cedula) ?></td>
-                    <td><?= htmlspecialchars($b->nombres) ?></td>
-                    <td><?= htmlspecialchars($b->apellidos) ?></td>
-                    <td><?= htmlspecialchars($b->telefono) ?></td>
-                    <td><?= htmlspecialchars($b->email ?? '') ?></td>
-                    <td><?= htmlspecialchars($b->direccion) ?></td>
-                    <td class="text-center">
-                        <a href="?route=beneficiarios/form&id=<?= urlencode((string)$b->id) ?>" class="btn btn-sm btn-info" title="Editar">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <form method="POST" action="?route=beneficiarios/eliminar" onsubmit="return confirm('¿Eliminar este beneficiario?');" class="d-inline">
-                            <input type="hidden" name="id" value="<?= htmlspecialchars((string)$b->id) ?>">
-                            <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        <?php endif; ?>
-    </tbody>
+    <table class="table table-bordered table-striped w-100">
+      <thead>
+        <tr>
+          <th>Cédula</th>
+          <th>Nombres</th>
+          <th>Apellidos</th>
+          <th>Teléfono</th>
+          <th>Email</th>
+          <th>Dirección</th>
+          <th width="15%">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+    <?php if (empty($beneficiarios)): ?>
+      <tr><td colspan="7" class="text-center">No se encontraron beneficiarios.</td></tr>
+    <?php else: ?>
+      <?php foreach ($beneficiarios as $b): ?>
+        <tr>
+          <td><?= htmlspecialchars($b->cedula) ?></td>
+          <td><?= htmlspecialchars($b->nombres) ?></td>
+          <td><?= htmlspecialchars($b->apellidos) ?></td>
+          <td><?= htmlspecialchars($b->telefono) ?></td>
+          <td><?= htmlspecialchars($b->email ?? '') ?></td>
+          <td><?= htmlspecialchars($b->direccion) ?></td>
+          <td class="text-center">
+            <a href="?route=beneficiarios/form&id=<?= urlencode((string)$b->id) ?>" class="btn btn-sm btn-info" title="Editar">
+              <i class="fas fa-edit"></i>
+            </a>
+            <form method="POST" action="?route=beneficiarios/eliminar" onsubmit="return confirm('¿Eliminar este beneficiario?');" class="d-inline">
+              <input type="hidden" name="id" value="<?= htmlspecialchars((string)$b->id) ?>">
+              <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+      <?php endforeach; ?>
+    <?php endif; ?>
+  </tbody>
 </table>
-    </div>
+    <?php if (isset($paginator)): ?>
+      <?php include $partialsPath . 'pagination.phtml'; ?>
+    <?php endif; ?>
+  </div>
 </div>

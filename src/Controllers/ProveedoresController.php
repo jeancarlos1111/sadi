@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Models\Proveedor;
@@ -21,17 +23,22 @@ class ProveedoresController extends HomeController
     public function index(): void
     {
         $search = $_GET['search'] ?? '';
+        $page = (int)($_GET['page'] ?? 1);
+        $perPage = 15; // Podría leerse de configuración
 
         try {
-            $proveedores = $this->repo->all($search);
-        } catch (PDOException | \Exception $e) {
+            $paginator = $this->repo->paginate($search, $page, $perPage);
+            $proveedores = $paginator['data'];
+        } catch (\PDOException | \Exception $e) {
             $proveedores = [];
+            $paginator = null;
             $error = "Error al obtener proveedores: " . $e->getMessage();
         }
 
         $this->renderView('proveedores/index', [
             'titulo' => 'Listado de Proveedores',
             'proveedores' => $proveedores,
+            'paginator' => $paginator,
             'search' => $search,
             'error' => $error ?? null,
         ]);

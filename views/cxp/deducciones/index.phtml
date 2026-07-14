@@ -38,9 +38,9 @@
                 <td><?= htmlspecialchars($item->aplicaSobre) ?></td>
                 <td><?= $item->activo ? '<span style="color:green">Activo</span>' : '<span style="color:red">Inactivo</span>' ?></td>
                 <td>
-                    <a href="?route=deducciones_cxp/form&id=<?= $item->id ?>" style="margin-right:8px;">Editar</a>
+                    <a href="?route=deducciones_cxp/form&id=<?= htmlspecialchars((string)$item->id) ?>" style="margin-right:8px;">Editar</a>
                     <form method="POST" action="?route=deducciones_cxp/eliminar" onsubmit="return confirm('¿Seguro que desea eliminar esta deducción?');" style="display:inline;">
-                        <input type="hidden" name="id" value="<?= $item->id ?>">
+                        <input type="hidden" name="id" value="<?= htmlspecialchars((string)$item->id) ?>">
                         <button type="submit" style="color:red; border:none; background:none; cursor:pointer;">Eliminar</button>
                     </form>
                 </td>
@@ -48,3 +48,6 @@
         <?php endforeach; endif; ?>
     </tbody>
 </table>
+        <?php if (isset($paginator)): ?>
+            <?php include $partialsPath . 'pagination.phtml'; ?>
+        <?php endif; ?>

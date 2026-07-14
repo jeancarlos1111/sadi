@@ -1,0 +1,22 @@
+/vendor/
+/node_modules/
+
+# Entorno
+.env
+.env.*
+!.env.example
+
+# IDEs y SO
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Logs y Caché
+/logs/
+*.log
+/cache/
+
+# Docker (si tienes volumenes locales)
+/docker/db-data/

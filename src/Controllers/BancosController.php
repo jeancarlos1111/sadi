@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Models\Banco;
@@ -21,12 +23,15 @@ class BancosController extends BaseController
 
     public function index(): void
     {
-        $bancos = $this->repo->all();
+        $page = (int)($_GET['page'] ?? 1);
+        $paginator = $this->repo->paginate('', $page, 15);
+        $bancos = $paginator['data'];
         $this->renderView('banco/catalogos/bancos/index', [
             'titulo' => 'Maestro de Bancos',
             'bancos' => $bancos,
             'success' => $_GET['success'] ?? null,
             'error'   => $_GET['error'] ?? null,
+                    'paginator' => $paginator,
         ]);
     }
 

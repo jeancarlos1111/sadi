@@ -21,7 +21,7 @@
         <select name="id_nomina" required style="width: 100%; padding: 10px;">
             <option value="">-- Seleccione Nómina Activa --</option>
             <?php foreach ($nominasActivas as $n): ?>
-                <option value="<?= $n->id ?>"><?= htmlspecialchars($n->nombre) ?> (Periodicidad: <?= htmlspecialchars($n->tipoPeriodo) ?>)</option>
+                <option value="<?= htmlspecialchars((string)$n->id) ?>"><?= htmlspecialchars($n->nombre) ?> (Periodicidad: <?= htmlspecialchars($n->tipoPeriodo) ?>)</option>
             <?php endforeach; ?>
         </select>
     </div>

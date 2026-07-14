@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Models\DeduccionCxP;
@@ -21,7 +23,9 @@ class DeduccionesCxPController extends HomeController
         $items = [];
 
         try {
-            $items = $this->repo->all($search);
+            $page = (int)($_GET['page'] ?? 1);
+            $paginator = $this->repo->paginate($search, $page, 15);
+            $items = $paginator['data'];
         } catch (PDOException $e) {
             // Log the error or handle it appropriately
             error_log("Error fetching deducciones: " . $e->getMessage());
@@ -33,6 +37,7 @@ class DeduccionesCxPController extends HomeController
             'titulo' => 'Deducciones y Retenciones (CxP)',
             'items'  => $items,
             'search' => $search,
+            'paginator' => $paginator ?? null,
         ]);
     }
 

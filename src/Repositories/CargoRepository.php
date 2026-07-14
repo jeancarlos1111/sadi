@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -16,7 +18,7 @@ class CargoRepository extends Repository
     public function all(): array
     {
         $db = $this->getPdo();
-        $stmt = $db->query("SELECT * FROM cargo WHERE eliminado = 0 ORDER BY nombre ASC");
+        $stmt = $db->query("SELECT * FROM cargo WHERE eliminado = false ORDER BY nombre ASC");
 
         $results = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
@@ -28,7 +30,7 @@ class CargoRepository extends Repository
 
     public function find(int $id): ?Cargo
     {
-        $row = $this->query()->where('cod_cargo', '=', $id)->where('eliminado', '=', 0)->first();
+        $row = $this->query()->where('cod_cargo', '=', $id)->where('eliminado', '=', 'false')->first();
         if (!$row) {
             return null;
         }

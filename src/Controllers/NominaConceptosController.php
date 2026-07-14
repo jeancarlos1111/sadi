@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Models\ConceptoNomina;
@@ -23,10 +25,13 @@ class NominaConceptosController extends BaseController
 
     public function index(): void
     {
-        $conceptos = $this->repo->all();
+        $page = (int)($_GET['page'] ?? 1);
+        $paginator = $this->repo->paginate('', $page, 15);
+        $conceptos = $paginator['data'];
         $this->renderView('nomina/conceptos/index', [
             'titulo'   => 'Conceptos de Nómina (Asignaciones y Deducciones)',
             'conceptos' => $conceptos,
+                    'paginator' => $paginator,
         ]);
     }
 

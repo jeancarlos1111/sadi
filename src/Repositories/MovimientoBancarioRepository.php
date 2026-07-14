@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -29,7 +31,7 @@ class MovimientoBancarioRepository extends Repository
             JOIN cta_bancaria AS CB ON MB.id_cta_bancaria = CB.id_cta_bancaria
             JOIN banco AS B ON CB.id_banco = B.id_banco
             JOIN tipo_operacion_bancaria AS TOB ON MB.id_tipo_operacion_bancaria = TOB.id_tipo_operacion_bancaria
-            WHERE MB.eliminado = 0
+            WHERE MB.eliminado = false
         ";
 
         if ($search !== '') {
@@ -71,7 +73,7 @@ class MovimientoBancarioRepository extends Repository
 
     public function find(int $id): ?MovimientoBancario
     {
-        $row = $this->query()->where('id_movimiento_bancario', '=', $id)->where('eliminado', '=', 0)->first();
+        $row = $this->query()->where('id_movimiento_bancario', '=', $id)->where('eliminado', '=', 'false')->first();
         if (!$row) {
             return null;
         }
@@ -113,7 +115,7 @@ class MovimientoBancarioRepository extends Repository
     public function getTiposOperacion(): array
     {
         $db = $this->getPdo();
-        $stmt = $db->prepare("SELECT * FROM tipo_operacion_bancaria WHERE eliminado = 0");
+        $stmt = $db->prepare("SELECT * FROM tipo_operacion_bancaria WHERE eliminado = false");
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -128,7 +130,7 @@ class MovimientoBancarioRepository extends Repository
                 TOB.nombre_tipo_operacion_bancaria, TOB.acronimo_tipo_operacion_bancaria
             FROM movimiento_bancario AS MB
             JOIN tipo_operacion_bancaria AS TOB ON MB.id_tipo_operacion_bancaria = TOB.id_tipo_operacion_bancaria
-            WHERE MB.id_cta_bancaria = ? AND MB.fecha BETWEEN ? AND ? AND MB.eliminado = 0
+            WHERE MB.id_cta_bancaria = ? AND MB.fecha BETWEEN ? AND ? AND MB.eliminado = false
             ORDER BY MB.fecha ASC, MB.id_movimiento_bancario ASC
         ";
         $stmt = $db->prepare($sql);
@@ -140,7 +142,7 @@ class MovimientoBancarioRepository extends Repository
     public function getSaldoAnterior(int $idCta, string $desde): float
     {
         $db = $this->getPdo();
-        $sql = "SELECT SUM(monto) FROM movimiento_bancario WHERE id_cta_bancaria = ? AND fecha < ? AND eliminado = 0";
+        $sql = "SELECT SUM(monto) FROM movimiento_bancario WHERE id_cta_bancaria = ? AND fecha < ? AND eliminado = false";
         $stmt = $db->prepare($sql);
         $stmt->execute([$idCta, $desde]);
 

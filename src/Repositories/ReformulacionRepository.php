@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -40,16 +42,17 @@ class ReformulacionRepository extends Repository
             LEFT JOIN reformulacion r
                 ON f.id_estruc_presupuestaria = r.id_estruc_presupuestaria
                AND f.id_codigo_plan_unico = r.id_codigo_plan_unico
-               AND (r.eliminado = 0 OR r.eliminado IS NULL)
+               AND (r.eliminado = false OR r.eliminado IS NULL)
             JOIN estruc_presupuestaria ep  ON ep.id_estruc_presupuestaria = COALESCE(f.id_estruc_presupuestaria, r.id_estruc_presupuestaria)
             JOIN plan_unico_cuentas puc    ON puc.id_codigo_plan_unico = COALESCE(f.id_codigo_plan_unico, r.id_codigo_plan_unico)
-            WHERE (f.eliminado = 0 OR f.eliminado IS NULL)
+            WHERE (f.eliminado = false OR f.eliminado IS NULL)
             $where
             ORDER BY ep.descripcion_ep ASC, puc.codigo_plan_unico ASC
         ";
 
         $stmt = $this->getPdo()->prepare($sql);
         $stmt->execute($params);
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -65,7 +68,7 @@ class ReformulacionRepository extends Repository
                 monto_reformulado = excluded.monto_reformulado,
                 observacion       = excluded.observacion,
                 fecha_registro    = date('now'),
-                eliminado         = 0
+                eliminado = false
         ");
         $stmt->execute([
             'id_ep'  => $id_estruc,

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -36,7 +38,7 @@ class PlanillaNominaRepository extends Repository
             $fichas = $db->prepare("
                 SELECT f.cod_ficha, f.sueldo_basico
                 FROM ficha f
-                WHERE f.nomina_cod_nomina = ? AND f.eliminado = 0
+                WHERE f.nomina_cod_nomina = ? AND f.eliminado = false
             ");
             $fichas->execute([$idNomina]);
             $trabajadores = $fichas->fetchAll(PDO::FETCH_ASSOC);
@@ -134,14 +136,14 @@ class PlanillaNominaRepository extends Repository
             ")->execute([$totalAsignacionesGlobal, $totalAsignacionesGlobal]);
 
             // Asiento contable del Causado
-            $convRepo = new ConvertidorCuentaRepository();
+            $convRepo = new VinculacionPucContableRepository();
             $idPartidaNomina = 4;
             $idCuentaGasto = $convRepo->getCuentaContableId($idPartidaNomina, 'NOMINA_ASIGNACION');
             $idCuentaPasivo = $convRepo->getCuentaContableId($idPartidaNomina, 'NOMINA_DEDUCCION');
 
             $asientoDetalles = [];
-            $asientoDetalles[] = ['id_cuenta' => $idCuentaGasto ?: 6, 'tipo' => 'D', 'monto' => $totalAsignacionesGlobal];
-            $asientoDetalles[] = ['id_cuenta' => $idCuentaPasivo ?: 3, 'tipo' => 'H', 'monto' => $totalAsignacionesGlobal];
+            $asientoDetalles[] = ['id_cuenta_contable' => $idCuentaGasto ?: 6, 'tipo' => 'D', 'monto' => $totalAsignacionesGlobal];
+            $asientoDetalles[] = ['id_cuenta_contable' => $idCuentaPasivo ?: 3, 'tipo' => 'H', 'monto' => $totalAsignacionesGlobal];
 
             AsientoContable::registrarDesdeTransaccion(
                 $fechaEmision,

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -19,14 +21,14 @@ class ConceptoNominaRepository extends Repository
     public function all(): array
     {
         $db = $this->getPdo();
-        $stmt = $db->query("SELECT * FROM concepto_nomina WHERE eliminado = 0 ORDER BY tipo_concepto ASC, id_concepto ASC");
+        $stmt = $db->query("SELECT * FROM concepto_nomina WHERE eliminado = false ORDER BY tipo_concepto ASC, id_concepto ASC");
 
         return array_map(fn ($row) => $this->mapRowToEntity($row), $stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
     public function find(int $id): ?ConceptoNomina
     {
-        $row = $this->query()->where('id_concepto', '=', $id)->where('eliminado', '=', 0)->first();
+        $row = $this->query()->where('id_concepto', '=', $id)->where('eliminado', '=', 'false')->first();
         if (!$row) {
             return null;
         }
@@ -61,7 +63,7 @@ class ConceptoNominaRepository extends Repository
 
     public function delete(int $id): bool
     {
-        return $this->query()->where('id_concepto', '=', $id)->update(['eliminado' => 1]);
+        return $this->query()->where('id_concepto', '=', $id)->update(['eliminado' => 'true']);
     }
 
     private function mapRowToEntity(array $row): ConceptoNomina

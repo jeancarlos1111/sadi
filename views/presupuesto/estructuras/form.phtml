@@ -15,7 +15,7 @@
                     <?php endif; ?>
 
                     <?php if ($estructura && $estructura->id): ?>
-                        <input type="hidden" name="id" value="<?= $estructura->id ?>">
+                        <input type="hidden" name="id" value="<?= htmlspecialchars((string)$estructura->id) ?>">
                     <?php endif; ?>
 
                     <div class="form-group">

@@ -4,65 +4,63 @@ $isHomePage = ($viewPath === 'home/index');
 
 $bodyClass = 'hold-transition';
 if ($isLoginPage) {
-    $bodyClass .= ' login-page';
+  $bodyClass .= ' login-page';
 } elseif ($isHomePage) {
-    $bodyClass .= ' layout-top-nav';
+  $bodyClass .= ' layout-top-nav';
 } else {
-    $bodyClass .= ' sidebar-mini layout-fixed';
+  $bodyClass .= ' sidebar-mini layout-fixed';
 }
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><?= htmlspecialchars($titulo ?? 'SADI') ?></title>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <title><?= htmlspecialchars($titulo ?? 'SADI') ?></title>
 
-  <!-- Google Font: Source Sans Pro -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-  <!-- Bootstrap 4 (Requiere cargar antes de AdminLTE si hay fallos) -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.2/css/bootstrap.min.css">
-  <!-- DataTables -->
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css">
-  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap4.min.css">
-  <!-- Theme style plugin - AdminLTE -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/css/adminlte.min.css">
+ <!-- Google Font: Source Sans Pro -->
+ <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+ <!-- Font Awesome -->
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+ <!-- Bootstrap 4 (Requiere cargar antes de AdminLTE si hay fallos) -->
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.2/css/bootstrap.min.css">
+
+ <!-- Theme style plugin - AdminLTE -->
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/css/adminlte.min.css">
 </head>
-<body class="<?= $bodyClass ?>">
+<body class="<?= htmlspecialchars((string)$bodyClass) ?>">
 
 <?php if ($isLoginPage): ?>
-  <?php require_once $viewsPath . $viewPath . '.phtml'; ?>
+ <?php require $viewsPath . $viewPath . '.phtml'; ?>
 <?php else: ?>
 <div class="wrapper">
-  <!-- Navbar -->
-  <?php require_once __DIR__ . '/navbar.phtml'; ?>
-  <!-- /.navbar -->
+ <!-- Navbar -->
+ <?php require_once __DIR__ . '/navbar.phtml'; ?>
+ <!-- /.navbar -->
 
-  <?php if (!$isHomePage): ?>
-  <!-- Main Sidebar Container -->
-  <?php require_once __DIR__ . '/sidebar.phtml'; ?>
-  <?php endif; ?>
+ <?php if (!$isHomePage): ?>
+ <!-- Main Sidebar Container -->
+ <?php require_once __DIR__ . '/sidebar.phtml'; ?>
+ <?php endif; ?>
 
-  <!-- Content Wrapper. Contains page content -->
-  <div class="content-wrapper">
-    <!-- Main content -->
-    <section class="content <?= $isHomePage ? 'pt-5' : 'pt-3' ?>">
-      <div class="<?= $isHomePage ? 'container' : 'container-fluid' ?>">
-        <?php require_once $viewsPath . $viewPath . '.phtml'; ?>
-      </div>
-    </section>
-    <!-- /.content -->
+ <!-- Content Wrapper. Contains page content -->
+ <div class="content-wrapper">
+  <!-- Main content -->
+  <section class="content <?= $isHomePage ? 'pt-5' : 'pt-3' ?>">
+   <div class="<?= $isHomePage ? 'container' : 'container-fluid' ?>">
+    <?php require $viewsPath . $viewPath . '.phtml'; ?>
+   </div>
+  </section>
+  <!-- /.content -->
+ </div>
+ <!-- /.content-wrapper -->
+
+ <footer class="main-footer">
+  <strong>SADI</strong> - Sistema Administrativo Integrado.
+  <div class="float-right d-none d-sm-inline-block">
+   <b>Versión</b> 2.0
   </div>
-  <!-- /.content-wrapper -->
-
-  <footer class="main-footer">
-    <strong>SADI</strong> - Sistema Administrativo Integrado.
-    <div class="float-right d-none d-sm-inline-block">
-      <b>Versión</b> 2.0
-    </div>
-  </footer>
+ </footer>
 </div>
 <!-- ./wrapper -->
 <?php endif; ?>
@@ -71,34 +69,8 @@ if ($isLoginPage) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <!-- Bootstrap 4 -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
-<!-- DataTables & Plugins -->
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
-<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
-<script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap4.min.js"></script>
+
 <!-- AdminLTE App -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/js/adminlte.min.js"></script>
-
-<!-- Initialize Global Components -->
-<script>
-  $(function () {
-    // Inicializar DataTables
-    if ($('.dataTable').length > 0) {
-      $('.dataTable').each(function() {
-          if (!$.fn.DataTable.isDataTable(this)) {
-              $(this).DataTable({
-                "pageLength": 20,
-                "responsive": true,
-                "lengthChange": false,
-                "autoWidth": false,
-                "language": {
-                    "url": "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
-                }
-              });
-          }
-      });
-    }
-  });
-</script>
 </body>
 </html>

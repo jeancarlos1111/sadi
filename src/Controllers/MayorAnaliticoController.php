@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
-use App\Repositories\MovimientoPresupuestarioRepository;
 use App\Repositories\EstrucPresupuestariaRepository;
+use App\Repositories\MovimientoPresupuestarioRepository;
 use App\Repositories\PlanUnicoCuentasRepository;
 use App\Services\MayorAnaliticoPdfService;
 

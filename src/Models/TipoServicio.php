@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
-class TipoServicio
+readonly class TipoServicio
 {
     /* private(set) */ public ?int $id;
 
@@ -12,5 +14,23 @@ class TipoServicio
         ?int           $id = null
     ) {
         $this->id = $id;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'denominacion' => $this->denominacion,
+            'descripcion' => $this->descripcion,
+        ];
+    }
+
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            $data['denominacion'] ?? null,
+            $data['descripcion'] ?? null,
+            $data['id'] ?? null,
+        );
     }
 }

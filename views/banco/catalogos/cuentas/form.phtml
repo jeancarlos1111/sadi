@@ -15,7 +15,7 @@
             <select name="id_banco" required style="padding: 8px; width: 100%; box-sizing: border-box;">
                 <option value="">Seleccione un banco...</option>
                 <?php foreach ($bancos as $b): ?>
-                    <option value="<?= $b->id ?>" <?= ($cuenta && $cuenta->idBanco == $b->id) ? 'selected' : '' ?>>
+                    <option value="<?= htmlspecialchars((string)$b->id) ?>" <?= ($cuenta && $cuenta->idBanco == $b->id) ? 'selected' : '' ?>>
                         <?= htmlspecialchars($b->nombreBanco) ?>
                     </option>
                 <?php endforeach; ?>

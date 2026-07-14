@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -171,6 +173,6 @@ class RequisicionBienesRepository extends Repository
 
     public function delete(int $id): bool
     {
-        return $this->query()->where('id_requisicion_bienes', '=', $id)->update(['eliminado' => 1]);
+        return $this->query()->where('id_requisicion_bienes', '=', $id)->update(['eliminado' => 'true']);
     }
 }

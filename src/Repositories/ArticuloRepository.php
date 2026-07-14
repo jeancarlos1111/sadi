@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -62,12 +64,48 @@ class ArticuloRepository extends Repository
         return $results;
     }
 
+    public function allAsync(): array
+    {
+        $sql = "
+            SELECT 
+                A.id_articulo, A.denominacion_a, A.observacion_a, A.id_tipo_de_articulo, 
+                A.id_unidades_de_medida, A.id_codigo_plan_unico, A.aplicar_iva,
+                UDM.denominacion_udm, TDA.denominacion_tda
+            FROM articulo AS A
+            JOIN unidades_de_medida AS UDM ON A.id_unidades_de_medida = UDM.id_unidades_de_medida
+            JOIN tipo_de_articulo AS TDA ON A.id_tipo_de_articulo = TDA.id_tipo_de_articulo
+            WHERE A.eliminado = false
+            ORDER BY A.denominacion_a
+        ";
+        $result = $this->getAsyncPool()->query($sql);
+
+        $results = [];
+        foreach ($result as $row) {
+            $articulo = new Articulo(
+                $row['denominacion_a'],
+                $row['observacion_a'] ?? '',
+                (int)$row['id_tipo_de_articulo'],
+                (int)$row['id_unidades_de_medida'],
+                $row['id_codigo_plan_unico'] ? (int)$row['id_codigo_plan_unico'] : null,
+                (bool)$row['aplicar_iva'],
+                (int)$row['id_articulo']
+            );
+            $results[] = [
+                'entity' => $articulo,
+                'denominacion_udm' => $row['denominacion_udm'],
+                'denominacion_tda' => $row['denominacion_tda'],
+            ];
+        }
+
+        return $results;
+    }
+
     public function findById(int $id): ?Articulo
     {
         $row = $this->query()
                     ->select('*')
                     ->where('id_articulo', '=', $id)
-                    ->where('eliminado', '=', 0)
+                    ->where('eliminado', '=', 'false')
                     ->first();
 
         if (!$row) {
@@ -108,6 +146,6 @@ class ArticuloRepository extends Repository
 
     public function delete(int $id): bool
     {
-        return $this->query()->where('id_articulo', '=', $id)->update(['eliminado' => 1]);
+        return $this->query()->where('id_articulo', '=', $id)->update(['eliminado' => 'true']);
     }
 }

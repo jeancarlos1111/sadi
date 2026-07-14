@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -15,7 +17,7 @@ class ComprobantePresupuestarioRepository extends Repository
 
     public function all(string $search = ''): array
     {
-        $sql = "SELECT * FROM {$this->getTable()} WHERE eliminado = 0";
+        $sql = "SELECT * FROM {$this->getTable()} WHERE eliminado = false";
         $params = [];
 
         if (!empty($search)) {
@@ -40,16 +42,19 @@ class ComprobantePresupuestarioRepository extends Repository
                 (int)$row['id_comprobante']
             );
         }
+
         return $results;
     }
 
     public function findById(int $id): ?ComprobantePresupuestario
     {
-        $stmt = $this->getPdo()->prepare("SELECT * FROM {$this->getTable()} WHERE id_comprobante = :id AND eliminado = 0");
+        $stmt = $this->getPdo()->prepare("SELECT * FROM {$this->getTable()} WHERE id_comprobante = :id AND eliminado = false");
         $stmt->execute(['id' => $id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$row) return null;
+        if (!$row) {
+            return null;
+        }
 
         return new ComprobantePresupuestario(
             $row['acronimo_c'],
@@ -70,7 +75,7 @@ class ComprobantePresupuestarioRepository extends Repository
     public function allExcept(array $excluded = [], string $search = '', string $tipo = ''): array
     {
         $placeholders = implode(',', array_fill(0, count($excluded), '?'));
-        $sql = "SELECT * FROM {$this->getTable()} WHERE eliminado = 0";
+        $sql = "SELECT * FROM {$this->getTable()} WHERE eliminado = false";
         $params = [];
 
         if (!empty($excluded)) {
@@ -104,14 +109,16 @@ class ComprobantePresupuestarioRepository extends Repository
                 (int)$row['id_comprobante']
             );
         }
+
         return $results;
     }
 
     public function getNextId(): int
     {
-         $stmt = $this->getPdo()->query("SELECT seq FROM sqlite_sequence WHERE name='comprobante_presupuestario'");
-         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-         return $row ? (int)$row['seq'] + 1 : 1;
+        $stmt = $this->getPdo()->query("SELECT seq FROM sqlite_sequence WHERE name='comprobante_presupuestario'");
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $row ? (int)$row['seq'] + 1 : 1;
     }
 
     public function save(ComprobantePresupuestario $c): int
@@ -134,8 +141,9 @@ class ComprobantePresupuestarioRepository extends Repository
                 'referencia' => $c->referencia_c,
                 'beneficiario' => $c->beneficiario_cedula,
                 'estado' => $c->estado,
-                'id' => $c->id_comprobante
+                'id' => $c->id_comprobante,
             ]);
+
             return $c->id_comprobante;
         } else {
             $stmt = $this->getPdo()->prepare("INSERT INTO {$this->getTable()} (
@@ -152,15 +160,16 @@ class ComprobantePresupuestarioRepository extends Repository
                 'denominacion' => $c->denominacion_c,
                 'referencia' => $c->referencia_c,
                 'beneficiario' => $c->beneficiario_cedula,
-                'estado' => $c->estado
+                'estado' => $c->estado,
             ]);
+
             return (int)$this->getPdo()->lastInsertId();
         }
     }
 
     public function delete(int $id): void
     {
-        $stmt = $this->getPdo()->prepare("UPDATE {$this->getTable()} SET eliminado = 1 WHERE id_comprobante = :id");
+        $stmt = $this->getPdo()->prepare("UPDATE {$this->getTable()} SET eliminado = true WHERE id_comprobante = :id");
         $stmt->execute(['id' => $id]);
     }
 }

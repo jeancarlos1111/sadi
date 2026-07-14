@@ -22,7 +22,7 @@
                     <option value="">-- Seleccione una orden --</option>
                     <?php if (!empty($ordenesCompra)): ?>
                         <?php foreach ($ordenesCompra as $oc): ?>
-                            <option value="<?= $oc['id_orden_de_compra'] ?>" data-tipo="compra">OC #<?= $oc['id_orden_de_compra'] ?> - <?= htmlspecialchars($oc['compania_proveedor']) ?> (<?= $oc['rif_proveedor'] ?>)</option>
+                            <option value="<?= htmlspecialchars((string)$oc['id_orden_de_compra']) ?>" data-tipo="compra">OC #<?= htmlspecialchars((string)$oc['id_orden_de_compra']) ?> - <?= htmlspecialchars($oc['compania_proveedor']) ?> (<?= htmlspecialchars((string)$oc['rif_proveedor']) ?>)</option>
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </select>

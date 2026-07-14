@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -19,7 +21,7 @@ class CuentaContableRepository extends Repository
     {
         $query = $this->query()
                       ->select('id_cuenta_contable', 'codigo_cuenta', 'denominacion_cuenta', 'tipo_cuenta')
-                      ->where('eliminado', '=', 0)
+                      ->where('eliminado', '=', 'false')
                       ->orderBy('codigo_cuenta', 'ASC');
 
         if ($search !== '') {

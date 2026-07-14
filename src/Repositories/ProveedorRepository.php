@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -61,12 +63,61 @@ class ProveedorRepository extends Repository
         return $results;
     }
 
+    public function paginate(...$args): array
+    {
+        $search = $args[0] ?? '';
+        $page = $args[1] ?? 1;
+        $perPage = $args[2] ?? 15;
+
+        $db = $this->getPdo();
+        $sql = "
+            SELECT 
+                P.id_proveedor, P.rif_proveedor, P.nit_proveedor, P.compania_proveedor, 
+                P.id_tipo_organizacion, P.direccion_proveedor, P.telefono_proveedor, P.id_codigo_contable,
+                T_O.nombre_tipo_organizacion
+            FROM proveedor AS P
+            LEFT JOIN tipo_organizacion AS T_O ON P.id_tipo_organizacion = T_O.id_tipo_organizacion
+            WHERE P.eliminado = false
+        ";
+
+        $bindings = [];
+        if ($search !== '') {
+            $sql .= " AND (P.rif_proveedor ILIKE :search OR P.compania_proveedor ILIKE :search OR P.direccion_proveedor ILIKE :search OR T_O.nombre_tipo_organizacion ILIKE :search)";
+            $bindings[':search'] = "%$search%";
+        }
+        $sql .= " ORDER BY P.rif_proveedor ASC";
+
+        $paginator = \App\Database\Paginator::paginateRaw($db, $sql, $bindings, $page, $perPage);
+
+        $results = [];
+        foreach ($paginator['data'] as $row) {
+            $proveedor = new Proveedor(
+                $row['rif_proveedor'],
+                $row['compania_proveedor'],
+                (int)$row['id_tipo_organizacion'],
+                $row['direccion_proveedor'],
+                $row['telefono_proveedor'],
+                $row['nit_proveedor'],
+                $row['id_codigo_contable'] ? (int)$row['id_codigo_contable'] : null,
+                (int)$row['id_proveedor']
+            );
+            $results[] = [
+                'entity' => $proveedor,
+                'nombre_tipo_organizacion' => $row['nombre_tipo_organizacion'],
+            ];
+        }
+
+        $paginator['data'] = $results;
+
+        return $paginator;
+    }
+
     public function findById(int $id): ?Proveedor
     {
         $row = $this->query()
                     ->select('*')
                     ->where('id_proveedor', '=', $id)
-                    ->where('eliminado', '=', 0)
+                    ->where('eliminado', '=', 'false')
                     ->first();
 
         if (!$row) {
@@ -108,6 +159,6 @@ class ProveedorRepository extends Repository
 
     public function delete(int $id): bool
     {
-        return $this->query()->where('id_proveedor', '=', $id)->update(['eliminado' => 1]);
+        return $this->query()->where('id_proveedor', '=', $id)->update(['eliminado' => 'true']);
     }
 }

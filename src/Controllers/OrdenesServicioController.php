@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Repositories\OrdenServicioRepository;
@@ -28,7 +30,9 @@ class OrdenesServicioController extends HomeController
         $mes    = $_GET['mes'] ?? '';
 
         try {
-            $ordenes = $this->repo->all($search, $mes);
+            $page = (int)($_GET['page'] ?? 1);
+            $paginator = $this->repo->paginate($search, $mes, $page, 15);
+            $ordenes = $paginator['data'];
         } catch (PDOException | \Exception $e) {
             $ordenes = [];
             $error = "Error: " . $e->getMessage();
@@ -39,6 +43,7 @@ class OrdenesServicioController extends HomeController
             'search'  => $search,
             'mes'     => $mes,
             'error'   => $error ?? null,
+                    'paginator' => $paginator,
         ]);
     }
 

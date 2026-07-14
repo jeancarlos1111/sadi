@@ -76,18 +76,21 @@
                                         <input 
                                             type="checkbox" 
                                             class="custom-control-input" 
-                                            id="mes_<?= $mes ?>" 
+                                            id="mes_<?= htmlspecialchars((string)$mes) ?>" 
                                             name="meses_cerrados[]" 
-                                            value="<?= $mes ?>" 
+                                            value="<?= htmlspecialchars((string)$mes) ?>" 
                                             <?= !$periodo->isAbierto() ? 'checked' : '' ?>
                                         >
-                                        <label class="custom-control-label" for="mes_<?= $mes ?>" style="cursor: pointer;">&nbsp;</label>
+                                        <label class="custom-control-label" for="mes_<?= htmlspecialchars((string)$mes) ?>" style="cursor: pointer;">&nbsp;</label>
                                     </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+        <?php if (isset($paginator)): ?>
+            <?php include $partialsPath . 'pagination.phtml'; ?>
+        <?php endif; ?>
             </div>
 
             <div class="form-group mt-4">
@@ -99,7 +102,7 @@
                 <button type="submit" class="btn btn-danger" onclick="return confirm('¿Confirmar los cambios de los estados de los períodos presupuestarios?');">
                     <i class="fas fa-lock btn-icon-prepend"></i> Aplicar Cierre / Apertura
                 </button>
-                <a href="?route=periodos_presupuesto/index&anio=<?= $anio ?>" class="btn btn-default ml-2">Cancelar</a>
+                <a href="?route=periodos_presupuesto/index&anio=<?= htmlspecialchars((string)$anio) ?>" class="btn btn-default ml-2">Cancelar</a>
             </div>
         </form>
     </div>

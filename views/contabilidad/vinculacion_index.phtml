@@ -1,0 +1,68 @@
+<div class="card card-outline card-primary">
+  <div class="card-header">
+    <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+    <div class="card-tools">
+      <a href="?route=vinculacion_puc_contable/vincular" class="btn btn-sm btn-primary font-weight-bold">
+        <i class="fas fa-plus"></i> Configurar Nueva Vinculación
+      </a>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="callout callout-info mb-4">
+      <p class="mb-0"><i class="fas fa-info-circle"></i> El Convertidor General permite configurar a qué <b>Cuenta Contable</b> se debe cargar o abonar los montos cada vez que un módulo del sistema (Compras, Tesorería, Nómina) efectúe un gasto por una <b>Partida Presupuestaria</b> específica.</p>
+    </div>
+
+    <?php if (isset($_GET['success'])): ?>
+      <div class="alert alert-success alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <h5><i class="icon fas fa-check"></i> Éxito</h5>
+        <?= htmlspecialchars($_GET['success']) ?>
+      </div>
+    <?php endif; ?>
+
+    <?php if (isset($error)): ?>
+      <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <h5><i class="icon fas fa-ban"></i> Error</h5>
+        <?= htmlspecialchars($error) ?>
+      </div>
+    <?php endif; ?>
+
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped w-100 table-sm">
+        <thead class="thead-dark">
+          <tr>
+            <th width="20%">Tipo de Operación SADI</th>
+            <th width="35%">Partida Presupuestaria</th>
+            <th width="35%">Afectación Contable Patrimonial</th>
+            <th class="text-center" width="10%">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php if (!empty($mapeos)): ?>
+            <?php foreach ($mapeos as $m): ?>
+              <tr>
+                <td class="font-weight-bold text-success align-middle"><?= htmlspecialchars($m['tipo_operacion']) ?></td>
+                <td>
+                  <span class="font-weight-bold text-primary"><?= htmlspecialchars($m['codigo_plan_unico']) ?></span><br>
+                  <small class="text-muted"><?= htmlspecialchars($m['partida']) ?></small>
+                </td>
+                <td class="align-middle">
+                  <span class="font-weight-bold"><?= htmlspecialchars($m['cuenta']) ?></span>
+                </td>
+                <td class="text-center align-middle">
+                  <form method="POST" action="?route=vinculacion_puc_contable/eliminar" class="m-0" onsubmit="return confirm('¿Seguro que desea eliminar esta matriz de conversión? Podría ocurrir fallos contables si la partida se usa y no tiene mapeo.');">
+                    <input type="hidden" name="id_vinculacion" value="<?= htmlspecialchars((string)$m['id_vinculacion']) ?>">
+                    <button type="submit" class="btn btn-sm btn-danger" title="Eliminar Vínculo">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

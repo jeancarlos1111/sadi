@@ -1,0 +1,102 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Controllers;
+
+use App\Repositories\{{ RepoClass }};
+
+class {{ ClassName }} extends HomeController
+{
+    private {{ RepoClass }} $repo;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->repo = new {{ RepoClass }}();
+    }
+
+    public function index(): void
+    {
+        $items   = $this->repo->all();
+        $success = $_SESSION['success'] ?? null;
+        $error   = $_SESSION['error']   ?? null;
+        unset($_SESSION['success'], $_SESSION['error']);
+
+        $this->renderView('{{ viewFolder }}/index', [
+            'titulo'  => '{{ Name }}',
+            'items'   => $items,
+            'success' => $success,
+            'error'   => $error,
+        ]);
+    }
+
+    public function form(): void
+    {
+        $id   = (int)($_GET['id'] ?? 0);
+        $item = $id ? $this->repo->findById($id) : null;
+
+        $this->renderView('{{ viewFolder }}/form', [
+            'titulo' => $item ? 'Editar {{ Name }}' : 'Nuevo {{ Name }}',
+            'item'   => $item,
+        ]);
+    }
+
+    public function store(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ?route={{ routePrefix }}/index');
+            exit;
+        }
+
+        try {
+            // TODO: construir el modelo desde $_POST y llamar $this->repo->save($modelo)
+            $_SESSION['success'] = '{{ Name }} guardado correctamente.';
+        } catch (\Exception $e) {
+            $_SESSION['error'] = 'Error: ' . $e->getMessage();
+        }
+
+        header('Location: ?route={{ routePrefix }}/index');
+        exit;
+    }
+
+    public function update(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ?route={{ routePrefix }}/index');
+            exit;
+        }
+
+        $id = (int)($_POST['id'] ?? 0);
+
+        try {
+            // TODO: actualizar el registro con $this->repo->save($modelo)
+            $_SESSION['success'] = '{{ Name }} actualizado correctamente.';
+        } catch (\Exception $e) {
+            $_SESSION['error'] = 'Error: ' . $e->getMessage();
+        }
+
+        header('Location: ?route={{ routePrefix }}/index');
+        exit;
+    }
+
+    public function eliminar(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ?route={{ routePrefix }}/index');
+            exit;
+        }
+
+        $id = (int)($_POST['id'] ?? 0);
+
+        try {
+            $this->repo->delete($id);
+            $_SESSION['success'] = '{{ Name }} eliminado correctamente.';
+        } catch (\Exception $e) {
+            $_SESSION['error'] = 'Error al eliminar: ' . $e->getMessage();
+        }
+
+        header('Location: ?route={{ routePrefix }}/index');
+        exit;
+    }
+}

@@ -24,7 +24,11 @@ if (!empty($parts[0])) {
     if ($rawModule === 'cxp') $parts[0] = 'cuentas_por_pagar';
     if ($rawModule === 'ppto') $parts[0] = 'presupuesto';
     
-    $controllerName = str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $parts[0])));
+    if ($rawModule === 'deducciones_cxp') {
+        $controllerName = 'DeduccionesCxP';
+    } else {
+        $controllerName = str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $parts[0])));
+    }
 }
 $actionRaw = $parts[1] ?? 'index';
 $action = lcfirst(str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $actionRaw))));

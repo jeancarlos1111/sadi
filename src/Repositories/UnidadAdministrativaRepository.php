@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -19,12 +21,12 @@ class UnidadAdministrativaRepository extends Repository
     {
         $query = $this->query()
                       ->select('*')
-                      ->where('eliminado', '=', 0)
+                      ->where('eliminado', '=', 'false')
                       ->orderBy('codigo', 'ASC');
 
         if ($search !== '') {
             $db = $this->getPdo();
-            $sql = "SELECT * FROM unidad_administrativa WHERE eliminado = 0 AND (denominacion LIKE :s OR codigo LIKE :s) ORDER BY codigo";
+            $sql = "SELECT * FROM unidad_administrativa WHERE eliminado = false AND (denominacion LIKE :s OR codigo LIKE :s) ORDER BY codigo";
             $stmt = $db->prepare($sql);
             $stmt->bindValue(':s', "%$search%");
             $stmt->execute();
@@ -36,12 +38,22 @@ class UnidadAdministrativaRepository extends Repository
         return array_map(fn ($row) => $this->mapRowToEntity($row), $rows);
     }
 
+    public function allAsync(): array
+    {
+        $result = $this->getAsyncPool()->query("SELECT * FROM unidad_administrativa WHERE eliminado = false ORDER BY codigo ASC");
+        $results = [];
+        foreach ($result as $row) {
+            $results[] = $this->mapRowToEntity($row);
+        }
+        return $results;
+    }
+
     public function findById(int $id): ?UnidadAdministrativa
     {
         $row = $this->query()
                     ->select('*')
                     ->where('id_unidad_administrativa', '=', $id)
-                    ->where('eliminado', '=', 0)
+                    ->where('eliminado', '=', 'false')
                     ->first();
 
         return $row ? $this->mapRowToEntity($row) : null;
@@ -65,7 +77,7 @@ class UnidadAdministrativaRepository extends Repository
 
     public function delete(int $id): bool
     {
-        return $this->query()->where('id_unidad_administrativa', '=', $id)->update(['eliminado' => 1]);
+        return $this->query()->where('id_unidad_administrativa', '=', $id)->update(['eliminado' => 'true']);
     }
 
     private function mapRowToEntity(array $row): UnidadAdministrativa

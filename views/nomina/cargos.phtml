@@ -41,7 +41,7 @@
                     <td style="text-align: center; font-weight: bold;"><?= htmlspecialchars((string)$c->id) ?></td>
                     <td><?= htmlspecialchars($c->nombre) ?></td>
                     <td style="text-align: center;">
-                        <a href="?route=nomina/editarCargo&cod_cargo=<?= $c->id ?>" style="color: white; background-color: #ffc107; text-decoration: none; padding: 5px 10px; border-radius: 4px; color: #000; font-weight: bold;">Editar Cargo</a>
+                        <a href="?route=nomina/editarCargo&cod_cargo=<?= htmlspecialchars((string)$c->id) ?>" style="color: white; background-color: #ffc107; text-decoration: none; padding: 5px 10px; border-radius: 4px; color: #000; font-weight: bold;">Editar Cargo</a>
                     </td>
                 </tr>
             <?php endforeach; ?>

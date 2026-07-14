@@ -1,78 +1,81 @@
 <div class="card card-outline card-primary">
-    <div class="card-header">
-        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
-        <div class="card-tools">
-            <a href="?route=nomina/conceptos/form" class="btn btn-sm btn-success">
-                <i class="fas fa-plus"></i> Nuevo Concepto
-            </a>
-        </div>
+  <div class="card-header">
+    <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+    <div class="card-tools">
+      <a href="?route=nomina/conceptos/form" class="btn btn-sm btn-success">
+        <i class="fas fa-plus"></i> Nuevo Concepto
+      </a>
     </div>
-    <div class="card-body">
-        <?php if (isset($error)): ?>
-            <div class="alert alert-danger alert-dismissible">
-                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                <h5><i class="icon fas fa-ban"></i> Error</h5>
-                <?= htmlspecialchars($error) ?>
-            </div>
-        <?php endif; ?>
+  </div>
+  <div class="card-body">
+    <?php if (isset($error)): ?>
+      <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <h5><i class="icon fas fa-ban"></i> Error</h5>
+        <?= htmlspecialchars($error) ?>
+      </div>
+    <?php endif; ?>
 
-        <div class="callout callout-info mb-4">
-            <h5><i class="fas fa-info-circle"></i> Variables disponibles en Fórmulas:</h5>
-            <code>SUELDO</code> (sueldo básico),
-            <code>TOTAL_ASIG</code> (suma de asignaciones calculadas hasta el momento),
-            <code>SALARIO_MINIMO</code>,
-            <code>CESTATICKET</code><br>
-            <small><b>Ejemplos:</b> <code>SUELDO * 0.04</code> | <code>SUELDO + 200</code> | <code>TOTAL_ASIG * 0.005</code></small>
-        </div>
-
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped dataTable w-100 table-sm">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Código</th>
-                        <th>Descripción</th>
-                        <th>Tipo</th>
-                        <th>Fórmula / Valor</th>
-                        <th class="text-center" width="15%">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($conceptos)): ?>
-                        <tr><td colspan="5" class="text-center">No hay conceptos de nómina registrados.</td></tr>
-                    <?php else: ?>
-                        <?php foreach ($conceptos as $c): ?>
-                            <tr>
-                                <td><code><?= htmlspecialchars($c->codigo) ?></code></td>
-                                <td><?= htmlspecialchars($c->descripcion) ?></td>
-                                <td class="font-weight-bold <?= $c->tipo === 'A' ? 'text-success' : 'text-danger' ?>">
-                                    <?= $c->tipo === 'A' ? '<i class="fas fa-caret-up"></i> Asignación' : '<i class="fas fa-caret-down"></i> Deducción' ?>
-                                </td>
-                                <td>
-                                    <?php if (!empty($c->formulaExpr)): ?>
-                                        <code class="bg-light px-2 py-1 rounded border"><?= htmlspecialchars($c->formulaExpr) ?></code>
-                                        <span class="text-muted small"> (Fórmula Dinámica)</span>
-                                    <?php elseif ($c->esPorcentaje): ?>
-                                        <?= number_format($c->formulaValor, 2) ?>% del Sueldo
-                                    <?php else: ?>
-                                        Bs <?= number_format($c->formulaValor, 2, ',', '.') ?> (Fijo)
-                                    <?php endif; ?>
-                                </td>
-                                <td class="text-center text-nowrap">
-                                    <a href="?route=nomina_conceptos/form&id=<?= $c->id ?>" class="btn btn-sm btn-info" title="Editar">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <form method="POST" action="?route=nomina_conceptos/eliminar" onsubmit="return confirm('¿Eliminar este concepto?');" class="d-inline">
-                                        <input type="hidden" name="id" value="<?= $c->id ?>">
-                                        <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
+    <div class="callout callout-info mb-4">
+      <h5><i class="fas fa-info-circle"></i> Variables disponibles en Fórmulas:</h5>
+      <code>SUELDO</code> (sueldo básico),
+      <code>TOTAL_ASIG</code> (suma de asignaciones calculadas hasta el momento),
+      <code>SALARIO_MINIMO</code>,
+      <code>CESTATICKET</code><br>
+      <small><b>Ejemplos:</b> <code>SUELDO * 0.04</code> | <code>SUELDO + 200</code> | <code>TOTAL_ASIG * 0.005</code></small>
     </div>
+
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped w-100 table-sm">
+        <thead class="thead-dark">
+          <tr>
+            <th>Código</th>
+            <th>Descripción</th>
+            <th>Tipo</th>
+            <th>Fórmula / Valor</th>
+            <th class="text-center" width="15%">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php if (empty($conceptos)): ?>
+            <tr><td colspan="5" class="text-center">No hay conceptos de nómina registrados.</td></tr>
+          <?php else: ?>
+            <?php foreach ($conceptos as $c): ?>
+              <tr>
+                <td><code><?= htmlspecialchars($c->codigo) ?></code></td>
+                <td><?= htmlspecialchars($c->descripcion) ?></td>
+                <td class="font-weight-bold <?= $c->tipo === 'A' ? 'text-success' : 'text-danger' ?>">
+                  <?= $c->tipo === 'A' ? '<i class="fas fa-caret-up"></i> Asignación' : '<i class="fas fa-caret-down"></i> Deducción' ?>
+                </td>
+                <td>
+                  <?php if (!empty($c->formulaExpr)): ?>
+                    <code class="bg-light px-2 py-1 rounded border"><?= htmlspecialchars($c->formulaExpr) ?></code>
+                    <span class="text-muted small"> (Fórmula Dinámica)</span>
+                  <?php elseif ($c->esPorcentaje): ?>
+                    <?= number_format($c->formulaValor, 2) ?>% del Sueldo
+                  <?php else: ?>
+                    Bs <?= number_format($c->formulaValor, 2, ',', '.') ?> (Fijo)
+                  <?php endif; ?>
+                </td>
+                <td class="text-center text-nowrap">
+                  <a href="?route=nomina_conceptos/form&id=<?= htmlspecialchars((string)$c->id) ?>" class="btn btn-sm btn-info" title="Editar">
+                    <i class="fas fa-edit"></i>
+                  </a>
+                  <form method="POST" action="?route=nomina_conceptos/eliminar" onsubmit="return confirm('¿Eliminar este concepto?');" class="d-inline">
+                    <input type="hidden" name="id" value="<?= htmlspecialchars((string)$c->id) ?>">
+                    <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </tbody>
+      </table>
+    <?php if (isset($paginator)): ?>
+      <?php include $partialsPath . 'pagination.phtml'; ?>
+    <?php endif; ?>
+    </div>
+  </div>
 </div>

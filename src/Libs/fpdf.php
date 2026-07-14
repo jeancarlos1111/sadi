@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*******************************************************************************
 * FPDF                                                                         *
 *                                                                              *
@@ -1995,7 +1997,7 @@ class FPDF
         $this->_put('0 '.($this->n + 1));
         $this->_put('0000000000 65535 f ');
         for ($i = 1;$i <= $this->n;$i++) {
-            $this->_put(sprintf('%010d 00000 n ',$this->offsets[$i]));
+            $this->_put(sprintf('%010d 00000 n ', $this->offsets[$i]));
         }
         // Trailer
         $this->_put('trailer');

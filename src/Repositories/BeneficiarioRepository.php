@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -19,7 +21,7 @@ class BeneficiarioRepository extends Repository
     {
         $query = $this->query()
                       ->select('*')
-                      ->where('eliminado', '=', 0)
+                      ->where('eliminado', '=', 'false')
                       ->orderBy('apellidos', 'ASC')
                       ->orderBy('nombres', 'ASC');
 
@@ -34,7 +36,7 @@ class BeneficiarioRepository extends Repository
         // Por ahora, para mantener la lógica exacta del search con OR:
         if ($search !== '') {
             $db = $this->getPdo();
-            $sql = "SELECT * FROM beneficiario WHERE eliminado = 0 AND (nombres LIKE :s OR apellidos LIKE :s OR cedula LIKE :s) ORDER BY apellidos, nombres";
+            $sql = "SELECT * FROM beneficiario WHERE eliminado = false AND (nombres LIKE :s OR apellidos LIKE :s OR cedula LIKE :s) ORDER BY apellidos, nombres";
             $stmt = $db->prepare($sql);
             $stmt->bindValue(':s', "%$search%");
             $stmt->execute();
@@ -51,7 +53,7 @@ class BeneficiarioRepository extends Repository
         $row = $this->query()
                     ->select('*')
                     ->where('id_beneficiario', '=', $id)
-                    ->where('eliminado', '=', 0)
+                    ->where('eliminado', '=', 'false')
                     ->first();
 
         return $row ? $this->mapRowToEntity($row) : null;
@@ -87,7 +89,7 @@ class BeneficiarioRepository extends Repository
 
     public function delete(int $id): bool
     {
-        return $this->query()->where('id_beneficiario', '=', $id)->update(['eliminado' => 1]);
+        return $this->query()->where('id_beneficiario', '=', $id)->update(['eliminado' => 'true']);
     }
 
     private function mapRowToEntity(array $row): Beneficiario

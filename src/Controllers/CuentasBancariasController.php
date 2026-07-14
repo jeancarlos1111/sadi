@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Models\CuentaBancaria;
@@ -24,12 +26,15 @@ class CuentasBancariasController extends BaseController
 
     public function index(): void
     {
-        $cuentas = $this->repo->all();
+        $page = (int)($_GET['page'] ?? 1);
+        $paginator = $this->repo->paginate('', $page, 15);
+        $cuentas = $paginator['data'];
         $this->renderView('banco/catalogos/cuentas/index', [
             'titulo' => 'Cuentas Bancarias',
             'cuentas' => $cuentas,
             'success' => $_GET['success'] ?? null,
             'error'   => $_GET['error'] ?? null,
+                    'paginator' => $paginator,
         ]);
     }
 

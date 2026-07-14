@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
-class Articulo
+readonly class Articulo
 {
     /* private(set) */ public ?int $id;
 
@@ -16,5 +18,31 @@ class Articulo
         ?int $id = null
     ) {
         $this->id = $id;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'denominacion' => $this->denominacion,
+            'observacion' => $this->observacion,
+            'idTipoDeArticulo' => $this->idTipoDeArticulo,
+            'idUnidadesDeMedida' => $this->idUnidadesDeMedida,
+            'idCodigoPlanUnico' => $this->idCodigoPlanUnico,
+            'aplicarIva' => $this->aplicarIva,
+        ];
+    }
+
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            $data['denominacion'] ?? null,
+            $data['observacion'] ?? null,
+            $data['idTipoDeArticulo'] ?? null,
+            $data['idUnidadesDeMedida'] ?? null,
+            $data['idCodigoPlanUnico'] ?? null,
+            $data['aplicarIva'] ?? null,
+            $data['id'] ?? null,
+        );
     }
 }

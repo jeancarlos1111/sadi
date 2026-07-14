@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -18,7 +20,7 @@ class PresupuestoIngresoRepository extends Repository
     {
         $db = $this->getPdo();
 
-        return $db->query("SELECT * FROM presupuesto_ingresos_ramo WHERE eliminado = 0 ORDER BY codigo_ramo")->fetchAll(PDO::FETCH_ASSOC);
+        return $db->query("SELECT * FROM presupuesto_ingresos_ramo WHERE eliminado = false ORDER BY codigo_ramo")->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function allFormulado(): array
@@ -29,7 +31,7 @@ class PresupuestoIngresoRepository extends Repository
             SELECT pi.*, pir.codigo_ramo, pir.denominacion_ramo 
             FROM presupuesto_ingresos pi
             JOIN presupuesto_ingresos_ramo pir ON pi.id_ramo = pir.id_ramo
-            WHERE pi.eliminado = 0
+            WHERE pi.eliminado = false
             ORDER BY pir.codigo_ramo
         ")->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -39,7 +41,7 @@ class PresupuestoIngresoRepository extends Repository
         $db = $this->getPdo();
 
         // Verifica si ya existe, si sí suma, si no inserta
-        $stmt = $db->prepare("SELECT id_presupuesto_ingreso FROM presupuesto_ingresos WHERE id_ramo = ? AND eliminado = 0");
+        $stmt = $db->prepare("SELECT id_presupuesto_ingreso FROM presupuesto_ingresos WHERE id_ramo = ? AND eliminado = false");
         $stmt->execute([$id_ramo]);
         $existe = $stmt->fetchColumn();
 
@@ -78,8 +80,8 @@ class PresupuestoIngresoRepository extends Repository
             $asientoDetalles = [];
 
             // Mockeamos la regla para el MVP si no está en convertidor
-            $asientoDetalles[] = ['id_cuenta' => 2, 'tipo' => 'D', 'monto' => $monto_recaudado]; // Bancos sube
-            $asientoDetalles[] = ['id_cuenta' => 5, 'tipo' => 'H', 'monto' => $monto_recaudado]; // Cuenta Ingresos Patrimoniales sube
+            $asientoDetalles[] = ['id_cuenta_contable' => 2, 'tipo' => 'D', 'monto' => $monto_recaudado]; // Bancos sube
+            $asientoDetalles[] = ['id_cuenta_contable' => 5, 'tipo' => 'H', 'monto' => $monto_recaudado]; // Cuenta Ingresos Patrimoniales sube
 
             AsientoContable::registrarDesdeTransaccion(
                 date('Y-m-d'),

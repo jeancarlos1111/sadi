@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
-class ConceptoNomina
+readonly class ConceptoNomina
 {
     public function __construct(
         public string $codigo,
@@ -13,5 +15,31 @@ class ConceptoNomina
         public ?string $formulaExpr = null, // Expresión algebraica dinámica
         public ?int $id = null
     ) {
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'codigo' => $this->codigo,
+            'descripcion' => $this->descripcion,
+            'tipo' => $this->tipo,
+            'formulaValor' => $this->formulaValor,
+            'esPorcentaje' => $this->esPorcentaje,
+            'formulaExpr' => $this->formulaExpr,
+            'id' => $this->id,
+        ];
+    }
+
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            $data['codigo'] ?? null,
+            $data['descripcion'] ?? null,
+            $data['tipo'] ?? null,
+            $data['formulaValor'] ?? null,
+            $data['esPorcentaje'] ?? null,
+            $data['formulaExpr'] ?? null,
+            $data['id'] ?? null,
+        );
     }
 }

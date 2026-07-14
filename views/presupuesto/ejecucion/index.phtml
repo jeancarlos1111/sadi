@@ -1,66 +1,73 @@
 <?php if (isset($error)): ?>
-    <div class="alert alert-danger alert-dismissible">
-        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-        <h5><i class="icon fas fa-ban"></i> Error!</h5>
-        <?= htmlspecialchars($error) ?>
-    </div>
+  <div class="alert alert-danger alert-dismissible">
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+    <h5><i class="icon fas fa-ban"></i> Error!</h5>
+    <?= htmlspecialchars($error) ?>
+  </div>
 <?php endif; ?>
 
 <div class="card card-primary card-outline">
-    <div class="card-header">
-        <h3 class="card-title mt-1"><i class="fas fa-chart-line mr-1"></i> <?= htmlspecialchars($titulo) ?></h3>
-        <div class="card-tools">
-            <a href="?route=presupuesto/form" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> Ajustes</a>
-        </div>
+  <div class="card-header">
+    <h3 class="card-title mt-1"><i class="fas fa-chart-line mr-1"></i> <?= htmlspecialchars($titulo) ?></h3>
+    <div class="card-tools">
+      <a href="?route=presupuesto/form" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> Ajustes</a>
     </div>
-    <div class="card-body">
-        <div class="mb-3">
-            <form method="GET" action="" class="form-inline">
-                <input type="hidden" name="route" value="presupuesto/index">
-                <div class="input-group input-group-sm">
-                    <input type="text" name="search" class="form-control" placeholder="Buscar Partida o Estructura..." value="<?= htmlspecialchars($search ?? '') ?>" style="width: 300px;">
-                    <span class="input-group-append">
-                        <button type="submit" class="btn btn-primary btn-flat"><i class="fas fa-search"></i></button>
-                    </span>
-                </div>
-                <a href="?route=presupuesto/index" class="btn btn-default btn-sm ml-2">Limpiar</a>
-            </form>
+  </div>
+  <div class="card-body">
+    <div class="mb-3">
+      <form method="GET" action="" class="form-inline">
+        <input type="hidden" name="route" value="presupuesto/index">
+        <div class="input-group input-group-sm">
+          <input type="text" name="search" class="form-control" placeholder="Buscar Partida o Estructura..." value="<?= htmlspecialchars($search ?? '') ?>" style="width: 300px;">
+          <span class="input-group-append">
+            <button type="submit" class="btn btn-primary btn-flat"><i class="fas fa-search"></i></button>
+          </span>
         </div>
+        <a href="?route=presupuesto/index" class="btn btn-default btn-sm ml-2">Limpiar</a>
+      </form>
+    </div>
 
-        <table class="table table-bordered table-striped dataTable w-100">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Estructura</th>
-                    <th>Partida (Plan de Cuentas)</th>
-                    <th class="text-right">Monto Asignado</th>
-                    <th class="text-right">Comprometido</th>
-                    <th class="text-right">Causado</th>
-                    <th class="text-right">Pagado</th>
-                    <th class="text-right">Disponibilidad</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (empty($partidas)): ?>
-                    <tr>
-                        <td colspan="7" class="text-center text-muted py-4">No se encontraron partidas.</td>
-                    </tr>
-                <?php else: ?>
-                    <?php foreach ($partidas as $data): ?>
-                        <?php $pg = $data['entity']; ?>
-                        <tr>
-                            <td class="align-middle"><?= htmlspecialchars($data['estructura_desc']) ?></td>
-                            <td class="align-middle"><strong><?= htmlspecialchars($data['partida_codigo']) ?></strong> - <?= htmlspecialchars($data['partida_desc']) ?></td>
-                            <td class="text-right align-middle"><?= number_format($pg->montoAsignado, 2, ',', '.') ?></td>
-                            <td class="text-right align-middle text-warning"><?= number_format($pg->montoComprometido, 2, ',', '.') ?></td>
-                            <td class="text-right align-middle text-danger"><?= number_format($pg->montoCausado, 2, ',', '.') ?></td>
-                            <td class="text-right align-middle text-success"><?= number_format($pg->montoPagado, 2, ',', '.') ?></td>
-                            <td class="text-right align-middle font-weight-bold" style="color: <?= $data['disponibilidad'] > 0 ? 'green' : 'red' ?>;">
-                                <?= number_format($data['disponibilidad'], 2, ',', '.') ?>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </tbody>
-        </table>
-    </div>
+    <table class="table table-bordered table-striped w-100">
+      <thead class="thead-dark">
+        <tr>
+          <th>Estructura</th>
+          <th>Unidad Ejecutora</th>
+          <th>Fuente Fin.</th>
+          <th>Partida (Plan de Cuentas)</th>
+          <th class="text-right">Monto Asignado</th>
+          <th class="text-right">Comprometido</th>
+          <th class="text-right">Causado</th>
+          <th class="text-right">Pagado</th>
+          <th class="text-right">Disponibilidad</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php if (empty($partidas)): ?>
+          <tr>
+            <td colspan="9" class="text-center text-muted py-4">No se encontraron partidas.</td>
+          </tr>
+        <?php else: ?>
+          <?php foreach ($partidas as $data): ?>
+            <?php $pg = $data['entity']; ?>
+            <tr>
+              <td class="align-middle"><?= htmlspecialchars($data['estructura_desc']) ?></td>
+              <td class="align-middle"><small><?= htmlspecialchars($data['unidad_desc']) ?></small></td>
+              <td class="align-middle"><small><?= htmlspecialchars($data['fuente_desc']) ?></small></td>
+              <td class="align-middle"><strong><?= htmlspecialchars($data['partida_codigo']) ?></strong> - <?= htmlspecialchars($data['partida_desc']) ?></td>
+              <td class="text-right align-middle"><?= number_format($pg->montoAsignado, 2, ',', '.') ?></td>
+              <td class="text-right align-middle text-warning"><?= number_format($pg->montoComprometido, 2, ',', '.') ?></td>
+              <td class="text-right align-middle text-danger"><?= number_format($pg->montoCausado, 2, ',', '.') ?></td>
+              <td class="text-right align-middle text-success"><?= number_format($pg->montoPagado, 2, ',', '.') ?></td>
+              <td class="text-right align-middle font-weight-bold" style="color: <?= $data['disponibilidad'] > 0 ? 'green' : 'red' ?>;">
+                <?= number_format($data['disponibilidad'], 2, ',', '.') ?>
+              </td>
+            </tr>
+          <?php endforeach; ?>
+        <?php endif; ?>
+      </tbody>
+    </table>
+    <?php if (isset($paginator)): ?>
+      <?php include $partialsPath . 'pagination.phtml'; ?>
+    <?php endif; ?>
+  </div>
 </div>

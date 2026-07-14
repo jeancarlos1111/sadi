@@ -1,15 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
+use App\Database\Connection;
 use App\Models\ComprobantePresupuestario;
 use App\Models\MovimientoPresupuestario;
-use App\Repositories\ComprobantePresupuestarioRepository;
-use App\Repositories\MovimientoPresupuestarioRepository;
-use App\Repositories\EstrucPresupuestariaRepository;
-use App\Repositories\PlanUnicoCuentasRepository;
 use App\Repositories\BeneficiarioRepository;
-use App\Database\Connection;
+use App\Repositories\ComprobantePresupuestarioRepository;
+use App\Repositories\EstrucPresupuestariaRepository;
+use App\Repositories\MovimientoPresupuestarioRepository;
+use App\Repositories\PlanUnicoCuentasRepository;
 use Exception;
 
 /**
@@ -90,7 +92,7 @@ class ComprobantePresupuestoController extends HomeController
             'tipos'        => self::TIPOS,
             'estructuras'  => $estructuras,
             'planCuentas'  => $planCuentas,
-            'beneficiarios'=> $beneficiarios,
+            'beneficiarios' => $beneficiarios,
             'error'        => $_SESSION['error'] ?? null,
         ]);
         unset($_SESSION['error']);
@@ -202,6 +204,7 @@ class ComprobantePresupuestoController extends HomeController
         $id = (int)($_POST['id'] ?? 0);
         if ($id) {
             $db = Connection::getInstance();
+
             try {
                 $db->beginTransaction();
                 $this->movimientoRepo->deleteByComprobanteId($id);

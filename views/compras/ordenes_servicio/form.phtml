@@ -28,7 +28,7 @@
                                 <select name="id_proveedor" class="form-control" required>
                                     <option value="">-- Seleccione Proveedor --</option>
                                     <?php foreach ($proveedores as $p_data): $p = $p_data['entity']; ?>
-                                        <option value="<?= $p->id ?>"><?= htmlspecialchars($p->compania) ?> (<?= htmlspecialchars($p->rif) ?>)</option>
+                                        <option value="<?= htmlspecialchars((string)$p->id) ?>"><?= htmlspecialchars($p->compania) ?> (<?= htmlspecialchars($p->rif) ?>)</option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
@@ -65,7 +65,7 @@
                                         <select name="id_servicio[]" class="form-control form-control-sm sel-servicio" required>
                                             <option value="">-- Seleccione --</option>
                                             <?php foreach ($serviciosCatalogo as $sd): $s = $sd['entity']; ?>
-                                                <option value="<?= $s->id ?>" data-iva="<?= $s->aplicarIva ? '1' : '0' ?>"><?= htmlspecialchars($s->denominacion) ?></option>
+                                                <option value="<?= htmlspecialchars((string)$s->id) ?>" data-iva="<?= $s->aplicarIva ? '1' : '0' ?>"><?= htmlspecialchars($s->denominacion) ?></option>
                                             <?php endforeach; ?>
                                         </select>
                                     </td>
@@ -134,7 +134,7 @@
 </div>
 
 <script>
-const opcionesServicios = `<?php foreach ($serviciosCatalogo as $sd): $s = $sd['entity']; ?><option value="<?= $s->id ?>" data-iva="<?= $s->aplicarIva ? '1' : '0' ?>"><?= htmlspecialchars($s->denominacion) ?></option><?php endforeach; ?>`;
+const opcionesServicios = `<?php foreach ($serviciosCatalogo as $sd): $s = $sd['entity']; ?><option value="<?= htmlspecialchars((string)$s->id) ?>" data-iva="<?= $s->aplicarIva ? '1' : '0' ?>"><?= htmlspecialchars($s->denominacion) ?></option><?php endforeach; ?>`;
 let rowIdx = 1;
 
 function vincularEventos(tr) {

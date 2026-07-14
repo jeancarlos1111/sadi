@@ -23,7 +23,7 @@
                                     <option value="">-- Seleccione un Proveedor --</option>
                                     <?php foreach ($proveedores as $prov): ?>
                                         <?php $p = $prov['entity']; ?>
-                                        <option value="<?= $p->id ?>"><?= htmlspecialchars($p->rif . ' - ' . $p->compania) ?></option>
+                                        <option value="<?= htmlspecialchars((string)$p->id) ?>"><?= htmlspecialchars($p->rif . ' - ' . $p->compania) ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
@@ -122,7 +122,7 @@
     const catalogoArticulos = [
         <?php foreach ($articulos as $art): ?>
             <?php $a = $art['entity']; ?>
-            { id: <?= $a->id ?>, nombre: "<?= addslashes($a->denominacion) ?>", partida: "<?= addslashes($art['partida'] ?? 'Sin Partida') ?>", aplica_iva: <?= $a->aplicarIva ? 'true' : 'false' ?> },
+            { id: <?= htmlspecialchars((string)$a->id) ?>, nombre: "<?= addslashes($a->denominacion) ?>", partida: "<?= addslashes($art['partida'] ?? 'Sin Partida') ?>", aplica_iva: <?= $a->aplicarIva ? 'true' : 'false' ?> },
         <?php endforeach; ?>
     ];
 

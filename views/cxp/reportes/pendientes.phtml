@@ -1,54 +1,54 @@
 <div class="card card-outline card-primary">
-    <div class="card-header d-print-none">
-        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
-        <div class="card-tools">
-            <button class="btn btn-sm btn-info" onclick="window.print()">
-                <i class="fas fa-print"></i> Imprimir Listado
-            </button>
-        </div>
+  <div class="card-header d-print-none">
+    <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+    <div class="card-tools">
+      <button class="btn btn-sm btn-info" onclick="window.print()">
+        <i class="fas fa-print"></i> Imprimir Listado
+      </button>
     </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped dataTable w-100 table-sm">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Fecha Factura</th>
-                        <th>Proveedor</th>
-                        <th>Documento / RIF</th>
-                        <th>Tipo</th>
-                        <th>Nº Factura</th>
-                        <th class="text-right">Base Imponible</th>
-                        <th class="text-right">Impuestos (IVA)</th>
-                        <th class="text-right">Total Deuda (Mto Facturado)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php 
-                    $granTotalDeuda = 0;
-                    if (empty($pendientes)): ?>
-                        <tr><td colspan="8" class="text-center">No hay cuentas por pagar pendientes.</td></tr>
-                    <?php else: foreach ($pendientes as $p): 
-                        $granTotalDeuda += $p['monto_total_d'];
-                    ?>
-                        <tr>
-                            <td><?= htmlspecialchars($p['fecha_emision_d'] ?? '') ?></td>
-                            <td><strong><?= htmlspecialchars($p['compania_proveedor'] ?? '') ?></strong></td>
-                            <td><?= htmlspecialchars($p['rif_proveedor'] ?? '') ?></td>
-                            <td><?= htmlspecialchars($p['denominacion_tipo_documento'] ?? '') ?></td>
-                            <td class="font-weight-bold text-danger"><?= htmlspecialchars($p['nro_documento_d'] ?? '') ?></td>
-                            <td class="text-right"><?= number_format($p['monto_base_d'], 2, ',', '.') ?></td>
-                            <td class="text-right"><?= number_format($p['monto_impuesto_d'], 2, ',', '.') ?></td>
-                            <td class="text-right font-weight-bold">Bs <?= number_format($p['monto_total_d'], 2, ',', '.') ?></td>
-                        </tr>
-                    <?php endforeach; endif; ?>
-                </tbody>
-                <tfoot class="thead-light">
-                    <tr>
-                        <th colspan="7" class="text-right font-weight-bold h6 pt-3">TOTAL GENERAL PENDIENTE POR PAGAR:</th>
-                        <th class="text-right font-weight-bold text-danger h5 pt-2 mb-0">Bs <?= number_format($granTotalDeuda, 2, ',', '.') ?></th>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped w-100 table-sm">
+        <thead class="thead-dark">
+          <tr>
+            <th>Fecha Factura</th>
+            <th>Proveedor</th>
+            <th>Documento / RIF</th>
+            <th>Tipo</th>
+            <th>Nº Factura</th>
+            <th class="text-right">Base Imponible</th>
+            <th class="text-right">Impuestos (IVA)</th>
+            <th class="text-right">Total Deuda (Mto Facturado)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php 
+          $granTotalDeuda = 0;
+          if (empty($pendientes)): ?>
+            <tr><td colspan="8" class="text-center">No hay cuentas por pagar pendientes.</td></tr>
+          <?php else: foreach ($pendientes as $p): 
+            $granTotalDeuda += $p['monto_total_d'];
+          ?>
+            <tr>
+              <td><?= htmlspecialchars($p['fecha_emision_d'] ?? '') ?></td>
+              <td><strong><?= htmlspecialchars($p['compania_proveedor'] ?? '') ?></strong></td>
+              <td><?= htmlspecialchars($p['rif_proveedor'] ?? '') ?></td>
+              <td><?= htmlspecialchars($p['denominacion_tipo_documento'] ?? '') ?></td>
+              <td class="font-weight-bold text-danger"><?= htmlspecialchars($p['nro_documento_d'] ?? '') ?></td>
+              <td class="text-right"><?= number_format($p['monto_base_d'], 2, ',', '.') ?></td>
+              <td class="text-right"><?= number_format($p['monto_impuesto_d'], 2, ',', '.') ?></td>
+              <td class="text-right font-weight-bold">Bs <?= number_format($p['monto_total_d'], 2, ',', '.') ?></td>
+            </tr>
+          <?php endforeach; endif; ?>
+        </tbody>
+        <tfoot class="thead-light">
+          <tr>
+            <th colspan="7" class="text-right font-weight-bold h6 pt-3">TOTAL GENERAL PENDIENTE POR PAGAR:</th>
+            <th class="text-right font-weight-bold text-danger h5 pt-2 mb-0">Bs <?= number_format($granTotalDeuda, 2, ',', '.') ?></th>
+          </tr>
+        </tfoot>
+      </table>
     </div>
+  </div>
 </div>

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -15,27 +17,29 @@ class MovimientoPresupuestarioRepository extends Repository
 
     public function all(string $search = ''): array
     {
-        $sql = "SELECT * FROM {$this->getTable()} WHERE eliminado = 0";
+        $sql = "SELECT * FROM {$this->getTable()} WHERE eliminado = false";
         // Si hay search, se podría cruzar con tablas foráneas o filtrar por operación
         $sql .= " ORDER BY id_movimiento_presupuestario DESC";
-        
+
         $stmt = $this->getPdo()->query($sql);
         $results = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $results[] = $this->mapRowToEntity($row);
         }
+
         return $results;
     }
 
     public function findByComprobanteId(int $id_comprobante): array
     {
-        $stmt = $this->getPdo()->prepare("SELECT * FROM {$this->getTable()} WHERE id_comprobante = :id AND eliminado = 0");
+        $stmt = $this->getPdo()->prepare("SELECT * FROM {$this->getTable()} WHERE id_comprobante = :id AND eliminado = false");
         $stmt->execute(['id' => $id_comprobante]);
-        
+
         $results = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $results[] = $this->mapRowToEntity($row);
         }
+
         return $results;
     }
 
@@ -48,21 +52,22 @@ class MovimientoPresupuestarioRepository extends Repository
         $sql = "
             SELECT p.id_codigo_plan_unico, p.codigo_plan_unico, p.denominacion
             FROM plan_unico_cuentas p
-            WHERE p.eliminado = 0
+            WHERE p.eliminado = false
             AND p.id_codigo_plan_unico NOT IN (
                 SELECT m.id_codigo_plan_unico 
                 FROM movimiento_presupuestario m
                 JOIN comprobante_presupuestario c ON m.id_comprobante = c.id_comprobante
                 WHERE m.id_estruc_presupuestaria = :id_estruc 
                 AND m.id_operacion = 'AAP'
-                AND m.eliminado = 0
-                AND c.eliminado = 0
+                AND m.eliminado = false
+                AND c.eliminado = false
             )
             ORDER BY p.codigo_plan_unico ASC
         ";
 
         $stmt = $this->getPdo()->prepare($sql);
         $stmt->execute(['id_estruc' => $id_estruc]);
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -84,8 +89,9 @@ class MovimientoPresupuestarioRepository extends Repository
                 'op' => $m->id_operacion,
                 'monto' => $m->monto_mp,
                 'desc' => $m->descripcion_mp,
-                'id' => $m->id_movimiento_presupuestario
+                'id' => $m->id_movimiento_presupuestario,
             ]);
+
             return $m->id_movimiento_presupuestario;
         } else {
             $stmt = $this->getPdo()->prepare("INSERT INTO {$this->getTable()} (
@@ -100,8 +106,9 @@ class MovimientoPresupuestarioRepository extends Repository
                 'id_cpu' => $m->id_codigo_plan_unico,
                 'op' => $m->id_operacion,
                 'monto' => $m->monto_mp,
-                'desc' => $m->descripcion_mp
+                'desc' => $m->descripcion_mp,
             ]);
+
             return (int)$this->getPdo()->lastInsertId();
         }
     }
@@ -109,7 +116,7 @@ class MovimientoPresupuestarioRepository extends Repository
     /** Elimina lógicamente todas las líneas de un comprobante (para edición) */
     public function deleteByComprobanteId(int $id_comprobante): void
     {
-        $stmt = $this->getPdo()->prepare("UPDATE {$this->getTable()} SET eliminado = 1 WHERE id_comprobante = :id");
+        $stmt = $this->getPdo()->prepare("UPDATE {$this->getTable()} SET eliminado = true WHERE id_comprobante = :id");
         $stmt->execute(['id' => $id_comprobante]);
     }
 
@@ -129,12 +136,13 @@ class MovimientoPresupuestarioRepository extends Repository
             JOIN comprobante_presupuestario c ON m.id_comprobante = c.id_comprobante
             WHERE m.id_estruc_presupuestaria = :id_ep
               AND m.id_codigo_plan_unico = :id_cpu
-              AND m.eliminado = 0
-              AND c.eliminado = 0
+              AND m.eliminado = false
+              AND c.eliminado = false
         ";
         $stmt = $this->getPdo()->prepare($sql);
         $stmt->execute(['id_ep' => $id_estruc, 'id_cpu' => $id_cuenta]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
         return (float)($row['disponible'] ?? 0);
     }
 
@@ -145,7 +153,7 @@ class MovimientoPresupuestarioRepository extends Repository
      */
     public function getResumenDisponibilidad(?int $id_estruc = null, ?int $id_cuenta = null): array
     {
-        $where = "m.eliminado = 0 AND c.eliminado = 0";
+        $where = "m.eliminado = false AND c.eliminado = false";
         $params = [];
 
         if ($id_estruc !== null) {
@@ -182,7 +190,54 @@ class MovimientoPresupuestarioRepository extends Repository
 
         $stmt = $this->getPdo()->prepare($sql);
         $stmt->execute($params);
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getResumenDisponibilidadAsync(?int $id_estruc = null, ?int $id_cuenta = null): array
+    {
+        $where = "m.eliminado = false AND c.eliminado = false";
+        $params = [];
+        $paramIndex = 1;
+
+        if ($id_estruc !== null) {
+            $where .= " AND m.id_estruc_presupuestaria = $" . $paramIndex++;
+            $params[] = $id_estruc;
+        }
+        if ($id_cuenta !== null) {
+            $where .= " AND m.id_codigo_plan_unico = $" . $paramIndex++;
+            $params[] = $id_cuenta;
+        }
+
+        $sql = "
+            SELECT
+                m.id_estruc_presupuestaria,
+                ep.descripcion_ep,
+                m.id_codigo_plan_unico,
+                puc.codigo_plan_unico,
+                puc.denominacion AS denominacion_cuenta,
+                COALESCE(SUM(CASE WHEN m.id_operacion = 'AAP' THEN m.monto_mp ELSE 0 END), 0) AS asignado_inicial,
+                COALESCE(SUM(CASE WHEN m.id_operacion = 'CA'  THEN m.monto_mp ELSE 0 END), 0) AS creditos_adicionales,
+                COALESCE(SUM(CASE WHEN m.id_operacion = 'CG'  THEN m.monto_mp ELSE 0 END), 0) AS gastos_causados,
+                COALESCE(SUM(CASE WHEN m.id_operacion = 'TR'  THEN m.monto_mp ELSE 0 END), 0) AS traspasos_reduccion,
+                COALESCE(SUM(CASE WHEN m.id_operacion IN ('AAP','CA') THEN m.monto_mp ELSE 0 END), 0)
+                - COALESCE(SUM(CASE WHEN m.id_operacion IN ('CG','TR') THEN m.monto_mp ELSE 0 END), 0) AS disponible
+            FROM movimiento_presupuestario m
+            JOIN comprobante_presupuestario c   ON m.id_comprobante = c.id_comprobante
+            JOIN estruc_presupuestaria ep        ON m.id_estruc_presupuestaria = ep.id_estruc_presupuestaria
+            JOIN plan_unico_cuentas puc          ON m.id_codigo_plan_unico = puc.id_codigo_plan_unico
+            WHERE $where
+            GROUP BY m.id_estruc_presupuestaria, m.id_codigo_plan_unico,
+                     ep.descripcion_ep, puc.codigo_plan_unico, puc.denominacion
+            ORDER BY ep.descripcion_ep ASC, puc.codigo_plan_unico ASC
+        ";
+
+        $result = $this->getAsyncPool()->execute($sql, $params);
+        $rows = [];
+        foreach ($result as $row) {
+            $rows[] = $row;
+        }
+        return $rows;
     }
 
     /**
@@ -191,7 +246,7 @@ class MovimientoPresupuestarioRepository extends Repository
      */
     public function getMayorAnalitico(?int $id_estruc = null, ?int $id_cuenta = null, ?string $anio = null): array
     {
-        $where  = "m.eliminado = 0 AND c.eliminado = 0";
+        $where  = "m.eliminado = false AND c.eliminado = false";
         $params = [];
 
         if ($id_estruc !== null) {
@@ -284,7 +339,7 @@ class MovimientoPresupuestarioRepository extends Repository
 
     public function delete(int $id): void
     {
-        $stmt = $this->getPdo()->prepare("UPDATE {$this->getTable()} SET eliminado = 1 WHERE id_movimiento_presupuestario = :id");
+        $stmt = $this->getPdo()->prepare("UPDATE {$this->getTable()} SET eliminado = true WHERE id_movimiento_presupuestario = :id");
         $stmt->execute(['id' => $id]);
     }
 

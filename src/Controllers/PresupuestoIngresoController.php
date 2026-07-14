@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 // Keep this if the model is still used directly somewhere, though the repo should abstract it.

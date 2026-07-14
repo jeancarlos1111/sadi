@@ -1,0 +1,41 @@
+<?php
+// $paginator must be provided to this partial
+if (!isset($paginator) || !is_array($paginator) || !isset($paginator['last_page']) || $paginator['last_page'] <= 1) {
+    return;
+}
+$current_page = $paginator['current_page'];
+$last_page = $paginator['last_page'];
+
+// Build the base query string for pagination links, preserving other params like 'search' or 'route'
+$queryParams = $_GET;
+unset($queryParams['page']); // Remove old page if it exists
+$queryString = http_build_query($queryParams);
+$baseUrl = '?' . ($queryString ? $queryString . '&' : '') . 'page=';
+?>
+<nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-end m-0">
+        <!-- Previous -->
+        <li class="page-item <?= ($current_page <= 1) ? 'disabled' : '' ?>">
+            <a class="page-link" href="<?= htmlspecialchars($baseUrl . ($current_page - 1)) ?>" <?= ($current_page <= 1) ? 'tabindex="-1" aria-disabled="true"' : '' ?>>Anterior</a>
+        </li>
+        
+        <!-- Page Numbers -->
+        <?php for ($i = 1; $i <= $last_page; $i++): ?>
+            <?php 
+                // Show first, last, and +/- 2 pages around current
+                if ($i == 1 || $i == $last_page || abs($i - $current_page) <= 2): 
+            ?>
+                <li class="page-item <?= ($i == $current_page) ? 'active' : '' ?>">
+                    <a class="page-link" href="<?= htmlspecialchars($baseUrl . $i) ?>"><?= htmlspecialchars((string)$i) ?></a>
+                </li>
+            <?php elseif (abs($i - $current_page) == 3): ?>
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+            <?php endif; ?>
+        <?php endfor; ?>
+
+        <!-- Next -->
+        <li class="page-item <?= ($current_page >= $last_page) ? 'disabled' : '' ?>">
+            <a class="page-link" href="<?= htmlspecialchars($baseUrl . ($current_page + 1)) ?>" <?= ($current_page >= $last_page) ? 'tabindex="-1" aria-disabled="true"' : '' ?>>Siguiente</a>
+        </li>
+    </ul>
+</nav>

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Repositories\BancoRepository;
@@ -137,7 +139,7 @@ class ChequesController extends BaseController
                     FROM movimiento_bancario m
                     JOIN cta_bancaria c ON m.id_cta_bancaria = c.id_cta_bancaria
                     JOIN banco b ON c.id_banco = b.id_banco
-                    WHERE m.id_tipo_operacion_bancaria = ? AND m.eliminado = 0
+                    WHERE m.id_tipo_operacion_bancaria = ? AND m.eliminado = false
                     AND m.fecha BETWEEN ? AND ?";
 
             if ($idCta) {
@@ -225,7 +227,7 @@ class ChequesController extends BaseController
             FROM movimiento_bancario m
             JOIN cta_bancaria c ON m.id_cta_bancaria = c.id_cta_bancaria
             JOIN banco b ON c.id_banco = b.id_banco
-            WHERE m.id_movimiento_bancario = ? AND m.eliminado = 0
+            WHERE m.id_movimiento_bancario = ? AND m.eliminado = false
         ");
         $stmt->execute([$idMov]);
         $mov = $stmt->fetch(\PDO::FETCH_ASSOC);

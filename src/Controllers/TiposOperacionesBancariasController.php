@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Models\TipoOperacionBancaria;
@@ -21,12 +23,15 @@ class TiposOperacionesBancariasController extends BaseController
 
     public function index(): void
     {
-        $tipos = $this->repo->all();
+        $page = (int)($_GET['page'] ?? 1);
+        $paginator = $this->repo->paginate('', $page, 15);
+        $tipos = $paginator['data'];
         $this->renderView('banco/catalogos/tipos_operacion/index', [
             'titulo' => 'Tipos de Operación Bancaria',
             'tipos'  => $tipos,
             'success' => $_GET['success'] ?? null,
             'error'   => $_GET['error'] ?? null,
+                    'paginator' => $paginator,
         ]);
     }
 

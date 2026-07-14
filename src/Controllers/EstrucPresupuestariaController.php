@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Models\EstructuraPresupuestaria;
@@ -22,7 +24,9 @@ class EstrucPresupuestariaController extends HomeController
         $estructuras = [];
 
         try {
-            $estructuras = $this->repo->all();
+            $page = (int)($_GET['page'] ?? 1);
+            $paginator = $this->repo->paginate('', $page, 15);
+            $estructuras = $paginator['data'];
         } catch (PDOException $e) {
             error_log("Error fetching estructuras: " . $e->getMessage());
         }
@@ -31,6 +35,7 @@ class EstrucPresupuestariaController extends HomeController
             'titulo'      => 'Estructuras Presupuestarias',
             'estructuras' => $estructuras,
             'search'      => $search,
+                    'paginator' => $paginator,
         ]);
     }
 

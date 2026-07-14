@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -16,7 +18,7 @@ class EstrucPresupuestariaRepository extends Repository
     public function all(): array
     {
         $db = $this->getPdo();
-        $stmt = $db->query("SELECT id_estruc_presupuestaria, descripcion_ep FROM estruc_presupuestaria WHERE eliminado = 0 ORDER BY descripcion_ep");
+        $stmt = $db->query("SELECT id_estruc_presupuestaria, descripcion_ep FROM estruc_presupuestaria WHERE eliminado = false ORDER BY descripcion_ep");
 
         $results = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
@@ -29,9 +31,24 @@ class EstrucPresupuestariaRepository extends Repository
         return $results;
     }
 
+    public function allAsync(): array
+    {
+        $result = $this->getAsyncPool()->query("SELECT id_estruc_presupuestaria, descripcion_ep FROM estruc_presupuestaria WHERE eliminado = false ORDER BY descripcion_ep");
+
+        $results = [];
+        foreach ($result as $row) {
+            $results[] = new EstructuraPresupuestaria(
+                (int)$row['id_estruc_presupuestaria'],
+                $row['descripcion_ep']
+            );
+        }
+
+        return $results;
+    }
+
     public function find(int $id): ?EstructuraPresupuestaria
     {
-        $row = $this->query()->where('id_estruc_presupuestaria', '=', $id)->where('eliminado', '=', 0)->first();
+        $row = $this->query()->where('id_estruc_presupuestaria', '=', $id)->where('eliminado', '=', 'false')->first();
         if (!$row) {
             return null;
         }
@@ -66,6 +83,6 @@ class EstrucPresupuestariaRepository extends Repository
 
     public function delete(int $id): bool
     {
-        return $this->query()->where('id_estruc_presupuestaria', '=', $id)->update(['eliminado' => 1]);
+        return $this->query()->where('id_estruc_presupuestaria', '=', $id)->update(['eliminado' => 'true']);
     }
 }

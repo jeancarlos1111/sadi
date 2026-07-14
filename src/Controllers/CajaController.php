@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Models\CajaChica;
@@ -23,10 +25,13 @@ class CajaController extends BaseController
     /** Listado de cajas chicas */
     public function index(): void
     {
-        $cajas = $this->repo->all();
+        $page = (int)($_GET['page'] ?? 1);
+        $paginator = $this->repo->paginate('', $page, 15);
+        $cajas = $paginator['data'];
         $this->renderView('caja/index', [
             'titulo' => 'Módulo de Caja Chica',
             'cajas'  => $cajas,
+                    'paginator' => $paginator,
         ]);
     }
 

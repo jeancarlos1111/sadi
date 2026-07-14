@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -19,13 +21,13 @@ class UnidadMedidaRepository extends Repository
     {
         $query = $this->query()
                       ->select('*')
-                      ->where('eliminado', '=', 0)
+                      ->where('eliminado', '=', 'false')
                       ->orderBy('denominacion_udm', 'ASC');
 
         // Aplicamos el formato con OR al ser una búsqueda en múltiples campos
         if ($search !== '') {
             $db = $this->getPdo();
-            $sql = "SELECT * FROM unidades_de_medida WHERE eliminado = 0 AND (denominacion_udm LIKE :s OR unidades_udm LIKE :s) ORDER BY denominacion_udm";
+            $sql = "SELECT * FROM unidades_de_medida WHERE eliminado = false AND (denominacion_udm LIKE :s OR unidades_udm LIKE :s) ORDER BY denominacion_udm";
             $stmt = $db->prepare($sql);
             $stmt->bindValue(':s', "%$search%");
             $stmt->execute();
@@ -42,7 +44,7 @@ class UnidadMedidaRepository extends Repository
         $row = $this->query()
                     ->select('*')
                     ->where('id_unidades_de_medida', '=', $id)
-                    ->where('eliminado', '=', 0)
+                    ->where('eliminado', '=', 'false')
                     ->first();
 
         return $row ? $this->mapRowToEntity($row) : null;
@@ -67,7 +69,7 @@ class UnidadMedidaRepository extends Repository
 
     public function delete(int $id): bool
     {
-        return $this->query()->where('id_unidades_de_medida', '=', $id)->update(['eliminado' => 1]);
+        return $this->query()->where('id_unidades_de_medida', '=', $id)->update(['eliminado' => 'true']);
     }
 
     private function mapRowToEntity(array $row): UnidadMedida

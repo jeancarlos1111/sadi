@@ -1,84 +1,87 @@
 <div class="card card-outline card-primary">
-    <div class="card-header">
-        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
-        <div class="card-tools">
-            <a href="?route=requisiciones_servicios/form" class="btn btn-sm btn-success">
-                <i class="fas fa-plus"></i> Nueva Requisición
-            </a>
-        </div>
+  <div class="card-header">
+    <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+    <div class="card-tools">
+      <a href="?route=requisiciones_servicios/form" class="btn btn-sm btn-success">
+        <i class="fas fa-plus"></i> Nueva Requisición
+      </a>
     </div>
-    <div class="card-body">
-        <?php if (isset($_GET['success'])): ?>
-            <div class="alert alert-success alert-dismissible">
-                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                <h5><i class="icon fas fa-check"></i> Éxito</h5>
-                <?= htmlspecialchars($_GET['success']) ?>
-            </div>
-        <?php endif; ?>
+  </div>
+  <div class="card-body">
+    <?php if (isset($_GET['success'])): ?>
+      <div class="alert alert-success alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <h5><i class="icon fas fa-check"></i> Éxito</h5>
+        <?= htmlspecialchars($_GET['success']) ?>
+      </div>
+    <?php endif; ?>
 
-        <?php if (isset($error)): ?>
-            <div class="alert alert-danger alert-dismissible">
-                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                <h5><i class="icon fas fa-ban"></i> Error</h5>
-                <?= htmlspecialchars($error) ?>
-            </div>
-        <?php endif; ?>
+    <?php if (isset($error)): ?>
+      <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <h5><i class="icon fas fa-ban"></i> Error</h5>
+        <?= htmlspecialchars($error) ?>
+      </div>
+    <?php endif; ?>
 
-        <form method="GET" action="" class="form-inline mb-4">
-            <input type="hidden" name="route" value="requisiciones_servicios/index">
-            <div class="form-group mr-2">
-                <input type="text" name="search" class="form-control" placeholder="Buscar..." value="<?= htmlspecialchars($search) ?>" style="width: 220px;">
-            </div>
-            <div class="form-group mr-2">
-                <select name="mes" class="form-control">
-                    <option value="">Todos los Meses</option>
-                    <?php for($i=1; $i<=12; $i++): $m = str_pad((string)$i, 2, '0', STR_PAD_LEFT); ?>
-                        <option value="<?= $m ?>" <?= ($mes === $m) ? 'selected' : '' ?>>Mes <?= $m ?></option>
-                    <?php endfor; ?>
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
-            <a href="?route=requisiciones_servicios/index" class="btn btn-default ml-2">Limpiar</a>
-        </form>
+    <form method="GET" action="" class="form-inline mb-4">
+      <input type="hidden" name="route" value="requisiciones_servicios/index">
+      <div class="form-group mr-2">
+        <input type="text" name="search" class="form-control" placeholder="Buscar..." value="<?= htmlspecialchars($search) ?>" style="width: 220px;">
+      </div>
+      <div class="form-group mr-2">
+        <select name="mes" class="form-control">
+          <option value="">Todos los Meses</option>
+          <?php for($i=1; $i<=12; $i++): $m = str_pad((string)$i, 2, '0', STR_PAD_LEFT); ?>
+            <option value="<?= htmlspecialchars((string)$m) ?>" <?= ($mes === $m) ? 'selected' : '' ?>>Mes <?= htmlspecialchars((string)$m) ?></option>
+          <?php endfor; ?>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
+      <a href="?route=requisiciones_servicios/index" class="btn btn-default ml-2">Limpiar</a>
+    </form>
 
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped dataTable w-100 table-sm">
-                <thead class="thead-dark">
-                    <tr>
-                        <th class="text-center">Nro.</th>
-                        <th class="text-center">Fecha</th>
-                        <th>Concepto</th>
-                        <th class="text-center">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($requisiciones)): ?>
-                        <tr>
-                            <td colspan="4" class="text-center">No hay requisiciones de servicios.</td>
-                        </tr>
-                    <?php else: foreach ($requisiciones as $rs): ?>
-                        <tr>
-                            <td class="text-center align-middle"><strong><?= $rs['id_requisicion_servicios'] ?></strong></td>
-                            <td class="text-center align-middle"><?= htmlspecialchars($rs['fecha_rs']) ?></td>
-                            <td class="align-middle"><?= htmlspecialchars($rs['concepto_rs']) ?></td>
-                            <td class="text-center align-middle text-nowrap">
-                                <a href="?route=documental/requisicionServicios&id=<?= $rs['id_requisicion_servicios'] ?>" target="_blank" class="btn btn-sm btn-secondary" title="Imprimir PDF">
-                                    <i class="fas fa-file-pdf"></i>
-                                </a>
-                                <a href="?route=requisiciones_servicios/form&id=<?= $rs['id_requisicion_servicios'] ?>" class="btn btn-sm btn-info" title="Editar">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <form method="POST" action="?route=requisiciones_servicios/eliminar" onsubmit="return confirm('¿Eliminar?');" style="display:inline;">
-                                    <input type="hidden" name="id" value="<?= $rs['id_requisicion_servicios'] ?>">
-                                    <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    <?php endforeach; endif; ?>
-                </tbody>
-            </table>
-        </div>
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped w-100 table-sm">
+        <thead class="thead-dark">
+          <tr>
+            <th class="text-center">Nro.</th>
+            <th class="text-center">Fecha</th>
+            <th>Concepto</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php if (empty($requisiciones)): ?>
+            <tr>
+              <td colspan="4" class="text-center">No hay requisiciones de servicios.</td>
+            </tr>
+          <?php else: foreach ($requisiciones as $rs): ?>
+            <tr>
+              <td class="text-center align-middle"><strong><?= htmlspecialchars((string)$rs['id_requisicion_servicios']) ?></strong></td>
+              <td class="text-center align-middle"><?= htmlspecialchars($rs['fecha_rs']) ?></td>
+              <td class="align-middle"><?= htmlspecialchars($rs['concepto_rs']) ?></td>
+              <td class="text-center align-middle text-nowrap">
+                <a href="?route=documental/requisicionServicios&id=<?= htmlspecialchars((string)$rs['id_requisicion_servicios']) ?>" target="_blank" class="btn btn-sm btn-secondary" title="Imprimir PDF">
+                  <i class="fas fa-file-pdf"></i>
+                </a>
+                <a href="?route=requisiciones_servicios/form&id=<?= htmlspecialchars((string)$rs['id_requisicion_servicios']) ?>" class="btn btn-sm btn-info" title="Editar">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <form method="POST" action="?route=requisiciones_servicios/eliminar" onsubmit="return confirm('¿Eliminar?');" style="display:inline;">
+                  <input type="hidden" name="id" value="<?= htmlspecialchars((string)$rs['id_requisicion_servicios']) ?>">
+                  <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+          <?php endforeach; endif; ?>
+        </tbody>
+      </table>
+    <?php if (isset($paginator)): ?>
+      <?php include $partialsPath . 'pagination.phtml'; ?>
+    <?php endif; ?>
     </div>
+  </div>
 </div>

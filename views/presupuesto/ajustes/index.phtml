@@ -1,147 +1,150 @@
 <div class="card card-outline card-primary">
-    <div class="card-header">
-        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
-    </div>
-    <div class="card-body">
-        <?php if (isset($success)): ?>
-            <div class="alert alert-success alert-dismissible">
-                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                <h5><i class="icon fas fa-check"></i> Éxito</h5>
-                <?= htmlspecialchars($success) ?>
-            </div>
-        <?php endif; ?>
-        <?php if (isset($error)): ?>
-            <div class="alert alert-danger alert-dismissible">
-                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                <h5><i class="icon fas fa-ban"></i> Error</h5>
-                <?= htmlspecialchars($error) ?>
-            </div>
-        <?php endif; ?>
+  <div class="card-header">
+    <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+  </div>
+  <div class="card-body">
+    <?php if (isset($success)): ?>
+      <div class="alert alert-success alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <h5><i class="icon fas fa-check"></i> Éxito</h5>
+        <?= htmlspecialchars($success) ?>
+      </div>
+    <?php endif; ?>
+    <?php if (isset($error)): ?>
+      <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <h5><i class="icon fas fa-ban"></i> Error</h5>
+        <?= htmlspecialchars($error) ?>
+      </div>
+    <?php endif; ?>
 
-        <p class="text-muted">
-            Aquí puede consultar las diferencias entre el presupuesto <strong>Formulado</strong> y el <strong>Reformulado</strong>.
-            Primero introduzca los montos reformulados, luego genere los comprobantes de ajuste automáticamente.
-        </p>
+    <p class="text-muted">
+      Aquí puede consultar las diferencias entre el presupuesto <strong>Formulado</strong> y el <strong>Reformulado</strong>.
+      Primero introduzca los montos reformulados, luego genere los comprobantes de ajuste automáticamente.
+    </p>
 
-        <!-- Filtro por Estructura -->
-        <form method="GET" action="" class="form-inline mb-4">
-            <input type="hidden" name="route" value="ajustes_presupuesto/index">
-            <div class="form-group mr-2">
-                <label class="mr-2 font-weight-bold">Estructura Presupuestaria:</label>
-                <select class="form-control" name="id_estruc" style="min-width: 250px;">
-                    <option value="">-- Todas --</option>
-                    <?php foreach ($estructuras as $ep): ?>
-                        <option value="<?= htmlspecialchars((string)$ep->id) ?>" <?= ($id_estruc === $ep->id) ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($ep->descripcion) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary mr-2"><i class="fas fa-filter"></i> Filtrar</button>
-            <a href="?route=ajustes_presupuesto/index" class="btn btn-default">Limpiar</a>
-        </form>
-
-        <?php if (empty($comparativa)): ?>
-            <div class="alert alert-info">
-                <h5><i class="icon fas fa-info"></i> Atención</h5>
-                No hay partidas con Formulación cargada. Primero registre datos en <strong>Presupuesto de Gastos</strong>.
-            </div>
-<?php else: ?>
-
-        <!-- Formulario de edición de montos reformulados -->
-        <form method="POST" action="?route=ajustes_presupuesto/guardarReformulacion">
-            <input type="hidden" name="id_estruc" value="<?= htmlspecialchars((string)($id_estruc ?? '')) ?>">
-
-            <table class="table table-bordered table-striped dataTable w-100" style="font-size:13px;">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Estructura</th>
-                        <th>Código Cuenta</th>
-                        <th>Denominación</th>
-                        <th class="text-right">Formulado (Bs.)</th>
-                        <th class="text-right">Reformulado (Bs.)</th>
-                        <th class="text-right">Diferencia (Bs.)</th>
-                        <th class="text-center" style="width:60px;">Tipo</th>
-                    </tr>
-                </thead>
-        <tbody>
-            <?php $ep_anterior = null; ?>
-            <?php foreach ($comparativa as $fila): ?>
-                <?php if ($fila['descripcion_ep'] !== $ep_anterior): $ep_anterior = $fila['descripcion_ep']; ?>
-                    <tr style="background-color:#dde8f7;">
-                        <td colspan="7" style="font-weight:bold; padding:4px 8px;">📁 <?= htmlspecialchars($fila['descripcion_ep']) ?></td>
-                    </tr>
-                <?php endif; ?>
-                <tr>
-                    <td></td>
-                    <td><strong><?= htmlspecialchars($fila['codigo_plan_unico']) ?></strong></td>
-                    <td><?= htmlspecialchars($fila['denominacion_cuenta']) ?></td>
-                    <td style="text-align:right;"><?= number_format((float)$fila['total_formulado'], 2, ',', '.') ?></td>
-                        <td class="text-right align-middle">
-                            <input type="hidden" name="id_cuenta[]" value="<?= htmlspecialchars((string)$fila['id_codigo_plan_unico']) ?>">
-                            <input type="number" class="form-control form-control-sm text-right float-right" name="monto_reformulado[]" step="0.01" min="0"
-                                   value="<?= htmlspecialchars(number_format((float)$fila['total_reformulado'], 2, '.')) ?>"
-                                   style="width:130px;"
-                                   onchange="calcularDif(this)">
-                        </td>
-                        <?php $dif = (float)$fila['diferencia']; ?>
-                        <td class="dif-cell text-right align-middle font-weight-bold <?= $dif > 0 ? 'text-success' : ($dif < 0 ? 'text-danger' : '') ?>">
-                            <?= number_format($dif, 2, ',', '.') ?>
-                        </td>
-                        <td class="text-center align-middle">
-                            <?php if ($dif > 0): ?>
-                                <span class="badge badge-success px-2 py-1">AU <i class="fas fa-arrow-up"></i></span>
-                            <?php elseif ($dif < 0): ?>
-                                <span class="badge badge-danger px-2 py-1">DI <i class="fas fa-arrow-down"></i></span>
-                            <?php else: ?>
-                                <span class="badge badge-secondary px-2 py-1">Sin cambio</span>
-                            <?php endif; ?>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-            </tbody>
-            <tfoot class="thead-light font-weight-bold">
-                <tr>
-                    <td colspan="3" class="text-right pr-3">TOTALES:</td>
-                    <td class="text-right"><?= number_format((float)$totales['formulado'], 2, ',', '.') ?></td>
-                    <td class="text-right"><?= number_format((float)$totales['reformulado'], 2, ',', '.') ?></td>
-                    <td class="text-right <?= (float)$totales['diferencia'] > 0 ? 'text-success' : ((float)$totales['diferencia'] < 0 ? 'text-danger' : '') ?>">
-                        <?= number_format((float)$totales['diferencia'], 2, ',', '.') ?>
-                    </td>
-                    <td></td>
-                </tr>
-            </tfoot>
-        </table>
-
-        <div class="mt-3 form-inline">
-            <label class="mr-2 font-weight-bold">Observación:</label>
-            <input type="text" class="form-control mr-3" name="observacion" maxlength="255" placeholder="Motivo de la reformulación..." style="width:320px;">
-            <button type="submit" class="btn btn-primary">
-                <i class="fas fa-save"></i> Guardar Montos Reformulados
-            </button>
-        </div>
+    <!-- Filtro por Estructura -->
+    <form method="GET" action="" class="form-inline mb-4">
+      <input type="hidden" name="route" value="ajustes_presupuesto/index">
+      <div class="form-group mr-2">
+        <label class="mr-2 font-weight-bold">Estructura Presupuestaria:</label>
+        <select class="form-control" name="id_estruc" style="min-width: 250px;">
+          <option value="">-- Todas --</option>
+          <?php foreach ($estructuras as $ep): ?>
+            <option value="<?= htmlspecialchars((string)$ep->id) ?>" <?= ($id_estruc === $ep->id) ? 'selected' : '' ?>>
+              <?= htmlspecialchars($ep->descripcion) ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary mr-2"><i class="fas fa-filter"></i> Filtrar</button>
+      <a href="?route=ajustes_presupuesto/index" class="btn btn-default">Limpiar</a>
     </form>
 
-        <!-- Botón para generar comprobantes de ajuste -->
-        <hr class="mt-4">
-        
-        <form method="POST" action="?route=ajustes_presupuesto/generarComprobantes"
-              onsubmit="return confirm('¿Generar comprobantes de Aumento (AU) y Disminución (DI) por las diferencias actuales?');">
-            <input type="hidden" name="id_estruc" value="<?= htmlspecialchars((string)($id_estruc ?? '')) ?>">
-            
-            <p class="text-muted small">
-                Al hacer clic se generarán automáticamente los comprobantes presupuestarios
-                <strong>SPGAU</strong> (aumentos) y/o <strong>SPGDI</strong> (disminuciones) según las diferencias calculadas.
-            </p>
-            <button type="submit" class="btn btn-danger">
-                <i class="fas fa-cogs"></i> Generar Comprobantes de Ajuste
-            </button>
-            <a href="?route=comprobante_presupuesto/index" class="btn btn-link text-primary ml-2">
-                Ver Comprobantes Generados <i class="fas fa-arrow-right"></i>
-            </a>
-        </form>
+    <?php if (empty($comparativa)): ?>
+      <div class="alert alert-info">
+        <h5><i class="icon fas fa-info"></i> Atención</h5>
+        No hay partidas con Formulación cargada. Primero registre datos en <strong>Presupuesto de Gastos</strong>.
+      </div>
+<?php else: ?>
 
+    <!-- Formulario de edición de montos reformulados -->
+    <form method="POST" action="?route=ajustes_presupuesto/guardarReformulacion">
+      <input type="hidden" name="id_estruc" value="<?= htmlspecialchars((string)($id_estruc ?? '')) ?>">
+
+      <table class="table table-bordered table-striped w-100" style="font-size:13px;">
+        <thead class="thead-dark">
+          <tr>
+            <th>Estructura</th>
+            <th>Código Cuenta</th>
+            <th>Denominación</th>
+            <th class="text-right">Formulado (Bs.)</th>
+            <th class="text-right">Reformulado (Bs.)</th>
+            <th class="text-right">Diferencia (Bs.)</th>
+            <th class="text-center" style="width:60px;">Tipo</th>
+          </tr>
+        </thead>
+    <tbody>
+      <?php $ep_anterior = null; ?>
+      <?php foreach ($comparativa as $fila): ?>
+        <?php if ($fila['descripcion_ep'] !== $ep_anterior): $ep_anterior = $fila['descripcion_ep']; ?>
+          <tr style="background-color:#dde8f7;">
+            <td colspan="7" style="font-weight:bold; padding:4px 8px;">📁 <?= htmlspecialchars($fila['descripcion_ep']) ?></td>
+          </tr>
         <?php endif; ?>
+        <tr>
+          <td></td>
+          <td><strong><?= htmlspecialchars($fila['codigo_plan_unico']) ?></strong></td>
+          <td><?= htmlspecialchars($fila['denominacion_cuenta']) ?></td>
+          <td style="text-align:right;"><?= number_format((float)$fila['total_formulado'], 2, ',', '.') ?></td>
+            <td class="text-right align-middle">
+              <input type="hidden" name="id_cuenta[]" value="<?= htmlspecialchars((string)$fila['id_codigo_plan_unico']) ?>">
+              <input type="number" class="form-control form-control-sm text-right float-right" name="monto_reformulado[]" step="0.01" min="0"
+                  value="<?= htmlspecialchars(number_format((float)$fila['total_reformulado'], 2, '.')) ?>"
+                  style="width:130px;"
+                  onchange="calcularDif(this)">
+            </td>
+            <?php $dif = (float)$fila['diferencia']; ?>
+            <td class="dif-cell text-right align-middle font-weight-bold <?= $dif > 0 ? 'text-success' : ($dif < 0 ? 'text-danger' : '') ?>">
+              <?= number_format($dif, 2, ',', '.') ?>
+            </td>
+            <td class="text-center align-middle">
+              <?php if ($dif > 0): ?>
+                <span class="badge badge-success px-2 py-1">AU <i class="fas fa-arrow-up"></i></span>
+              <?php elseif ($dif < 0): ?>
+                <span class="badge badge-danger px-2 py-1">DI <i class="fas fa-arrow-down"></i></span>
+              <?php else: ?>
+                <span class="badge badge-secondary px-2 py-1">Sin cambio</span>
+              <?php endif; ?>
+          </td>
+        </tr>
+      <?php endforeach; ?>
+    </tbody>
+      </tbody>
+      <tfoot class="thead-light font-weight-bold">
+        <tr>
+          <td colspan="3" class="text-right pr-3">TOTALES:</td>
+          <td class="text-right"><?= number_format((float)$totales['formulado'], 2, ',', '.') ?></td>
+          <td class="text-right"><?= number_format((float)$totales['reformulado'], 2, ',', '.') ?></td>
+          <td class="text-right <?= (float)$totales['diferencia'] > 0 ? 'text-success' : ((float)$totales['diferencia'] < 0 ? 'text-danger' : '') ?>">
+            <?= number_format((float)$totales['diferencia'], 2, ',', '.') ?>
+          </td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+    <?php if (isset($paginator)): ?>
+      <?php include $partialsPath . 'pagination.phtml'; ?>
+    <?php endif; ?>
+
+    <div class="mt-3 form-inline">
+      <label class="mr-2 font-weight-bold">Observación:</label>
+      <input type="text" class="form-control mr-3" name="observacion" maxlength="255" placeholder="Motivo de la reformulación..." style="width:320px;">
+      <button type="submit" class="btn btn-primary">
+        <i class="fas fa-save"></i> Guardar Montos Reformulados
+      </button>
     </div>
+  </form>
+
+    <!-- Botón para generar comprobantes de ajuste -->
+    <hr class="mt-4">
+    
+    <form method="POST" action="?route=ajustes_presupuesto/generarComprobantes"
+       onsubmit="return confirm('¿Generar comprobantes de Aumento (AU) y Disminución (DI) por las diferencias actuales?');">
+      <input type="hidden" name="id_estruc" value="<?= htmlspecialchars((string)($id_estruc ?? '')) ?>">
+      
+      <p class="text-muted small">
+        Al hacer clic se generarán automáticamente los comprobantes presupuestarios
+        <strong>SPGAU</strong> (aumentos) y/o <strong>SPGDI</strong> (disminuciones) según las diferencias calculadas.
+      </p>
+      <button type="submit" class="btn btn-danger">
+        <i class="fas fa-cogs"></i> Generar Comprobantes de Ajuste
+      </button>
+      <a href="?route=comprobante_presupuesto/index" class="btn btn-link text-primary ml-2">
+        Ver Comprobantes Generados <i class="fas fa-arrow-right"></i>
+      </a>
+    </form>
+
+    <?php endif; ?>
+  </div>
 </div>

@@ -1,65 +1,68 @@
 <div class="card card-outline card-primary">
-    <div class="card-header">
-        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
-        <div class="card-tools">
-            <a href="?route=administrador/configuracion" class="btn btn-sm btn-warning font-weight-bold text-dark">
-                <i class="fas fa-cogs"></i> Ir a Configuración Global
-            </a>
-        </div>
+  <div class="card-header">
+    <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+    <div class="card-tools">
+      <a href="?route=administrador/configuracion" class="btn btn-sm btn-warning font-weight-bold text-dark">
+        <i class="fas fa-cogs"></i> Ir a Configuración Global
+      </a>
     </div>
-    <div class="card-body">
-        <?php if (isset($error)): ?>
-            <div class="alert alert-danger alert-dismissible">
-                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                <h5><i class="icon fas fa-ban"></i> Error</h5>
-                <?= htmlspecialchars($error) ?>
-            </div>
-        <?php endif; ?>
+  </div>
+  <div class="card-body">
+    <?php if (isset($error)): ?>
+      <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <h5><i class="icon fas fa-ban"></i> Error</h5>
+        <?= htmlspecialchars($error) ?>
+      </div>
+    <?php endif; ?>
 
-        <form method="GET" action="" class="form-inline mb-4">
-            <input type="hidden" name="route" value="administrador/usuarios">
-            <div class="input-group mr-2">
-                <input type="text" class="form-control" name="search" placeholder="Nombre de usuario o empleado..." value="<?= htmlspecialchars($search) ?>" style="width: 300px;">
-                <span class="input-group-append">
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
-                    <a href="?route=administrador/usuarios" class="btn btn-default">Limpiar</a>
-                </span>
-            </div>
-        </form>
+    <form method="GET" action="" class="form-inline mb-4">
+      <input type="hidden" name="route" value="administrador/usuarios">
+      <div class="input-group mr-2">
+        <input type="text" class="form-control" name="search" placeholder="Nombre de usuario o empleado..." value="<?= htmlspecialchars($search) ?>" style="width: 300px;">
+        <span class="input-group-append">
+          <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
+          <a href="?route=administrador/usuarios" class="btn btn-default">Limpiar</a>
+        </span>
+      </div>
+    </form>
 
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped dataTable w-100 table-sm">
-                <thead class="thead-dark">
-                    <tr>
-                        <th class="text-center" width="10%">ID</th>
-                        <th>Nombre de Usuario</th>
-                        <th>Personal Asignado</th>
-                        <th class="text-center" width="20%">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($usuarios)): ?>
-                        <tr><td colspan="4" class="text-center">No hay usuarios registrados.</td></tr>
-                    <?php else: ?>
-                        <?php foreach ($usuarios as $data): ?>
-                            <?php $usr = $data['entity']; ?>
-                            <tr>
-                                <td class="text-center font-weight-bold"><?= $usr->id ?></td>
-                                <td class="font-weight-bold text-primary"><i class="fas fa-user-circle text-muted mr-1"></i> <?= htmlspecialchars($usr->usuario) ?></td>
-                                <td><?= htmlspecialchars($data['nombre_completo']) ?></td>
-                                <td class="text-center text-nowrap">
-                                    <a href="#" class="btn btn-sm btn-info" title="Editar">
-                                        <i class="fas fa-edit"></i> Editar
-                                    </a>
-                                    <a href="#" class="btn btn-sm btn-outline-danger ml-1" title="Restablecer Clave">
-                                        <i class="fas fa-key"></i> Clave
-                                    </a>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped w-100 table-sm">
+        <thead class="thead-dark">
+          <tr>
+            <th class="text-center" width="10%">ID</th>
+            <th>Nombre de Usuario</th>
+            <th>Personal Asignado</th>
+            <th class="text-center" width="20%">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php if (empty($usuarios)): ?>
+            <tr><td colspan="4" class="text-center">No hay usuarios registrados.</td></tr>
+          <?php else: ?>
+            <?php foreach ($usuarios as $data): ?>
+              <?php $usr = $data['entity']; ?>
+              <tr>
+                <td class="text-center font-weight-bold"><?= htmlspecialchars((string)$usr->id) ?></td>
+                <td class="font-weight-bold text-primary"><i class="fas fa-user-circle text-muted mr-1"></i> <?= htmlspecialchars($usr->usuario) ?></td>
+                <td><?= htmlspecialchars($data['nombre_completo']) ?></td>
+                <td class="text-center text-nowrap">
+                  <a href="#" class="btn btn-sm btn-info" title="Editar">
+                    <i class="fas fa-edit"></i> Editar
+                  </a>
+                  <a href="#" class="btn btn-sm btn-outline-danger ml-1" title="Restablecer Clave">
+                    <i class="fas fa-key"></i> Clave
+                  </a>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </tbody>
+      </table>
+    <?php if (isset($paginator)): ?>
+      <?php include $partialsPath . 'pagination.phtml'; ?>
+    <?php endif; ?>
     </div>
+  </div>
 </div>

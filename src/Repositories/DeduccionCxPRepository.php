@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -19,7 +21,7 @@ class DeduccionCxPRepository extends Repository
     public function all(string $search = ''): array
     {
         $db = $this->getPdo();
-        $sql = "SELECT * FROM deducciones_cxp WHERE eliminado = 0";
+        $sql = "SELECT * FROM deducciones_cxp WHERE eliminado = false";
         if ($search !== '') {
             $sql .= " AND (codigo_deduccion LIKE :s OR denominacion LIKE :s)";
         }
@@ -48,7 +50,7 @@ class DeduccionCxPRepository extends Repository
 
     public function findById(int $id): ?DeduccionCxP
     {
-        $row = $this->query()->where('id_deduccion', '=', $id)->where('eliminado', '=', 0)->first();
+        $row = $this->query()->where('id_deduccion', '=', $id)->where('eliminado', '=', 'false')->first();
         if (!$row) {
             return null;
         }
@@ -89,6 +91,6 @@ class DeduccionCxPRepository extends Repository
 
     public function delete(int $id): bool
     {
-        return $this->query()->where('id_deduccion', '=', $id)->update(['eliminado' => 1]);
+        return $this->query()->where('id_deduccion', '=', $id)->update(['eliminado' => 'true']);
     }
 }

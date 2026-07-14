@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
-class RequisicionBienes
+readonly class RequisicionBienes
 {
     // Property Hooks
     /* private(set) */ public ?int $id;
@@ -15,5 +17,27 @@ class RequisicionBienes
         ?int $id = null
     ) {
         $this->id = $id;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'fecha' => $this->fecha,
+            'concepto' => $this->concepto,
+            'idEstructuraPresupuestaria' => $this->idEstructuraPresupuestaria,
+            'articulos' => $this->articulos,
+        ];
+    }
+
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            $data['fecha'] ?? null,
+            $data['concepto'] ?? null,
+            $data['idEstructuraPresupuestaria'] ?? null,
+            $data['articulos'] ?? null,
+            $data['id'] ?? null,
+        );
     }
 }

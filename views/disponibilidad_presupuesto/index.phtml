@@ -1,115 +1,118 @@
 <div class="card card-outline card-primary">
-    <div class="card-header">
-        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
-    </div>
-    <div class="card-body">
-        <p class="text-muted">Consulte el estado presupuestario de cada partida: monto asignado, gastos ejecutados y saldo disponible en tiempo real.</p>
+  <div class="card-header">
+    <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+  </div>
+  <div class="card-body">
+    <p class="text-muted">Consulte el estado presupuestario de cada partida: monto asignado, gastos ejecutados y saldo disponible en tiempo real.</p>
 
-        <form method="GET" action="" class="mb-4">
-            <input type="hidden" name="route" value="disponibilidad_presupuesto/index">
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label>Estructura Presupuestaria</label>
-                        <select class="form-control" name="id_estruc">
-                            <option value="">-- Todas las Estructuras --</option>
-                            <?php foreach ($estructuras as $ep): ?>
-                                <option value="<?= htmlspecialchars((string)$ep->id) ?>" <?= ($id_estruc === $ep->id) ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($ep->descripcion) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label>Partida (Cuenta)</label>
-                        <select class="form-control" name="id_cuenta">
-                            <option value="">-- Todas las Cuentas --</option>
-                            <?php foreach ($planCuentas as $cpu): ?>
-                                <option value="<?= htmlspecialchars((string)$cpu->id) ?>" <?= ($id_cuenta === $cpu->id) ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($cpu->codigo . ' – ' . $cpu->denominacion) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-4 d-flex align-items-end mb-3">
-                    <button type="submit" class="btn btn-primary mr-2"><i class="fas fa-search"></i> Consultar</button>
-                    <a href="?route=disponibilidad_presupuesto/index" class="btn btn-default">Limpiar</a>
-                </div>
-            </div>
-        </form>
+    <form method="GET" action="" class="mb-4">
+      <input type="hidden" name="route" value="disponibilidad_presupuesto/index">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="form-group">
+            <label>Estructura Presupuestaria</label>
+            <select class="form-control" name="id_estruc">
+              <option value="">-- Todas las Estructuras --</option>
+              <?php foreach ($estructuras as $ep): ?>
+                <option value="<?= htmlspecialchars((string)$ep->id) ?>" <?= ($id_estruc === $ep->id) ? 'selected' : '' ?>>
+                  <?= htmlspecialchars($ep->descripcion) ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            <label>Partida (Cuenta)</label>
+            <select class="form-control" name="id_cuenta">
+              <option value="">-- Todas las Cuentas --</option>
+              <?php foreach ($planCuentas as $cpu): ?>
+                <option value="<?= htmlspecialchars((string)$cpu->id) ?>" <?= ($id_cuenta === $cpu->id) ? 'selected' : '' ?>>
+                  <?= htmlspecialchars($cpu->codigo . ' – ' . $cpu->denominacion) ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-4 d-flex align-items-end mb-3">
+          <button type="submit" class="btn btn-primary mr-2"><i class="fas fa-search"></i> Consultar</button>
+          <a href="?route=disponibilidad_presupuesto/index" class="btn btn-default">Limpiar</a>
+        </div>
+      </div>
+    </form>
 
 <?php if (empty($resumen)): ?>
-    <div class="alert alert-info">
-        <h5><i class="icon fas fa-info"></i> Atención</h5>
-        No se encontraron partidas aperturadas con los filtros seleccionados.
-    </div>
+  <div class="alert alert-info">
+    <h5><i class="icon fas fa-info"></i> Atención</h5>
+    No se encontraron partidas aperturadas con los filtros seleccionados.
+  </div>
 <?php else: ?>
 
 <div class="table-responsive">
-    <table class="table table-bordered table-striped dataTable w-100 table-sm">
-        <thead class="thead-light">
-            <tr>
-                <th>Estructura Presupuestaria</th>
-                <th>Código Cuenta</th>
-                <th>Denominación Partida</th>
-                <th class="text-right">Asignado Inicial</th>
-                <th class="text-right">Créditos Ad. (CA)</th>
-                <th class="text-right">Gastos (CG)</th>
-                <th class="text-right">Traspasos (TR)</th>
-                <th class="text-right bg-primary">💰 Disponible</th>
-            </tr>
-        </thead>
-        <tbody>
-        <?php
-        $ep_anterior = null;
-        foreach ($resumen as $fila):
-            // Agrupar visualmente por estructura
-            if ($fila['descripcion_ep'] !== $ep_anterior):
-                $ep_anterior = $fila['descripcion_ep'];
-        ?>
-            <tr class="table-secondary">
-                <td colspan="8" class="font-weight-bold p-2">
-                    📁 <?= htmlspecialchars($fila['descripcion_ep']) ?>
-                </td>
-            </tr>
-        <?php endif; ?>
-        <tr>
-            <td></td>
-            <td><strong><?= htmlspecialchars($fila['codigo_plan_unico']) ?></strong></td>
-            <td><?= htmlspecialchars($fila['denominacion_cuenta']) ?></td>
-            <td class="text-right"><?= number_format((float)$fila['asignado_inicial'], 2, ',', '.') ?></td>
-            <td class="text-right text-success"><?= number_format((float)$fila['creditos_adicionales'], 2, ',', '.') ?></td>
-            <td class="text-right text-danger"><?= number_format((float)$fila['gastos_causados'], 2, ',', '.') ?></td>
-            <td class="text-right text-danger"><?= number_format((float)$fila['traspasos_reduccion'], 2, ',', '.') ?></td>
-            <td class="text-right font-weight-bold <?= (float)$fila['disponible'] < 0 ? 'table-danger text-danger' : 'table-success text-success' ?>">
-                <?= number_format((float)$fila['disponible'], 2, ',', '.') ?>
-            </td>
-        </tr>
-        <?php endforeach; ?>
-    </tbody>
-    <tfoot class="thead-light font-weight-bold">
-        <tr>
-            <td colspan="3" class="text-right pr-3">TOTALES:</td>
-            <td class="text-right"><?= number_format((float)$totales['asignado_inicial'], 2, ',', '.') ?></td>
-            <td class="text-right text-success"><?= number_format((float)$totales['creditos_adicionales'], 2, ',', '.') ?></td>
-            <td class="text-right text-danger"><?= number_format((float)$totales['gastos_causados'], 2, ',', '.') ?></td>
-            <td class="text-right text-danger"><?= number_format((float)$totales['traspasos_reduccion'], 2, ',', '.') ?></td>
-            <td class="text-right <?= (float)$totales['disponible'] < 0 ? 'text-danger' : 'text-success' ?>">
-                <?= number_format((float)$totales['disponible'], 2, ',', '.') ?>
-            </td>
-        </tr>
-    </tfoot>
-    </table>
+  <table class="table table-bordered table-striped w-100 table-sm">
+    <thead class="thead-dark">
+      <tr>
+        <th>Estructura Presupuestaria</th>
+        <th>Código Cuenta</th>
+        <th>Denominación Partida</th>
+        <th class="text-right">Asignado Inicial</th>
+        <th class="text-right">Créditos Ad. (CA)</th>
+        <th class="text-right">Gastos (CG)</th>
+        <th class="text-right">Traspasos (TR)</th>
+        <th class="text-right bg-primary">💰 Disponible</th>
+      </tr>
+    </thead>
+    <tbody>
+    <?php
+    $ep_anterior = null;
+    foreach ($resumen as $fila):
+      // Agrupar visualmente por estructura
+      if ($fila['descripcion_ep'] !== $ep_anterior):
+        $ep_anterior = $fila['descripcion_ep'];
+    ?>
+      <tr class="table-secondary">
+        <td colspan="8" class="font-weight-bold p-2">
+          📁 <?= htmlspecialchars($fila['descripcion_ep']) ?>
+        </td>
+      </tr>
+    <?php endif; ?>
+    <tr>
+      <td></td>
+      <td><strong><?= htmlspecialchars($fila['codigo_plan_unico']) ?></strong></td>
+      <td><?= htmlspecialchars($fila['denominacion_cuenta']) ?></td>
+      <td class="text-right"><?= number_format((float)$fila['asignado_inicial'], 2, ',', '.') ?></td>
+      <td class="text-right text-success"><?= number_format((float)$fila['creditos_adicionales'], 2, ',', '.') ?></td>
+      <td class="text-right text-danger"><?= number_format((float)$fila['gastos_causados'], 2, ',', '.') ?></td>
+      <td class="text-right text-danger"><?= number_format((float)$fila['traspasos_reduccion'], 2, ',', '.') ?></td>
+      <td class="text-right font-weight-bold <?= (float)$fila['disponible'] < 0 ? 'table-danger text-danger' : 'table-success text-success' ?>">
+        <?= number_format((float)$fila['disponible'], 2, ',', '.') ?>
+      </td>
+    </tr>
+    <?php endforeach; ?>
+  </tbody>
+  <tfoot class="thead-light font-weight-bold">
+    <tr>
+      <td colspan="3" class="text-right pr-3">TOTALES:</td>
+      <td class="text-right"><?= number_format((float)$totales['asignado_inicial'], 2, ',', '.') ?></td>
+      <td class="text-right text-success"><?= number_format((float)$totales['creditos_adicionales'], 2, ',', '.') ?></td>
+      <td class="text-right text-danger"><?= number_format((float)$totales['gastos_causados'], 2, ',', '.') ?></td>
+      <td class="text-right text-danger"><?= number_format((float)$totales['traspasos_reduccion'], 2, ',', '.') ?></td>
+      <td class="text-right <?= (float)$totales['disponible'] < 0 ? 'text-danger' : 'text-success' ?>">
+        <?= number_format((float)$totales['disponible'], 2, ',', '.') ?>
+      </td>
+    </tr>
+  </tfoot>
+  </table>
+    <?php if (isset($paginator)): ?>
+      <?php include $partialsPath . 'pagination.phtml'; ?>
+    <?php endif; ?>
 </div>
 
 <div class="mt-3 small text-muted">
-    <span class="text-danger"><i class="fas fa-circle"></i></span> Valores en rojo indican déficit presupuestario.
-    <span class="text-success ml-3"><i class="fas fa-circle"></i></span> Valores en verde indican saldo disponible positivo.
+  <span class="text-danger"><i class="fas fa-circle"></i></span> Valores en rojo indican déficit presupuestario.
+  <span class="text-success ml-3"><i class="fas fa-circle"></i></span> Valores en verde indican saldo disponible positivo.
 </div>
 
 <?php endif; ?>
-    </div>
+  </div>
 </div>

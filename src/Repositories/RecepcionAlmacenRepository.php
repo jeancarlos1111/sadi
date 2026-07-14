@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -191,7 +193,7 @@ class RecepcionAlmacenRepository extends Repository
                     WHERE id_codigo_plan_unico = ?
                 ");
 
-                $convertidorRepo = new ConvertidorCuentaRepository();
+                $convertidorRepo = new VinculacionPucContableRepository();
 
                 foreach ($montoCausarPorPartida as $idPartida => $montoFase) {
                     $stmtPptoCausado->execute([$montoFase, $idPartida]);
@@ -199,8 +201,8 @@ class RecepcionAlmacenRepository extends Repository
                     // Buscar cuenta asociada para el Causado (Ej: Activo Inventario o Gasto Operativo)
                     $idCuentaDebe = $convertidorRepo->getCuentaContableId($idPartida, 'CAUSADO');
                     if ($idCuentaDebe) {
-                        $asientoDetalles[] = ['id_cuenta' => $idCuentaDebe, 'tipo' => 'D', 'monto' => $montoFase];
-                        $asientoDetalles[] = ['id_cuenta' => 3, 'tipo' => 'H', 'monto' => $montoFase];
+                        $asientoDetalles[] = ['id_cuenta_contable' => $idCuentaDebe, 'tipo' => 'D', 'monto' => $montoFase];
+                        $asientoDetalles[] = ['id_cuenta_contable' => 3, 'tipo' => 'H', 'monto' => $montoFase];
                     }
                 }
 

@@ -1,0 +1,68 @@
+<?php if (isset($error)): ?>
+  <div class="alert alert-danger alert-dismissible">
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+    <h5><i class="icon fas fa-ban"></i> Error!</h5>
+    <?= htmlspecialchars($error) ?>
+  </div>
+<?php endif; ?>
+
+<div class="card card-primary card-outline">
+  <div class="card-header">
+    <h3 class="card-title mt-1"><i class="fas fa-coins mr-1"></i> <?= htmlspecialchars($titulo) ?></h3>
+    <div class="card-tools">
+      <a href="?route=fuente_financiamiento/form" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> Nueva Fuente</a>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="mb-3">
+      <form method="GET" action="" class="form-inline">
+        <input type="hidden" name="route" value="fuente_financiamiento/index">
+        <div class="input-group input-group-sm">
+          <input type="text" name="search" class="form-control" placeholder="Buscar..." value="<?= htmlspecialchars($search ?? '') ?>" style="width: 300px;">
+          <span class="input-group-append">
+            <button type="submit" class="btn btn-primary btn-flat"><i class="fas fa-search"></i></button>
+          </span>
+        </div>
+        <a href="?route=fuente_financiamiento/index" class="btn btn-default btn-sm ml-2">Limpiar</a>
+      </form>
+    </div>
+
+    <table class="table table-bordered table-striped w-100">
+      <thead class="thead-dark">
+        <tr>
+          <th>ID</th>
+          <th>Denominación</th>
+          <th class="text-right">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php if (empty($items)): ?>
+          <tr>
+            <td colspan="3" class="text-center text-muted py-4">No se encontraron fuentes de financiamiento.</td>
+          </tr>
+        <?php else: ?>
+          <?php foreach ($items as $item): ?>
+            <tr>
+              <td class="align-middle"><?= htmlspecialchars((string)$item->id) ?></td>
+              <td class="align-middle"><?= htmlspecialchars($item->denominacion) ?></td>
+              <td class="text-right align-middle">
+                <a href="?route=fuente_financiamiento/form&id=<?= htmlspecialchars((string)$item->id) ?>" class="btn btn-sm btn-outline-primary" title="Editar">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <form method="POST" action="?route=fuente_financiamiento/delete" style="display: inline;" onsubmit="return confirm('¿Está seguro de eliminar esta fuente?');">
+                  <input type="hidden" name="id" value="<?= htmlspecialchars((string)$item->id) ?>">
+                  <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+          <?php endforeach; ?>
+        <?php endif; ?>
+      </tbody>
+    </table>
+    <?php if (isset($paginator) && $paginator !== null): ?>
+      <?php include $partialsPath . '/pagination.phtml'; ?>
+    <?php endif; ?>
+  </div>
+</div>

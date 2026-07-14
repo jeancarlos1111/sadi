@@ -1,0 +1,69 @@
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><?= htmlspecialchars($titulo) ?></h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <span class="badge bg-info text-dark fs-6 p-2">
+            Tiempo de carga asíncrona: <?= htmlspecialchars((string)$timeTaken) ?> ms
+        </span>
+    </div>
+</div>
+
+<?php if (isset($error)): ?>
+    <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+<?php endif; ?>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-header">Total Asignado</div>
+            <div class="card-body">
+                <h4 class="card-title">Bs. <?= number_format($totalRow['total_asignado'] ?? 0, 2, ',', '.') ?></h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-header">Total Comprometido</div>
+            <div class="card-body">
+                <h4 class="card-title">Bs. <?= number_format($totalRow['total_comprometido'] ?? 0, 2, ',', '.') ?></h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header fw-bold">Top 5 Partidas con Mayor Asignación</div>
+            <ul class="list-group list-group-flush">
+                <?php foreach ($topPartidas as $p): ?>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong><?= htmlspecialchars($p['partida_codigo']) ?></strong><br>
+                            <small class="text-muted"><?= htmlspecialchars($p['partida_nombre']) ?></small>
+                        </div>
+                        <span class="badge bg-primary rounded-pill">Bs. <?= number_format($p['monto_asignado'], 2, ',', '.') ?></span>
+                    </li>
+                <?php endforeach; ?>
+                <?php if(empty($topPartidas)): ?>
+                    <li class="list-group-item text-muted">No hay datos</li>
+                <?php endif; ?>
+            </ul>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header fw-bold">Ejecución por Fuente de Financiamiento</div>
+            <ul class="list-group list-group-flush">
+                <?php foreach ($fuentes as $f): ?>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <?= htmlspecialchars($f['nombre']) ?>
+                        <span class="badge bg-success rounded-pill">Bs. <?= number_format($f['total'], 2, ',', '.') ?></span>
+                    </li>
+                <?php endforeach; ?>
+                <?php if(empty($fuentes)): ?>
+                    <li class="list-group-item text-muted">No hay datos</li>
+                <?php endif; ?>
+            </ul>
+        </div>
+    </div>
+</div>

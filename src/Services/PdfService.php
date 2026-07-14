@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 // Requerir directamente FPDF sin dependencias (No namespaces)

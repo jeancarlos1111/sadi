@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
+use App\Database\Connection;
 use App\Models\ComprobantePresupuestario;
 use App\Models\MovimientoPresupuestario;
 use App\Repositories\ComprobantePresupuestarioRepository;
-use App\Repositories\MovimientoPresupuestarioRepository;
 use App\Repositories\EstrucPresupuestariaRepository;
-use App\Database\Connection;
+use App\Repositories\MovimientoPresupuestarioRepository;
 use Exception;
 
 class AperturaCuentasController extends HomeController

@@ -1,0 +1,19 @@
+<?php
+
+use App\Database\Connection;
+use Tests\Helpers\DatabaseSeeder;
+
+beforeEach(function () {
+    DatabaseSeeder::cleanBudgetTables();
+});
+
+test('{{ TestName }} ejemplo', function () {
+    // Arrange
+    $db = Connection::getInstance();
+
+    // Act
+    // TODO: llamar al repositorio o controller a probar
+
+    // Assert
+    expect(true)->toBeTrue();
+});

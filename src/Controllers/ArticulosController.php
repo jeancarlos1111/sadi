@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Models\Articulo;
@@ -29,7 +31,9 @@ class ArticulosController extends HomeController
         $search = $_GET['search'] ?? '';
 
         try {
-            $articulos = $this->repo->all($search);
+            $page = (int)($_GET['page'] ?? 1);
+            $paginator = $this->repo->paginate($search, $page, 15);
+            $articulos = $paginator['data'];
         } catch (PDOException | \Exception $e) {
             $articulos = [];
             $error = "Error al obtener la lista de artículos: " . $e->getMessage();
@@ -40,6 +44,7 @@ class ArticulosController extends HomeController
             'articulos' => $articulos,
             'search' => $search,
             'error' => $error ?? null,
+                    'paginator' => $paginator,
         ]);
     }
 

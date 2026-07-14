@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -79,7 +81,7 @@ class OrdenCompraRepository extends Repository
 
     public function delete(int $id): bool
     {
-        return $this->query()->where('id_orden_de_compra', '=', $id)->update(['eliminado' => 1]);
+        return $this->query()->where('id_orden_de_compra', '=', $id)->update(['eliminado' => 'true']);
     }
 
     /**
@@ -93,6 +95,49 @@ class OrdenCompraRepository extends Repository
         $db->beginTransaction();
 
         try {
+            // VERIFICACIÓN DE DISPONIBILIDAD PRESUPUESTARIA (PRE-COMPROMISO)
+            $pctIva = (float)$cabecera['porcentaje_iva_odc'];
+            $compromisosPartidas = [];
+
+            foreach ($detalles as $item) {
+                $stmtArt = $db->prepare("SELECT id_codigo_plan_unico FROM articulo WHERE id_articulo = ?");
+                $stmtArt->execute([$item['id_articulo']]);
+                $idPartida = $stmtArt->fetchColumn();
+
+                if (!$idPartida) {
+                    throw new Exception("El artículo seleccionado no tiene una Partida Presupuestaria asignada.");
+                }
+
+                $montoRenglon = $item['cantidad_aodc'] * $item['costo_aodc'];
+                if (!empty($item['aplica_iva'])) {
+                    $montoRenglon += ($montoRenglon * ($pctIva / 100));
+                }
+
+                if (!isset($compromisosPartidas[$idPartida])) {
+                    $compromisosPartidas[$idPartida] = 0;
+                }
+                $compromisosPartidas[$idPartida] += $montoRenglon;
+            }
+
+            foreach ($compromisosPartidas as $idPartida => $montoComprometer) {
+                // FOR UPDATE: bloquea la fila de esta partida hasta que la transacción
+                // haga COMMIT o ROLLBACK. Previene condición de carrera entre usuarios
+                // concurrentes que intenten comprometer la misma partida presupuestaria.
+                // Cumple con LOAFSP art. 36: no se puede generar compromiso sin disponibilidad.
+                $stmtCheck = $db->prepare("
+                    SELECT (monto_asignado - monto_comprometido - monto_precomprometido) AS disponible
+                    FROM presupuesto_gastos
+                    WHERE id_codigo_plan_unico = ?
+                    FOR UPDATE
+                ");
+                $stmtCheck->execute([$idPartida]);
+                $disponible = (float)$stmtCheck->fetchColumn();
+
+                if ($montoComprometer > $disponible) {
+                    throw new Exception("Pre-compromiso fallido: Insuficiente disponibilidad para la partida $idPartida. Faltan Bs " . number_format($montoComprometer - $disponible, 2, ',', '.'));
+                }
+            }
+
             // 1. Insertar Cabecera de la Orden
             $stmt = $db->prepare("
                 INSERT INTO orden_de_compra 
@@ -185,7 +230,14 @@ class OrdenCompraRepository extends Repository
             // Comprometer
             $stmtPresupuesto = $db->prepare("UPDATE presupuesto_gastos SET monto_comprometido = monto_comprometido + :monto WHERE id_codigo_plan_unico = :id_partida");
             foreach ($compromisosPartidas as $idPartida => $montoComprometer) {
-                $stmtCheck = $db->prepare("SELECT (monto_asignado - monto_comprometido) as disponible FROM presupuesto_gastos WHERE id_codigo_plan_unico = ?");
+                // FOR UPDATE: bloquea la fila durante la contabilización para evitar
+                // doble compromiso concurrente sobre la misma partida presupuestaria.
+                $stmtCheck = $db->prepare("
+                    SELECT (monto_asignado - monto_comprometido - monto_precomprometido) AS disponible
+                    FROM presupuesto_gastos
+                    WHERE id_codigo_plan_unico = ?
+                    FOR UPDATE
+                ");
                 $stmtCheck->execute([$idPartida]);
                 $disponible = (float)$stmtCheck->fetchColumn();
 
@@ -195,7 +247,7 @@ class OrdenCompraRepository extends Repository
                 $stmtPresupuesto->execute([':monto' => $montoComprometer, ':id_partida' => $idPartida]);
             }
 
-            $db->prepare("UPDATE orden_de_compra SET contabilizada = 1 WHERE id_orden_de_compra = ?")->execute([$id]);
+            $db->prepare("UPDATE orden_de_compra SET contabilizada = true WHERE id_orden_de_compra = ?")->execute([$id]);
             $db->commit();
 
             return true;
@@ -253,7 +305,7 @@ class OrdenCompraRepository extends Repository
                 $stmtPresupuesto->execute([':monto' => $monto, ':id_partida' => $idPartida]);
             }
 
-            $db->prepare("UPDATE orden_de_compra SET contabilizada = 0 WHERE id_orden_de_compra = ?")->execute([$id]);
+            $db->prepare("UPDATE orden_de_compra SET contabilizada = false WHERE id_orden_de_compra = ?")->execute([$id]);
             $db->commit();
 
             return true;

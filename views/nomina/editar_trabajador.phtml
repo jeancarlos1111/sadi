@@ -13,7 +13,7 @@
         <label style="display: block; font-weight: bold; margin-bottom: 5px;">Cargo Actual:</label>
         <select name="cod_cargo" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
             <?php foreach ($cargos as $c): ?>
-                <option value="<?= $c->id ?>" <?= $c->id == $trabajador['cargo_cod_cargo'] ? 'selected' : '' ?>>
+                <option value="<?= htmlspecialchars((string)$c->id) ?>" <?= $c->id == $trabajador['cargo_cod_cargo'] ? 'selected' : '' ?>>
                     <?= htmlspecialchars($c->nombre) ?>
                 </option>
             <?php endforeach; ?>
@@ -24,7 +24,7 @@
         <label style="display: block; font-weight: bold; margin-bottom: 5px;">Pertenece a Nómina:</label>
         <select name="cod_nomina" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
             <?php foreach ($nominas as $n): ?>
-                <option value="<?= $n->id ?>" <?= $n->id == $trabajador['nomina_cod_nomina'] ? 'selected' : '' ?>>
+                <option value="<?= htmlspecialchars((string)$n->id) ?>" <?= $n->id == $trabajador['nomina_cod_nomina'] ? 'selected' : '' ?>>
                     <?= htmlspecialchars($n->nombre) ?>
                 </option>
             <?php endforeach; ?>

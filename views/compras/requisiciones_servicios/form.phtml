@@ -15,7 +15,7 @@
 
                 <form method="POST" action="?route=requisiciones_servicios/guardar">
                     <?php if ($requisicion && $requisicion->id): ?>
-                        <input type="hidden" name="id" value="<?= $requisicion->id ?>">
+                        <input type="hidden" name="id" value="<?= htmlspecialchars((string)$requisicion->id) ?>">
                     <?php endif; ?>
 
                     <h5 class="mb-3 text-primary border-bottom pb-2">Datos Generales</h5>
@@ -32,7 +32,7 @@
                                 <select name="id_estructura_presupuestaria" class="form-control">
                                     <option value="0">-- Ninguna --</option>
                                     <?php foreach ($estructuras as $ep): ?>
-                                        <option value="<?= $ep['id_estruc_presupuestaria'] ?>" <?= ($requisicion && $requisicion->idEstructura == $ep['id_estruc_presupuestaria']) ? 'selected' : '' ?>>
+                                        <option value="<?= htmlspecialchars((string)$ep['id_estruc_presupuestaria']) ?>" <?= ($requisicion && $requisicion->idEstructura == $ep['id_estruc_presupuestaria']) ? 'selected' : '' ?>>
                                             <?= htmlspecialchars($ep['descripcion_ep']) ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -68,7 +68,7 @@
                                         <select name="servicios[]" class="form-control form-control-sm select2" required>
                                             <option value="">-- Seleccione --</option>
                                             <?php foreach ($serviciosCatalogo as $sd): $s = $sd['entity']; ?>
-                                                <option value="<?= $s->id ?>"><?= htmlspecialchars($s->denominacion) ?></option>
+                                                <option value="<?= htmlspecialchars((string)$s->id) ?>"><?= htmlspecialchars($s->denominacion) ?></option>
                                             <?php endforeach; ?>
                                         </select>
                                     </td>
@@ -98,7 +98,7 @@
 </div>
 
 <script>
-const opcionesServicios = `<?php foreach ($serviciosCatalogo as $sd): $s = $sd['entity']; ?><option value="<?= $s->id ?>"><?= htmlspecialchars($s->denominacion) ?></option><?php endforeach; ?>`;
+const opcionesServicios = `<?php foreach ($serviciosCatalogo as $sd): $s = $sd['entity']; ?><option value="<?= htmlspecialchars((string)$s->id) ?>"><?= htmlspecialchars($s->denominacion) ?></option><?php endforeach; ?>`;
 document.getElementById('btnAgregar').addEventListener('click', function() {
     const tr = document.createElement('tr');
     tr.innerHTML = `

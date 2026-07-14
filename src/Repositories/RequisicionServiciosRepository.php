@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -19,9 +21,9 @@ class RequisicionServiciosRepository extends Repository
     public function all(string $search = '', string $mes = ''): array
     {
         $db = $this->getPdo();
-        $sql = "SELECT * FROM requisicion_servicios WHERE eliminado = 0";
+        $sql = "SELECT * FROM requisicion_servicios WHERE eliminado = false";
         if ($mes !== '') {
-            $sql .= " AND strftime('%m', fecha_rs) = :mes";
+            $sql .= " AND to_char(fecha_rs, 'MM') = :mes";
         }
         if ($search !== '') {
             $sql .= " AND concepto_rs LIKE :s";
@@ -44,7 +46,7 @@ class RequisicionServiciosRepository extends Repository
     {
         $db = $this->getPdo();
 
-        $stmt = $db->prepare("SELECT * FROM requisicion_servicios WHERE id_requisicion_servicios = :id AND eliminado = 0");
+        $stmt = $db->prepare("SELECT * FROM requisicion_servicios WHERE id_requisicion_servicios = :id AND eliminado = false");
         $stmt->execute(['id' => $id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -123,6 +125,6 @@ class RequisicionServiciosRepository extends Repository
 
     public function delete(int $id): bool
     {
-        return $this->query()->where('id_requisicion_servicios', '=', $id)->update(['eliminado' => 1]);
+        return $this->query()->where('id_requisicion_servicios', '=', $id)->update(['eliminado' => 'true']);
     }
 }

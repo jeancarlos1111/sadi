@@ -9,7 +9,7 @@
                 $meses = ['01'=>'Enero', '02'=>'Febrero', '03'=>'Marzo', '04'=>'Abril', '05'=>'Mayo', '06'=>'Junio', '07'=>'Julio', '08'=>'Agosto', '09'=>'Septiembre', '10'=>'Octubre', '11'=>'Noviembre', '12'=>'Diciembre'];
                 foreach($meses as $num => $nombre): 
             ?>
-                <option value="<?= $num ?>" <?= ($mes == $num) ? 'selected' : '' ?>><?= $nombre ?></option>
+                <option value="<?= htmlspecialchars((string)$num) ?>" <?= ($mes == $num) ? 'selected' : '' ?>><?= htmlspecialchars((string)$nombre) ?></option>
             <?php endforeach; ?>
         </select>
         <input type="number" name="anio" value="<?= htmlspecialchars($anio) ?>" style="padding: 5px; width: 80px;" min="2000" max="2099">
@@ -25,7 +25,7 @@
     <table width="100%" cellpadding="8" style="margin-bottom: 20px;">
         <?php foreach ($filas as $f): if($f['tipo_cuenta'] === 'INGRESO' && $f['saldo'] != 0): ?>
             <tr>
-                <td width="15%" style="color: #666; font-family: monospace;"><?= $f['codigo_cuenta'] ?></td>
+                <td width="15%" style="color: #666; font-family: monospace;"><?= htmlspecialchars((string)$f['codigo_cuenta']) ?></td>
                 <td width="60%"><?= htmlspecialchars($f['denominacion_cuenta']) ?></td>
                 <td width="25%" align="right">Bs <?= number_format($f['saldo'], 2, ',', '.') ?></td>
             </tr>
@@ -41,7 +41,7 @@
     <table width="100%" cellpadding="8" style="margin-bottom: 30px;">
         <?php foreach ($filas as $f): if($f['tipo_cuenta'] === 'EGRESO' && $f['saldo'] != 0): ?>
             <tr>
-                <td width="15%" style="color: #666; font-family: monospace;"><?= $f['codigo_cuenta'] ?></td>
+                <td width="15%" style="color: #666; font-family: monospace;"><?= htmlspecialchars((string)$f['codigo_cuenta']) ?></td>
                 <td width="60%"><?= htmlspecialchars($f['denominacion_cuenta']) ?></td>
                 <td width="25%" align="right">Bs <?= number_format($f['saldo'], 2, ',', '.') ?></td>
             </tr>

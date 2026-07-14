@@ -1,0 +1,90 @@
+<div class="card card-primary card-outline">
+  <div class="card-header">
+    <h3 class="card-title mt-1"><i class="fas fa-calendar-alt mr-1"></i> <?= htmlspecialchars($titulo) ?></h3>
+    <div class="card-tools">
+      <a href="?route=p_a_c/form" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> Agregar al PAC</a>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="mb-3">
+      <form method="GET" action="" class="form-inline">
+        <input type="hidden" name="route" value="p_a_c/index">
+        <div class="input-group input-group-sm">
+          <input type="text" name="search" class="form-control" placeholder="Buscar artículo o proyecto..." value="<?= htmlspecialchars($search ?? '') ?>" style="width: 300px;">
+          <span class="input-group-append">
+            <button type="submit" class="btn btn-primary btn-flat"><i class="fas fa-search"></i></button>
+          </span>
+        </div>
+        <a href="?route=p_a_c/index" class="btn btn-default btn-sm ml-2">Limpiar</a>
+      </form>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped w-100">
+        <thead class="thead-dark">
+          <tr>
+            <th>Artículo</th>
+            <th>Proyecto/AC</th>
+            <th class="text-right">Cant. Anual</th>
+            <th class="text-right">Trim 1</th>
+            <th class="text-right">Trim 2</th>
+            <th class="text-right">Trim 3</th>
+            <th class="text-right">Trim 4</th>
+            <th class="text-right">Costo Est. (Bs)</th>
+            <th class="text-center">Estatus</th>
+            <th class="text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php if (empty($items)): ?>
+            <tr>
+              <td colspan="10" class="text-center text-muted py-4">No se encontraron renglones en el PAC.</td>
+            </tr>
+          <?php else: ?>
+            <?php foreach ($items as $item): ?>
+              <tr>
+                <td class="align-middle"><?= htmlspecialchars($item['articulo_desc'] ?? '') ?></td>
+                <td class="align-middle"><?= htmlspecialchars($item['proyecto_desc'] ?: $item['ac_desc']) ?></td>
+                <td class="text-right align-middle"><?= number_format($item['entity']->cantidad_anual, 2, ',', '.') ?></td>
+                <td class="text-right align-middle"><?= number_format($item['entity']->trim_1, 2, ',', '.') ?></td>
+                <td class="text-right align-middle"><?= number_format($item['entity']->trim_2, 2, ',', '.') ?></td>
+                <td class="text-right align-middle"><?= number_format($item['entity']->trim_3, 2, ',', '.') ?></td>
+                <td class="text-right align-middle"><?= number_format($item['entity']->trim_4, 2, ',', '.') ?></td>
+                <td class="text-right align-middle text-primary font-weight-bold"><?= number_format($item['entity']->costo_estimado, 2, ',', '.') ?></td>
+                <td class="text-center align-middle">
+                  <?php if($item['entity']->estatus === 'APROBADO'): ?>
+                      <span class="badge badge-success">Aprobado</span>
+                  <?php else: ?>
+                      <span class="badge badge-warning">Planificado</span>
+                  <?php endif; ?>
+                </td>
+                <td class="text-right align-middle text-nowrap">
+                  <?php if($item['entity']->estatus !== 'APROBADO'): ?>
+                  <form method="POST" action="?route=p_a_c/aprobar" style="display: inline-block;" onsubmit="return confirm('¿Aprobar y pre-comprometer este renglón?');">
+                    <input type="hidden" name="id" value="<?= $item['entity']->id ?>">
+                    <button type="submit" class="btn btn-sm btn-success" title="Aprobar">
+                      <i class="fas fa-check"></i>
+                    </button>
+                  </form>
+                  <?php endif; ?>
+                  <a href="?route=p_a_c/form&id=<?= $item['entity']->id ?>" class="btn btn-sm btn-info" title="Editar">
+                    <i class="fas fa-edit"></i>
+                  </a>
+                  <form method="POST" action="?route=p_a_c/delete" style="display: inline-block;" onsubmit="return confirm('¿Está seguro de eliminar este renglón?');">
+                    <input type="hidden" name="id" value="<?= $item['entity']->id ?>">
+                    <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </tbody>
+      </table>
+    </div>
+    <?php if (isset($paginator) && $paginator !== null): ?>
+      <?php include $partialsPath . '/pagination.phtml'; ?>
+    <?php endif; ?>
+  </div>
+</div>

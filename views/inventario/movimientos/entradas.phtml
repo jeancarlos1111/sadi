@@ -20,8 +20,8 @@
             <option value="">-- Buscar y Seleccionar --</option>
             <?php foreach ($ordenes as $o): ?>
                 <?php $oc = $o['entity']; ?>
-                <option value="<?= $oc->id ?>" <?= (isset($_GET['id_orden']) && $_GET['id_orden'] == $oc->id) ? 'selected' : '' ?>>
-                    Orden #<?= $oc->id ?> | <?= htmlspecialchars($o['proveedor']) ?> | Total: <?= number_format($oc->montoTotal, 2) ?> | Fecha: <?= date('d/m/Y', strtotime($oc->fecha)) ?>
+                <option value="<?= htmlspecialchars((string)$oc->id) ?>" <?= (isset($_GET['id_orden']) && $_GET['id_orden'] == $oc->id) ? 'selected' : '' ?>>
+                    Orden #<?= htmlspecialchars((string)$oc->id) ?> | <?= htmlspecialchars($o['proveedor']) ?> | Total: <?= number_format($oc->montoTotal, 2) ?> | Fecha: <?= date('d/m/Y', strtotime($oc->fecha)) ?>
                 </option>
             <?php endforeach; ?>
         </select>
@@ -71,18 +71,18 @@
                             <tr <?= $porRecibir <= 0 ? 'style="background-color: #d4edda; color: #155724;"' : '' ?>>
                                 <td style="text-align: left;">
                                     <?= htmlspecialchars($d['denominacion_a']) ?>
-                                    <input type="hidden" name="id_articulo[]" value="<?= $d['id_articulo'] ?>">
+                                    <input type="hidden" name="id_articulo[]" value="<?= htmlspecialchars((string)$d['id_articulo']) ?>">
                                 </td>
                                 <td><?= $d['tipo_tda'] == 1 ? 'Bien Nacional' : 'Insumo/Material' ?></td>
                                 <td><?= htmlspecialchars($d['denominacion_udm']) ?></td>
-                                <td><?= $pedida ?></td>
-                                <td><?= $recibida ?></td>
+                                <td><?= htmlspecialchars((string)$pedida) ?></td>
+                                <td><?= htmlspecialchars((string)$recibida) ?></td>
                                 <td style="font-weight: bold; color: <?= $porRecibir > 0 ? 'red' : 'green' ?>;">
-                                    <?= $porRecibir ?>
+                                    <?= htmlspecialchars((string)$porRecibir) ?>
                                 </td>
                                 <td>
                                     <?php if ($porRecibir > 0): ?>
-                                        <input type="number" name="cantidad_recibir[]" max="<?= $porRecibir ?>" min="0" step="1" value="<?= $porRecibir ?>" style="width: 80px; padding: 5px; text-align: center;" required>
+                                        <input type="number" name="cantidad_recibir[]" max="<?= htmlspecialchars((string)$porRecibir) ?>" min="0" step="1" value="<?= htmlspecialchars((string)$porRecibir) ?>" style="width: 80px; padding: 5px; text-align: center;" required>
                                     <?php else: ?>
                                         <span style="font-size: 1.2em;">✔ Completo</span>
                                         <input type="hidden" name="cantidad_recibir[]" value="0">

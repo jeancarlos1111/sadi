@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Models\RequisicionServicios;
@@ -29,7 +31,9 @@ class RequisicionesServiciosController extends HomeController
         $mes    = $_GET['mes'] ?? '';
 
         try {
-            $requisiciones = $this->repo->all($search, $mes);
+            $page = (int)($_GET['page'] ?? 1);
+            $paginator = $this->repo->paginate($search, $mes, $page, 15);
+            $requisiciones = $paginator['data'];
         } catch (PDOException | \Exception $e) {
             $requisiciones = [];
             $error = "Error: " . $e->getMessage();
@@ -40,6 +44,7 @@ class RequisicionesServiciosController extends HomeController
             'search'        => $search,
             'mes'           => $mes,
             'error'         => $error ?? null,
+                    'paginator' => $paginator,
         ]);
     }
 

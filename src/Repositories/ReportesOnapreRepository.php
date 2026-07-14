@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -47,8 +49,8 @@ class ReportesOnapreRepository extends Repository
             FROM cuenta_contable c
             JOIN movimiento_contable m ON c.id_cuenta_contable = m.id_cuenta_contable
             JOIN comprobante_diario cd ON m.id_comprobante_diario = cd.id_comprobante_diario
-            WHERE c.eliminado = 0 
-              AND cd.eliminado = 0
+            WHERE c.eliminado = false 
+              AND cd.eliminado = false
               AND c.tipo_cuenta IN ('INGRESO', 'EGRESO')
               {$filtroFecha}
             GROUP BY c.id_cuenta_contable
@@ -92,8 +94,8 @@ class ReportesOnapreRepository extends Repository
             FROM cuenta_contable c
             JOIN movimiento_contable m ON c.id_cuenta_contable = m.id_cuenta_contable
             JOIN comprobante_diario cd ON m.id_comprobante_diario = cd.id_comprobante_diario
-            WHERE c.eliminado = 0 
-              AND cd.eliminado = 0
+            WHERE c.eliminado = false 
+              AND cd.eliminado = false
               AND c.tipo_cuenta IN ('ACTIVO', 'PASIVO', 'PATRIMONIO')
               {$filtroFecha}
             GROUP BY c.id_cuenta_contable

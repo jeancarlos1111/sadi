@@ -1,85 +1,85 @@
 <div class="card card-outline card-primary d-print-none">
-    <div class="card-header">
-        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
-    </div>
-    <div class="card-body">
-        <div class="callout callout-info mb-4">
-            <form method="GET" action="index.php">
-                <input type="hidden" name="route" value="reportes_cxp/estado_cuenta">
-                <div class="row align-items-end">
-                    <div class="col-md-8">
-                        <div class="form-group mb-0">
-                            <label>Seleccione el Proveedor / Beneficiario:</label>
-                            <select class="form-control" name="id_proveedor" required>
-                                <option value="">-- Buscar --</option>
-                                <?php foreach ($proveedores as $prov): ?>
-                                    <option value="<?= $prov['id_proveedor'] ?>" <?= ($idProveedor == $prov['id_proveedor']) ? 'selected' : '' ?>>
-                                        <?= htmlspecialchars(($prov['rif_proveedor'] ?? '') . " - " . ($prov['compania_proveedor'] ?? '')) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Consultar</button>
-                        <?php if ($idProveedor): ?>
-                            <button type="button" class="btn btn-info ml-2" onclick="window.print()"><i class="fas fa-print"></i> Imprimir</button>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </form>
+  <div class="card-header">
+    <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+  </div>
+  <div class="card-body">
+    <div class="callout callout-info mb-4">
+      <form method="GET" action="index.php">
+        <input type="hidden" name="route" value="reportes_cxp/estado_cuenta">
+        <div class="row align-items-end">
+          <div class="col-md-8">
+            <div class="form-group mb-0">
+              <label>Seleccione el Proveedor / Beneficiario:</label>
+              <select class="form-control" name="id_proveedor" required>
+                <option value="">-- Buscar --</option>
+                <?php foreach ($proveedores as $prov): ?>
+                  <option value="<?= htmlspecialchars((string)$prov['id_proveedor']) ?>" <?= ($idProveedor == $prov['id_proveedor']) ? 'selected' : '' ?>>
+                    <?= htmlspecialchars(($prov['rif_proveedor'] ?? '') . " - " . ($prov['compania_proveedor'] ?? '')) ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Consultar</button>
+            <?php if ($idProveedor): ?>
+              <button type="button" class="btn btn-info ml-2" onclick="window.print()"><i class="fas fa-print"></i> Imprimir</button>
+            <?php endif; ?>
+          </div>
         </div>
+      </form>
     </div>
+  </div>
 </div>
 
 <?php if ($idProveedor): ?>
 <div class="card card-outline card-secondary">
-    <div class="card-header">
-        <h3 class="card-title">Estado de Cuenta: <strong><?= htmlspecialchars(($proveedorSeleccionado['rif_proveedor'] ?? '') . " - " . ($proveedorSeleccionado['compania_proveedor'] ?? '')) ?></strong></h3>
+  <div class="card-header">
+    <h3 class="card-title">Estado de Cuenta: <strong><?= htmlspecialchars(($proveedorSeleccionado['rif_proveedor'] ?? '') . " - " . ($proveedorSeleccionado['compania_proveedor'] ?? '')) ?></strong></h3>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped w-100 table-sm">
+        <thead class="thead-dark">
+          <tr>
+            <th>Fecha Emisión</th>
+            <th>Tipo</th>
+            <th>Número de Factura / Doc</th>
+            <th>Concepto</th>
+            <th class="text-right">Monto Facturado</th>
+            <th class="text-right">Pagado / Liquidado</th>
+            <th class="text-center">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php if (empty($movimientos)): ?>
+            <tr><td colspan="7" class="text-center">No hay movimientos históricos para este proveedor.</td></tr>
+          <?php else: foreach ($movimientos as $m): ?>
+            <tr>
+              <td><?= htmlspecialchars($m['fecha'] ?? '') ?></td>
+              <td><?= htmlspecialchars($m['tipo'] ?? '') ?></td>
+              <td class="font-weight-bold"><?= htmlspecialchars($m['nro'] ?? '') ?></td>
+              <td><small><?= htmlspecialchars($m['concepto'] ?? '') ?></small></td>
+              <td class="text-right">Bs <?= number_format($m['monto_facturado'], 2, ',', '.') ?></td>
+              <td class="text-right text-success">Bs <?= number_format($m['pagado'], 2, ',', '.') ?></td>
+              <td class="text-center">
+                <?php if ($m['estado'] === 'PAGADO'): ?>
+                  <span class="badge badge-success"><?= htmlspecialchars((string)$m['estado']) ?></span>
+                <?php else: ?>
+                  <span class="badge badge-danger"><?= htmlspecialchars((string)$m['estado']) ?></span>
+                <?php endif; ?>
+              </td>
+            </tr>
+          <?php endforeach; endif; ?>
+        </tbody>
+        <tfoot class="table-warning">
+          <tr>
+            <td colspan="6" class="text-right font-weight-bold text-warning-dark pt-3">Deuda Total Pendiente a Fecha actual:</td>
+            <td class="text-center font-weight-bold text-danger h5 pt-2 mb-0">Bs <?= number_format($saldoTotal, 2, ',', '.') ?></td>
+          </tr>
+        </tfoot>
+      </table>
     </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped dataTable w-100 table-sm">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Fecha Emisión</th>
-                        <th>Tipo</th>
-                        <th>Número de Factura / Doc</th>
-                        <th>Concepto</th>
-                        <th class="text-right">Monto Facturado</th>
-                        <th class="text-right">Pagado / Liquidado</th>
-                        <th class="text-center">Estado</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($movimientos)): ?>
-                        <tr><td colspan="7" class="text-center">No hay movimientos históricos para este proveedor.</td></tr>
-                    <?php else: foreach ($movimientos as $m): ?>
-                        <tr>
-                            <td><?= htmlspecialchars($m['fecha'] ?? '') ?></td>
-                            <td><?= htmlspecialchars($m['tipo'] ?? '') ?></td>
-                            <td class="font-weight-bold"><?= htmlspecialchars($m['nro'] ?? '') ?></td>
-                            <td><small><?= htmlspecialchars($m['concepto'] ?? '') ?></small></td>
-                            <td class="text-right">Bs <?= number_format($m['monto_facturado'], 2, ',', '.') ?></td>
-                            <td class="text-right text-success">Bs <?= number_format($m['pagado'], 2, ',', '.') ?></td>
-                            <td class="text-center">
-                                <?php if ($m['estado'] === 'PAGADO'): ?>
-                                    <span class="badge badge-success"><?= $m['estado'] ?></span>
-                                <?php else: ?>
-                                    <span class="badge badge-danger"><?= $m['estado'] ?></span>
-                                <?php endif; ?>
-                            </td>
-                        </tr>
-                    <?php endforeach; endif; ?>
-                </tbody>
-                <tfoot class="table-warning">
-                    <tr>
-                        <td colspan="6" class="text-right font-weight-bold text-warning-dark pt-3">Deuda Total Pendiente a Fecha actual:</td>
-                        <td class="text-center font-weight-bold text-danger h5 pt-2 mb-0">Bs <?= number_format($saldoTotal, 2, ',', '.') ?></td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-    </div>
+  </div>
 </div>
 <?php endif; ?>

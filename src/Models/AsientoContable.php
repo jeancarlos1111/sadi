@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
-class AsientoContable
+readonly class AsientoContable
 {
     public function __construct(
         public string $numeroComprobante,
@@ -24,5 +26,29 @@ class AsientoContable
         $repo = new \App\Repositories\AsientoContableRepository();
 
         return $repo->registrarDesdeTransaccion($fecha, $concepto, $movimientos);
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'numeroComprobante' => $this->numeroComprobante,
+            'fecha' => $this->fecha,
+            'concepto' => $this->concepto,
+            'totalDebe' => $this->totalDebe,
+            'totalHaber' => $this->totalHaber,
+            'id' => $this->id,
+        ];
+    }
+
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            $data['numeroComprobante'] ?? null,
+            $data['fecha'] ?? null,
+            $data['concepto'] ?? null,
+            $data['totalDebe'] ?? null,
+            $data['totalHaber'] ?? null,
+            $data['id'] ?? null,
+        );
     }
 }

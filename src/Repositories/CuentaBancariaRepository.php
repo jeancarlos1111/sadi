@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -23,7 +25,7 @@ class CuentaBancariaRepository extends Repository
             SELECT C.id_cta_bancaria, C.id_banco, C.numero_cta_bancaria, B.nombre_banco 
             FROM cta_bancaria AS C
             JOIN banco AS B ON C.id_banco = B.id_banco
-            WHERE C.eliminado = 0 AND B.eliminado = 0
+            WHERE C.eliminado = false AND B.eliminado = false
             ORDER BY B.nombre_banco, C.numero_cta_bancaria
         ";
         $stmt = $db->query($sql);
@@ -48,7 +50,7 @@ class CuentaBancariaRepository extends Repository
             SELECT C.id_cta_bancaria, C.id_banco, C.numero_cta_bancaria, B.nombre_banco 
             FROM cta_bancaria AS C
             JOIN banco AS B ON C.id_banco = B.id_banco
-            WHERE C.id_cta_bancaria = ? AND C.eliminado = 0
+            WHERE C.id_cta_bancaria = ? AND C.eliminado = false
         ";
         $stmt = $db->prepare($sql);
         $stmt->execute([$id]);
@@ -94,7 +96,7 @@ class CuentaBancariaRepository extends Repository
     public function delete(int $id): bool
     {
         $db = $this->getPdo();
-        $stmt = $db->prepare("UPDATE cta_bancaria SET eliminado = 1 WHERE id_cta_bancaria = ?");
+        $stmt = $db->prepare("UPDATE cta_bancaria SET eliminado = true WHERE id_cta_bancaria = ?");
 
         return $stmt->execute([$id]);
     }

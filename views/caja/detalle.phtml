@@ -1,173 +1,173 @@
 <div class="card card-outline card-primary mb-4">
-    <div class="card-header">
-        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
-        <div class="card-tools">
-            <a href="?route=caja/index" class="btn btn-sm btn-default">
-                <i class="fas fa-arrow-left"></i> Volver a Cajas Chicas
-            </a>
-        </div>
+  <div class="card-header">
+    <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+    <div class="card-tools">
+      <a href="?route=caja/index" class="btn btn-sm btn-default">
+        <i class="fas fa-arrow-left"></i> Volver a Cajas Chicas
+      </a>
     </div>
-    <div class="card-body">
-        <?php if (isset($success)): ?>
-            <div class="alert alert-success alert-dismissible">
-                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                <h5><i class="icon fas fa-check"></i> Éxito</h5>
-                <?= htmlspecialchars($success) ?>
-            </div>
-        <?php endif; ?>
-        <?php if (isset($error)): ?>
-            <div class="alert alert-danger alert-dismissible">
-                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                <h5><i class="icon fas fa-ban"></i> Error</h5>
-                <?= htmlspecialchars($error) ?>
-            </div>
-        <?php endif; ?>
+  </div>
+  <div class="card-body">
+    <?php if (isset($success)): ?>
+      <div class="alert alert-success alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <h5><i class="icon fas fa-check"></i> Éxito</h5>
+        <?= htmlspecialchars($success) ?>
+      </div>
+    <?php endif; ?>
+    <?php if (isset($error)): ?>
+      <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <h5><i class="icon fas fa-ban"></i> Error</h5>
+        <?= htmlspecialchars($error) ?>
+      </div>
+    <?php endif; ?>
 
-        <?php
-        $pct = $caja->montoAsignado > 0 ? ($caja->montoDisponible / $caja->montoAsignado) * 100 : 0;
-        $colorClass = $pct > 30 ? 'bg-success' : ($pct > 10 ? 'bg-warning' : 'bg-danger');
-        $textColor = $pct > 30 ? 'text-success' : ($pct > 10 ? 'text-warning' : 'text-danger');
+    <?php
+    $pct = $caja->montoAsignado > 0 ? ($caja->montoDisponible / $caja->montoAsignado) * 100 : 0;
+    $colorClass = $pct > 30 ? 'bg-success' : ($pct > 10 ? 'bg-warning' : 'bg-danger');
+    $textColor = $pct > 30 ? 'text-success' : ($pct > 10 ? 'text-warning' : 'text-danger');
+    ?>
+
+    <!-- Panel de estado de la caja -->
+    <div class="callout callout-info mb-4 d-flex justify-content-between align-items-center flex-wrap">
+      <div class="mb-2">
+        <small class="text-muted d-block">Total Asignado</small>
+        <span class="h4 font-weight-bold">Bs <?= number_format($caja->montoAsignado, 2, ',', '.') ?></span>
+      </div>
+      <div class="flex-grow-1 mx-4 mb-2" style="min-width: 200px;">
+        <div class="d-flex justify-content-between text-muted small mb-1">
+          <span>Saldo Disponible</span>
+          <span><?= round($pct) ?>%</span>
+        </div>
+        <div class="progress progress-sm">
+          <div class="progress-bar <?= htmlspecialchars((string)$colorClass) ?>" style="width: <?= min(100, round($pct)) ?>%"></div>
+        </div>
+        <div class="h5 font-weight-bold mt-1 <?= htmlspecialchars((string)$textColor) ?>">
+          Bs <?= number_format($caja->montoDisponible, 2, ',', '.') ?>
+        </div>
+      </div>
+      <div class="text-right mb-2">
+        <small class="text-muted d-block">Responsable</small>
+        <span><?= htmlspecialchars($caja->responsable) ?></span>
+        <small class="text-muted d-block"><?= htmlspecialchars($caja->fechaApertura) ?></small>
+      </div>
+    </div>
+
+    <div class="row mb-4">
+      <!-- Registrar Gasto -->
+      <div class="col-md-6">
+        <div class="card card-danger card-outline mb-3">
+          <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-money-bill-wave"></i> Registrar Gasto</h3>
+          </div>
+          <form method="POST" action="?route=caja/registrarGasto">
+            <div class="card-body">
+              <input type="hidden" name="id_caja_chica" value="<?= htmlspecialchars((string)$caja->id) ?>">
+              <div class="form-group">
+                <label>Concepto:</label>
+                <input type="text" class="form-control form-control-sm" name="concepto" required maxlength="200" placeholder="Descripción del gasto">
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>Monto (Bs):</label>
+                    <input type="number" class="form-control form-control-sm" name="monto" step="0.01" min="0.01" required max="<?= htmlspecialchars((string)$caja->montoDisponible) ?>">
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>Fecha:</label>
+                    <input type="date" class="form-control form-control-sm" name="fecha" required value="<?= date('Y-m-d') ?>">
+                  </div>
+                </div>
+              </div>
+              <div class="form-group mb-0">
+                <label>Nro. Comprobante / Factura:</label>
+                <input type="text" class="form-control form-control-sm" name="comprobante" maxlength="60" placeholder="Factura, recibo, etc.">
+              </div>
+            </div>
+            <div class="card-footer">
+              <button type="submit" class="btn btn-danger btn-block"><i class="fas fa-minus-circle"></i> Registrar Gasto</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Reponer Fondos -->
+      <div class="col-md-6">
+        <div class="card card-success card-outline mb-3">
+          <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-sync-alt"></i> Reponer Fondos</h3>
+          </div>
+          <form method="POST" action="?route=caja/reponer">
+            <div class="card-body">
+              <input type="hidden" name="id_caja_chica" value="<?= htmlspecialchars((string)$caja->id) ?>">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>Monto a Reponer (Bs):</label>
+                    <input type="number" class="form-control form-control-sm" name="monto_reposicion" step="0.01" min="0.01" required>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>Fecha de Reposición:</label>
+                    <input type="date" class="form-control form-control-sm" name="fecha_reposicion" required value="<?= date('Y-m-d') ?>">
+                  </div>
+                </div>
+              </div>
+              <div class="form-group mb-0">
+                <label>Referencia / Nro. Cheque:</label>
+                <input type="text" class="form-control form-control-sm" name="referencia_reposicion" maxlength="80" placeholder="Nro. de cheque o transferencia">
+              </div>
+            </div>
+            <div class="card-footer">
+              <button type="submit" class="btn btn-success btn-block" onclick="return confirm('¿Confirmar la reposición?');"><i class="fas fa-plus-circle"></i> Confirmar Reposición</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Historial de Movimientos -->
+    <h4 class="text-primary border-bottom pb-2 mb-3"><i class="fas fa-list"></i> Historial de Movimientos</h4>
+
+    <?php if (empty($movimientos)): ?>
+      <div class="alert alert-light text-center">
+        No hay movimientos registrados en esta caja chica.
+      </div>
+    <?php else: ?>
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped w-100 table-sm">
+        <thead class="thead-dark">
+          <tr>
+            <th>Fecha</th>
+            <th>Tipo</th>
+            <th>Concepto</th>
+            <th>Comprobante</th>
+            <th class="text-right">Monto (Bs)</th>
+          </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($movimientos as $m): 
+          $esGasto = $m['tipo'] === 'GASTO';
+          $textColor = $esGasto ? 'text-danger' : 'text-success';
+          $signo = $esGasto ? '-' : '+';
         ?>
-
-        <!-- Panel de estado de la caja -->
-        <div class="callout callout-info mb-4 d-flex justify-content-between align-items-center flex-wrap">
-            <div class="mb-2">
-                <small class="text-muted d-block">Total Asignado</small>
-                <span class="h4 font-weight-bold">Bs <?= number_format($caja->montoAsignado, 2, ',', '.') ?></span>
-            </div>
-            <div class="flex-grow-1 mx-4 mb-2" style="min-width: 200px;">
-                <div class="d-flex justify-content-between text-muted small mb-1">
-                    <span>Saldo Disponible</span>
-                    <span><?= round($pct) ?>%</span>
-                </div>
-                <div class="progress progress-sm">
-                    <div class="progress-bar <?= $colorClass ?>" style="width: <?= min(100, round($pct)) ?>%"></div>
-                </div>
-                <div class="h5 font-weight-bold mt-1 <?= $textColor ?>">
-                    Bs <?= number_format($caja->montoDisponible, 2, ',', '.') ?>
-                </div>
-            </div>
-            <div class="text-right mb-2">
-                <small class="text-muted d-block">Responsable</small>
-                <span><?= htmlspecialchars($caja->responsable) ?></span>
-                <small class="text-muted d-block"><?= htmlspecialchars($caja->fechaApertura) ?></small>
-            </div>
-        </div>
-
-        <div class="row mb-4">
-            <!-- Registrar Gasto -->
-            <div class="col-md-6">
-                <div class="card card-danger card-outline mb-3">
-                    <div class="card-header">
-                        <h3 class="card-title"><i class="fas fa-money-bill-wave"></i> Registrar Gasto</h3>
-                    </div>
-                    <form method="POST" action="?route=caja/registrarGasto">
-                        <div class="card-body">
-                            <input type="hidden" name="id_caja_chica" value="<?= $caja->id ?>">
-                            <div class="form-group">
-                                <label>Concepto:</label>
-                                <input type="text" class="form-control form-control-sm" name="concepto" required maxlength="200" placeholder="Descripción del gasto">
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Monto (Bs):</label>
-                                        <input type="number" class="form-control form-control-sm" name="monto" step="0.01" min="0.01" required max="<?= $caja->montoDisponible ?>">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Fecha:</label>
-                                        <input type="date" class="form-control form-control-sm" name="fecha" required value="<?= date('Y-m-d') ?>">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group mb-0">
-                                <label>Nro. Comprobante / Factura:</label>
-                                <input type="text" class="form-control form-control-sm" name="comprobante" maxlength="60" placeholder="Factura, recibo, etc.">
-                            </div>
-                        </div>
-                        <div class="card-footer">
-                            <button type="submit" class="btn btn-danger btn-block"><i class="fas fa-minus-circle"></i> Registrar Gasto</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Reponer Fondos -->
-            <div class="col-md-6">
-                <div class="card card-success card-outline mb-3">
-                    <div class="card-header">
-                        <h3 class="card-title"><i class="fas fa-sync-alt"></i> Reponer Fondos</h3>
-                    </div>
-                    <form method="POST" action="?route=caja/reponer">
-                        <div class="card-body">
-                            <input type="hidden" name="id_caja_chica" value="<?= $caja->id ?>">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Monto a Reponer (Bs):</label>
-                                        <input type="number" class="form-control form-control-sm" name="monto_reposicion" step="0.01" min="0.01" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Fecha de Reposición:</label>
-                                        <input type="date" class="form-control form-control-sm" name="fecha_reposicion" required value="<?= date('Y-m-d') ?>">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group mb-0">
-                                <label>Referencia / Nro. Cheque:</label>
-                                <input type="text" class="form-control form-control-sm" name="referencia_reposicion" maxlength="80" placeholder="Nro. de cheque o transferencia">
-                            </div>
-                        </div>
-                        <div class="card-footer">
-                            <button type="submit" class="btn btn-success btn-block" onclick="return confirm('¿Confirmar la reposición?');"><i class="fas fa-plus-circle"></i> Confirmar Reposición</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- Historial de Movimientos -->
-        <h4 class="text-primary border-bottom pb-2 mb-3"><i class="fas fa-list"></i> Historial de Movimientos</h4>
-
-        <?php if (empty($movimientos)): ?>
-            <div class="alert alert-light text-center">
-                No hay movimientos registrados en esta caja chica.
-            </div>
-        <?php else: ?>
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped dataTable w-100 table-sm">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Tipo</th>
-                        <th>Concepto</th>
-                        <th>Comprobante</th>
-                        <th class="text-right">Monto (Bs)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                <?php foreach ($movimientos as $m): 
-                    $esGasto = $m['tipo'] === 'GASTO';
-                    $textColor = $esGasto ? 'text-danger' : 'text-success';
-                    $signo = $esGasto ? '-' : '+';
-                ?>
-                    <tr>
-                        <td><?= htmlspecialchars($m['fecha']) ?></td>
-                        <td class="font-weight-bold <?= $textColor ?>"><?= htmlspecialchars($m['tipo']) ?></td>
-                        <td><?= htmlspecialchars($m['concepto']) ?></td>
-                        <td><code><?= htmlspecialchars($m['comprobante'] ?: '—') ?></code></td>
-                        <td class="text-right font-weight-bold <?= $textColor ?>">
-                            <?= $signo ?> Bs <?= number_format($m['monto'], 2, ',', '.') ?>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-        <?php endif; ?>
+          <tr>
+            <td><?= htmlspecialchars($m['fecha']) ?></td>
+            <td class="font-weight-bold <?= htmlspecialchars((string)$textColor) ?>"><?= htmlspecialchars($m['tipo']) ?></td>
+            <td><?= htmlspecialchars($m['concepto']) ?></td>
+            <td><code><?= htmlspecialchars($m['comprobante'] ?: '—') ?></code></td>
+            <td class="text-right font-weight-bold <?= htmlspecialchars((string)$textColor) ?>">
+              <?= htmlspecialchars((string)$signo) ?> Bs <?= number_format($m['monto'], 2, ',', '.') ?>
+            </td>
+          </tr>
+        <?php endforeach; ?>
+        </tbody>
+      </table>
     </div>
+    <?php endif; ?>
+  </div>
 </div>

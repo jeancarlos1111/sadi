@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -24,7 +26,7 @@ class ServicioRepository extends Repository
             FROM servicio s
             JOIN tipo_servicio ts ON s.id_tipo_servicio = ts.id_tipo_servicio
             LEFT JOIN plan_unico_cuentas puc ON s.id_codigo_plan_unico = puc.id_codigo_plan_unico
-            WHERE s.eliminado = 0
+            WHERE s.eliminado = false
         ";
 
         if ($search !== '') {
@@ -63,7 +65,7 @@ class ServicioRepository extends Repository
         $row = $this->query()
                     ->select('*')
                     ->where('id_servicio', '=', $id)
-                    ->where('eliminado', '=', 0)
+                    ->where('eliminado', '=', 'false')
                     ->first();
 
         if (!$row) {
@@ -102,6 +104,6 @@ class ServicioRepository extends Repository
 
     public function delete(int $id): bool
     {
-        return $this->query()->where('id_servicio', '=', $id)->update(['eliminado' => 1]);
+        return $this->query()->where('id_servicio', '=', $id)->update(['eliminado' => 'true']);
     }
 }

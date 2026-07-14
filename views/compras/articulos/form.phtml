@@ -35,7 +35,7 @@
                                 <select name="id_tipo_de_articulo" class="form-control" required>
                                     <option value="">-- SELECCIONE --</option>
                                     <?php foreach ($tiposArticulo as $tipo): ?>
-                                        <option value="<?= $tipo->id ?>" <?= ($articulo && $articulo->idTipoDeArticulo === $tipo->id) ? 'selected' : '' ?>>
+                                        <option value="<?= htmlspecialchars((string)$tipo->id) ?>" <?= ($articulo && $articulo->idTipoDeArticulo === $tipo->id) ? 'selected' : '' ?>>
                                             <?= htmlspecialchars($tipo->denominacion) ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -48,7 +48,7 @@
                                 <select name="id_unidades_de_medida" class="form-control" required>
                                     <option value="">-- SELECCIONE --</option>
                                     <?php foreach ($unidadesMedida as $udm): ?>
-                                        <option value="<?= $udm->id ?>" <?= ($articulo && $articulo->idUnidadesDeMedida === $udm->id) ? 'selected' : '' ?>>
+                                        <option value="<?= htmlspecialchars((string)$udm->id) ?>" <?= ($articulo && $articulo->idUnidadesDeMedida === $udm->id) ? 'selected' : '' ?>>
                                             <?= htmlspecialchars($udm->denominacion) ?>
                                         </option>
                                     <?php endforeach; ?>

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -72,7 +74,7 @@ class ComprobanteRetencionRepository extends Repository
 
     public function findById(int $id): ?ComprobanteRetencion
     {
-        $row = $this->query()->where('id_comprobante_retencion', '=', $id)->where('eliminado', '=', 0)->first();
+        $row = $this->query()->where('id_comprobante_retencion', '=', $id)->where('eliminado', '=', 'false')->first();
         if (!$row) {
             return null;
         }

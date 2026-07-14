@@ -7,18 +7,18 @@
                 <label style="display: block; font-weight: bold; margin-bottom: 5px;">Mes:</label>
                 <select name="mes" class="form-control" style="padding: 8px;">
                     <?php for($m=1; $m<=12; $m++): $mm = str_pad($m, 2, '0', STR_PAD_LEFT); ?>
-                        <option value="<?= $mm ?>" <?= ($mes == $mm) ? 'selected' : '' ?>><?= date('F', mktime(0, 0, 0, $m, 1)) ?></option>
+                        <option value="<?= htmlspecialchars((string)$mm) ?>" <?= ($mes == $mm) ? 'selected' : '' ?>><?= date('F', mktime(0, 0, 0, $m, 1)) ?></option>
                     <?php endfor; ?>
                 </select>
             </div>
             <div>
                 <label style="display: block; font-weight: bold; margin-bottom: 5px;">Año:</label>
-                <input type="number" name="anio" value="<?= $anio ?>" style="padding: 8px; width: 100px;">
+                <input type="number" name="anio" value="<?= htmlspecialchars((string)$anio) ?>" style="padding: 8px; width: 100px;">
             </div>
             <button type="submit" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
                 Consultar Libro
             </button>
-            <a href="?route=reportes_cxp/libroIva&mes=<?= $mes ?>&anio=<?= $anio ?>&pdf=1" target="_blank" style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 4px; text-decoration: none; font-size: 0.9em;">
+            <a href="?route=reportes_cxp/libroIva&mes=<?= htmlspecialchars((string)$mes) ?>&anio=<?= htmlspecialchars((string)$anio) ?>&pdf=1" target="_blank" style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 4px; text-decoration: none; font-size: 0.9em;">
                 Ver PDF
             </a>
         </form>

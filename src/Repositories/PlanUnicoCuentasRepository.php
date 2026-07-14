@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -19,12 +21,12 @@ class PlanUnicoCuentasRepository extends Repository
     {
         $query = $this->query()
                       ->select('*')
-                      ->where('eliminado', '=', 0)
+                      ->where('eliminado', '=', 'false')
                       ->orderBy('codigo_plan_unico', 'ASC');
 
         if ($search !== '') {
             $db = $this->getPdo();
-            $sql = "SELECT * FROM plan_unico_cuentas WHERE eliminado = 0 AND (codigo_plan_unico LIKE :s OR denominacion LIKE :s) ORDER BY codigo_plan_unico";
+            $sql = "SELECT * FROM plan_unico_cuentas WHERE eliminado = false AND (codigo_plan_unico LIKE :s OR denominacion LIKE :s) ORDER BY codigo_plan_unico";
             $stmt = $db->prepare($sql);
             $stmt->bindValue(':s', "%$search%");
             $stmt->execute();
@@ -36,12 +38,24 @@ class PlanUnicoCuentasRepository extends Repository
         return array_map(fn ($row) => $this->mapRowToEntity($row), $rows);
     }
 
+    public function allAsync(): array
+    {
+        $result = $this->getAsyncPool()->query("SELECT * FROM plan_unico_cuentas WHERE eliminado = false ORDER BY codigo_plan_unico ASC");
+
+        $results = [];
+        foreach ($result as $row) {
+            $results[] = $this->mapRowToEntity($row);
+        }
+
+        return $results;
+    }
+
     public function findById(int $id): ?PlanUnicoCuentas
     {
         $row = $this->query()
                     ->select('*')
                     ->where('id_codigo_plan_unico', '=', $id)
-                    ->where('eliminado', '=', 0)
+                    ->where('eliminado', '=', 'false')
                     ->first();
 
         return $row ? $this->mapRowToEntity($row) : null;
@@ -65,7 +79,7 @@ class PlanUnicoCuentasRepository extends Repository
 
     public function delete(int $id): bool
     {
-        return $this->query()->where('id_codigo_plan_unico', '=', $id)->update(['eliminado' => 1]);
+        return $this->query()->where('id_codigo_plan_unico', '=', $id)->update(['eliminado' => 'true']);
     }
 
     private function mapRowToEntity(array $row): PlanUnicoCuentas

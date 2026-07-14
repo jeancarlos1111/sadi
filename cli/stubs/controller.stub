@@ -1,0 +1,23 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Controllers;
+
+class {{ ClassName }} extends HomeController
+{
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    public function index(): void
+    {
+        $items = []; // TODO: cargar datos
+
+        $this->renderView('{{ Name }}/index', [
+            'titulo' => '{{ Name }}',
+            'items'  => $items,
+        ]);
+    }
+}

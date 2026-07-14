@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
-class ComprobanteRetencion
+readonly class ComprobanteRetencion
 {
     /* private(set) */ public ?int $id;
 
@@ -16,5 +18,31 @@ class ComprobanteRetencion
         ?int $id = null
     ) {
         $this->id = $id;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'idFactura' => $this->idFactura,
+            'tipoRetencion' => $this->tipoRetencion,
+            'numeroComprobante' => $this->numeroComprobante,
+            'porcentaje' => $this->porcentaje,
+            'montoRetenido' => $this->montoRetenido,
+            'fechaEmision' => $this->fechaEmision,
+        ];
+    }
+
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            $data['idFactura'] ?? null,
+            $data['tipoRetencion'] ?? null,
+            $data['numeroComprobante'] ?? null,
+            $data['porcentaje'] ?? null,
+            $data['montoRetenido'] ?? null,
+            $data['fechaEmision'] ?? null,
+            $data['id'] ?? null,
+        );
     }
 }

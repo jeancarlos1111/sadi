@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -19,7 +21,7 @@ class TipoDocumentoRepository extends Repository
     {
         $rows = $this->query()
                      ->select('id_tipo_documento', 'denominacion_tipo_documento', 'afecta_presupuesto_tipo_documento', 'siglas_tipo_documento')
-                     ->where('eliminado', '=', 0)
+                     ->where('eliminado', '=', 'false')
                      ->orderBy('denominacion_tipo_documento', 'ASC')
                      ->get();
 
@@ -31,7 +33,7 @@ class TipoDocumentoRepository extends Repository
         $row = $this->query()
                     ->select('*')
                     ->where('id_tipo_documento', '=', $id)
-                    ->where('eliminado', '=', 0)
+                    ->where('eliminado', '=', 'false')
                     ->first();
 
         return $row ? $this->mapRowToEntity($row) : null;
@@ -58,7 +60,7 @@ class TipoDocumentoRepository extends Repository
 
     public function delete(int $id): bool
     {
-        return $this->query()->where('id_tipo_documento', '=', $id)->update(['eliminado' => 1]);
+        return $this->query()->where('id_tipo_documento', '=', $id)->update(['eliminado' => 'true']);
     }
 
     private function mapRowToEntity(array $row): TipoDocumento

@@ -51,6 +51,63 @@
                                     <input type="text" class="form-control" name="anio_culm" value="<?= htmlspecialchars($item->anio_culm ?? '') ?>" placeholder="YYYY">
                                 </div>
                             </div>
+                            <div class="row">
+                                <div class="col-md-12 form-group">
+                                    <label>Unidad Ejecutora / Administrativa</label>
+                                    <select class="form-control" name="id_unidad_administrativa">
+                                        <option value="">-- Seleccione --</option>
+                                        <?php foreach ($unidades as $u): ?>
+                                            <option value="<?= htmlspecialchars((string)$u->id_unidad_administrativa) ?>" <?= ($item && $item->id_unidad_administrativa == $u->id_unidad_administrativa) ? 'selected' : '' ?>>
+                                                <?= htmlspecialchars($u->codigo . ' - ' . $u->denominacion) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card card-warning">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h3 class="card-title">Plan Operativo Anual (POA) - Indicadores Múltiples</h3>
+                            <button type="button" class="btn btn-sm btn-dark ml-auto" id="btn-add-indicador"><i class="fas fa-plus"></i> Añadir Indicador</button>
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table table-bordered table-striped" id="tabla-indicadores">
+                                <thead>
+                                    <tr>
+                                        <th>Eficacia</th>
+                                        <th>Eficiencia</th>
+                                        <th>Calidad</th>
+                                        <th>Impacto</th>
+                                        <th>Medio de Verificación</th>
+                                        <th style="width: 50px;">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php if(!empty($indicadores)): ?>
+                                        <?php foreach($indicadores as $ind): ?>
+                                            <tr>
+                                                <td><textarea class="form-control" name="ind_eficacia[]" rows="2"><?= htmlspecialchars($ind->indicador_eficacia ?? '') ?></textarea></td>
+                                                <td><textarea class="form-control" name="ind_eficiencia[]" rows="2"><?= htmlspecialchars($ind->indicador_eficiencia ?? '') ?></textarea></td>
+                                                <td><textarea class="form-control" name="ind_calidad[]" rows="2"><?= htmlspecialchars($ind->indicador_calidad ?? '') ?></textarea></td>
+                                                <td><textarea class="form-control" name="ind_impacto[]" rows="2"><?= htmlspecialchars($ind->indicador_impacto ?? '') ?></textarea></td>
+                                                <td><textarea class="form-control" name="ind_medio[]" rows="2"><?= htmlspecialchars($ind->medio_verificacion ?? '') ?></textarea></td>
+                                                <td><button type="button" class="btn btn-danger btn-sm btn-remove-ind"><i class="fas fa-trash"></i></button></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <tr>
+                                            <td><textarea class="form-control" name="ind_eficacia[]" rows="2"><?= htmlspecialchars($item->indicador_eficacia ?? '') ?></textarea></td>
+                                            <td><textarea class="form-control" name="ind_eficiencia[]" rows="2"><?= htmlspecialchars($item->indicador_eficiencia ?? '') ?></textarea></td>
+                                            <td><textarea class="form-control" name="ind_calidad[]" rows="2"><?= htmlspecialchars($item->indicador_calidad ?? '') ?></textarea></td>
+                                            <td><textarea class="form-control" name="ind_impacto[]" rows="2"><?= htmlspecialchars($item->indicador_impacto ?? '') ?></textarea></td>
+                                            <td><textarea class="form-control" name="ind_medio[]" rows="2"><?= htmlspecialchars($item->medio_verificacion ?? '') ?></textarea></td>
+                                            <td><button type="button" class="btn btn-danger btn-sm btn-remove-ind"><i class="fas fa-trash"></i></button></td>
+                                        </tr>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
@@ -103,3 +160,34 @@
         </form>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const btnAdd = document.getElementById('btn-add-indicador');
+    const tbody = document.querySelector('#tabla-indicadores tbody');
+
+    btnAdd.addEventListener('click', function() {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><textarea class="form-control" name="ind_eficacia[]" rows="2"></textarea></td>
+            <td><textarea class="form-control" name="ind_eficiencia[]" rows="2"></textarea></td>
+            <td><textarea class="form-control" name="ind_calidad[]" rows="2"></textarea></td>
+            <td><textarea class="form-control" name="ind_impacto[]" rows="2"></textarea></td>
+            <td><textarea class="form-control" name="ind_medio[]" rows="2"></textarea></td>
+            <td><button type="button" class="btn btn-danger btn-sm btn-remove-ind"><i class="fas fa-trash"></i></button></td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    tbody.addEventListener('click', function(e) {
+        if (e.target.closest('.btn-remove-ind')) {
+            const row = e.target.closest('tr');
+            if (tbody.querySelectorAll('tr').length > 1) {
+                row.remove();
+            } else {
+                alert('Debe mantener al menos un indicador');
+            }
+        }
+    });
+});
+</script>

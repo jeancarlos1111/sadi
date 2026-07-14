@@ -1,0 +1,49 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Repositories;
+
+use App\Database\Repository;
+use App\Models\{{ ModelName }};
+use PDO;
+
+class {{ ClassName }} extends Repository
+{
+    protected function getTable(): string
+    {
+        return '{{ TableName }}';
+    }
+
+    public function all(): array
+    {
+        $stmt = $this->getPdo()->query("SELECT * FROM {$this->getTable()} ORDER BY 1 DESC");
+        $results = [];
+
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $results[] = {{ ModelName }}::fromArray($row);
+        }
+
+        return $results;
+    }
+
+    public function findById(int $id): ?{{ ModelName }}
+    {
+        $stmt = $this->getPdo()->prepare("SELECT * FROM {$this->getTable()} WHERE id = :id LIMIT 1");
+        $stmt->execute(['id' => $id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $row ? {{ ModelName }}::fromArray($row) : null;
+    }
+
+    public function save({{ ModelName }} $model): bool
+    {
+        // TODO: implementar lógica de INSERT / UPDATE
+        return false;
+    }
+
+    public function delete(int $id): bool
+    {
+        return $this->query()->where('id', '=', $id)->update(['eliminado' => true]);
+    }
+}

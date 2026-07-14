@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -20,14 +22,14 @@ class CajaChicaRepository extends Repository
     public function all(): array
     {
         $db = $this->getPdo();
-        $stmt = $db->query("SELECT * FROM caja_chica WHERE eliminado = 0 ORDER BY denominacion");
+        $stmt = $db->query("SELECT * FROM caja_chica WHERE eliminado = false ORDER BY denominacion");
 
         return array_map(fn ($r) => $this->mapRowToEntity($r), $stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
     public function find(int $id): ?CajaChica
     {
-        $row = $this->query()->where('id_caja_chica', '=', $id)->where('eliminado', '=', 0)->first();
+        $row = $this->query()->where('id_caja_chica', '=', $id)->where('eliminado', '=', 'false')->first();
         if (!$row) {
             return null;
         }
@@ -62,7 +64,7 @@ class CajaChicaRepository extends Repository
 
     public function delete(int $id): bool
     {
-        return $this->query()->where('id_caja_chica', '=', $id)->update(['eliminado' => 1]);
+        return $this->query()->where('id_caja_chica', '=', $id)->update(['eliminado' => 'true']);
     }
 
     /** Registrar un gasto o reposición */
@@ -96,7 +98,7 @@ class CajaChicaRepository extends Repository
     public function getMovimientos(int $idCaja): array
     {
         $db = $this->getPdo();
-        $stmt = $db->prepare("SELECT * FROM movimiento_caja_chica WHERE id_caja_chica = ? AND eliminado = 0 ORDER BY fecha DESC, id_movimiento_cc DESC");
+        $stmt = $db->prepare("SELECT * FROM movimiento_caja_chica WHERE id_caja_chica = ? AND eliminado = false ORDER BY fecha DESC, id_movimiento_cc DESC");
         $stmt->execute([$idCaja]);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

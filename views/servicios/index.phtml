@@ -1,76 +1,79 @@
 <div class="card card-outline card-primary">
-    <div class="card-header">
-        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
-        <div class="card-tools">
-            <a href="?route=servicios/form" class="btn btn-sm btn-success">
-                <i class="fas fa-plus"></i> Nuevo Servicio
-            </a>
-        </div>
+  <div class="card-header">
+    <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+    <div class="card-tools">
+      <a href="?route=servicios/form" class="btn btn-sm btn-success">
+        <i class="fas fa-plus"></i> Nuevo Servicio
+      </a>
     </div>
-    <div class="card-body">
-        <?php if (isset($error)): ?>
-            <div class="alert alert-danger alert-dismissible">
-                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                <h5><i class="icon fas fa-ban"></i> Error</h5>
-                <?= htmlspecialchars($error) ?>
-            </div>
-        <?php endif; ?>
+  </div>
+  <div class="card-body">
+    <?php if (isset($error)): ?>
+      <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <h5><i class="icon fas fa-ban"></i> Error</h5>
+        <?= htmlspecialchars($error) ?>
+      </div>
+    <?php endif; ?>
 
-        <form method="GET" action="" class="form-inline mb-4">
-            <input type="hidden" name="route" value="servicios/index">
-            <div class="input-group mr-2">
-                <input type="text" class="form-control" name="search" placeholder="Buscar servicio..." value="<?= htmlspecialchars($search) ?>" style="width: 250px;">
-                <span class="input-group-append">
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
-                </span>
-            </div>
-            <a href="?route=servicios/index" class="btn btn-default">Limpiar</a>
-        </form>
+    <form method="GET" action="" class="form-inline mb-4">
+      <input type="hidden" name="route" value="servicios/index">
+      <div class="input-group mr-2">
+        <input type="text" class="form-control" name="search" placeholder="Buscar servicio..." value="<?= htmlspecialchars($search) ?>" style="width: 250px;">
+        <span class="input-group-append">
+          <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
+        </span>
+      </div>
+      <a href="?route=servicios/index" class="btn btn-default">Limpiar</a>
+    </form>
 
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped dataTable w-100 table-sm">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Denominación</th>
-                        <th>Partida Presupuestaria</th>
-                        <th>Tipo</th>
-                        <th class="text-center">Aplica IVA</th>
-                        <th>Descripción</th>
-                        <th width="15%" class="text-center">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($items)): ?>
-                        <tr><td colspan="6" class="text-center">No hay servicios registrados.</td></tr>
-                    <?php else: foreach ($items as $data):
-                        $s = $data['entity']; ?>
-                        <tr>
-                            <td><?= htmlspecialchars($s->denominacion) ?></td>
-                            <td><?= htmlspecialchars($data['partida']) ?></td>
-                            <td><?= htmlspecialchars($data['nombre_tipo']) ?></td>
-                            <td class="text-center">
-                                <?php if ($s->aplicarIva): ?>
-                                    <span class="badge badge-success"><i class="fas fa-check"></i> Sí</span>
-                                <?php else: ?>
-                                    <span class="badge badge-secondary">No</span>
-                                <?php endif; ?>
-                            </td>
-                            <td><?= htmlspecialchars($s->descripcion ?? '') ?></td>
-                            <td class="text-center">
-                                <a href="?route=servicios/form&id=<?= $s->id ?>" class="btn btn-sm btn-info" title="Editar">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <form method="POST" action="?route=servicios/eliminar" onsubmit="return confirm('¿Eliminar?');" class="d-inline">
-                                    <input type="hidden" name="id" value="<?= $s->id ?>">
-                                    <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    <?php endforeach; endif; ?>
-                </tbody>
-            </table>
-        </div>
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped w-100 table-sm">
+        <thead class="thead-dark">
+          <tr>
+            <th>Denominación</th>
+            <th>Partida Presupuestaria</th>
+            <th>Tipo</th>
+            <th class="text-center">Aplica IVA</th>
+            <th>Descripción</th>
+            <th width="15%" class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php if (empty($items)): ?>
+            <tr><td colspan="6" class="text-center">No hay servicios registrados.</td></tr>
+          <?php else: foreach ($items as $data):
+            $s = $data['entity']; ?>
+            <tr>
+              <td><?= htmlspecialchars($s->denominacion) ?></td>
+              <td><?= htmlspecialchars($data['partida']) ?></td>
+              <td><?= htmlspecialchars($data['nombre_tipo']) ?></td>
+              <td class="text-center">
+                <?php if ($s->aplicarIva): ?>
+                  <span class="badge badge-success"><i class="fas fa-check"></i> Sí</span>
+                <?php else: ?>
+                  <span class="badge badge-secondary">No</span>
+                <?php endif; ?>
+              </td>
+              <td><?= htmlspecialchars($s->descripcion ?? '') ?></td>
+              <td class="text-center">
+                <a href="?route=servicios/form&id=<?= htmlspecialchars((string)$s->id) ?>" class="btn btn-sm btn-info" title="Editar">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <form method="POST" action="?route=servicios/eliminar" onsubmit="return confirm('¿Eliminar?');" class="d-inline">
+                  <input type="hidden" name="id" value="<?= htmlspecialchars((string)$s->id) ?>">
+                  <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+          <?php endforeach; endif; ?>
+        </tbody>
+      </table>
+    <?php if (isset($paginator)): ?>
+      <?php include $partialsPath . 'pagination.phtml'; ?>
+    <?php endif; ?>
     </div>
+  </div>
 </div>

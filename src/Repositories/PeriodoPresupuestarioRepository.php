@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -55,6 +57,7 @@ class PeriodoPresupuestarioRepository extends Repository
     public function isMesAbierto(int $anio, int $mes): bool
     {
         $periodo = $this->findOrCreate($anio, $mes);
+
         return $periodo->isAbierto();
     }
 
@@ -83,7 +86,7 @@ class PeriodoPresupuestarioRepository extends Repository
                 'anio'        => $anio,
                 'mes'         => $mes,
                 'estado'      => $estado,
-                'fecha_cierre'=> $fecha_cierre,
+                'fecha_cierre' => $fecha_cierre,
                 'obs'         => $observacion,
             ]);
         }

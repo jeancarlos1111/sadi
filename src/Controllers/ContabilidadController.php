@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Repositories\AsientoContableRepository;
@@ -26,17 +28,22 @@ class ContabilidadController extends BaseController
     public function planCuentas(): void
     {
         $search = $_GET['search'] ?? '';
+        $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 
         try {
-            $cuentas = $this->cuentaRepo->all($search);
+            $paginator = $this->cuentaRepo->paginate($search, $page, 20);
+            $cuentas = $paginator['data'];
+            $pagination = $paginator;
         } catch (PDOException | \Exception $e) {
             $cuentas = [];
+            $pagination = null;
             $error = "Error al obtener el plan de cuentas: " . $e->getMessage();
         }
 
         $this->renderView('contabilidad/cuentas/index', [
             'titulo' => 'Plan de Cuentas Contable',
             'cuentas' => $cuentas,
+            'paginator' => $pagination,
             'search' => $search,
             'error' => $error ?? null,
         ]);
@@ -45,17 +52,22 @@ class ContabilidadController extends BaseController
     public function asientos(): void
     {
         $search = $_GET['search'] ?? '';
+        $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 
         try {
-            $asientos = $this->asientoRepo->all($search);
+            $paginator = $this->asientoRepo->paginate($search, $page, 20);
+            $asientos = $paginator['data'];
+            $pagination = $paginator;
         } catch (PDOException $e) {
             $asientos = [];
+            $pagination = null;
             $error = "Error al obtener comprobantes de diario: " . $e->getMessage();
         }
 
         $this->renderView('contabilidad/asientos/index', [
             'titulo' => 'Comprobantes de Diario (Asientos)',
             'asientos' => $asientos,
+            'paginator' => $pagination,
             'search' => $search,
             'error' => $error ?? null,
         ]);

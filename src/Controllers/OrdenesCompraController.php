@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Repositories\ArticuloRepository;
@@ -28,7 +30,9 @@ class OrdenesCompraController extends BaseController
         $mes = $_GET['mes'] ?? '';
 
         try {
-            $ordenes = $this->repo->all($search, $mes);
+            $page = (int)($_GET['page'] ?? 1);
+            $paginator = $this->repo->paginate($search, $mes, $page, 15);
+            $ordenes = $paginator['data'];
         } catch (PDOException | \Exception $e) {
             $ordenes = [];
             $error = "Error al obtener las órdenes de compra: " . $e->getMessage();
@@ -40,6 +44,7 @@ class OrdenesCompraController extends BaseController
             'search' => $search,
             'mes' => $mes,
             'error' => $error ?? null,
+                    'paginator' => $paginator,
         ]);
     }
 

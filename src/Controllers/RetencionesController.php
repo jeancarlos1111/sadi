@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Repositories\ComprobanteRetencionRepository;
@@ -23,7 +25,9 @@ class RetencionesController extends HomeController
         $search = $_GET['search'] ?? '';
 
         try {
-            $comprobantes = $this->repo->all($search);
+            $page = (int)($_GET['page'] ?? 1);
+            $paginator = $this->repo->paginate($search, $page, 15);
+            $comprobantes = $paginator['data'];
         } catch (PDOException $e) {
             $comprobantes = [];
             $error = "Error al obtener comprobantes de retención: " . $e->getMessage();
@@ -34,6 +38,7 @@ class RetencionesController extends HomeController
             'comprobantes' => $comprobantes,
             'search' => $search,
             'error' => $error ?? null,
+                    'paginator' => $paginator,
         ]);
     }
 

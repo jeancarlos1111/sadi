@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 require_once __DIR__ . '/../Libs/fpdf.php';
@@ -89,9 +91,14 @@ class MayorAnaliticoPdfService extends FPDF
                 $this->SetFillColor(0, 86, 179);
                 $this->SetTextColor(255);
                 $this->SetFont('Arial', 'B', 9);
-                $this->Cell(array_sum($w), 7,
+                $this->Cell(
+                    array_sum($w),
+                    7,
                     mb_convert_encoding("ESTRUCTURA: $ep", 'ISO-8859-1', 'UTF-8'),
-                    1, 1, 'L', true
+                    1,
+                    1,
+                    'L',
+                    true
                 );
                 $this->SetTextColor(0);
 
@@ -112,9 +119,14 @@ class MayorAnaliticoPdfService extends FPDF
             if ($cpu !== $cpu_anterior) {
                 $this->SetFillColor(220, 235, 250);
                 $this->SetFont('Arial', 'B', 7);
-                $this->Cell(array_sum($w), 5,
+                $this->Cell(
+                    array_sum($w),
+                    5,
                     mb_convert_encoding("  Partida: $cpu", 'ISO-8859-1', 'UTF-8'),
-                    'LB', 1, 'L', true
+                    'LB',
+                    1,
+                    'L',
+                    true
                 );
                 $cpu_anterior = $cpu;
             }
@@ -127,9 +139,9 @@ class MayorAnaliticoPdfService extends FPDF
             foreach ($grupo['movimientos'] as $mov) {
                 $tipo = $mov['id_operacion'];
                 $aap  = $tipo === 'AAP' ? number_format((float)$mov['monto_mp'], 2, ',', '.') : '';
-                $ca   = $tipo === 'CA'  ? number_format((float)$mov['monto_mp'], 2, ',', '.') : '';
-                $cg   = $tipo === 'CG'  ? number_format((float)$mov['monto_mp'], 2, ',', '.') : '';
-                $tr   = $tipo === 'TR'  ? number_format((float)$mov['monto_mp'], 2, ',', '.') : '';
+                $ca   = $tipo === 'CA' ? number_format((float)$mov['monto_mp'], 2, ',', '.') : '';
+                $cg   = $tipo === 'CG' ? number_format((float)$mov['monto_mp'], 2, ',', '.') : '';
+                $tr   = $tipo === 'TR' ? number_format((float)$mov['monto_mp'], 2, ',', '.') : '';
 
                 $this->Cell($w[0], 5, '', 'LR', 0, 'L', $fill);
                 $this->Cell($w[1], 5, mb_convert_encoding($mov['numero_c'] ?? '', 'ISO-8859-1', 'UTF-8'), 'LR', 0, 'C', $fill);
@@ -137,9 +149,9 @@ class MayorAnaliticoPdfService extends FPDF
                 $this->Cell($w[3], 5, $mov['fecha_c'] ?? '', 'LR', 0, 'C', $fill);
                 $this->Cell($w[4], 5, $tipo, 'LR', 0, 'C', $fill);
                 $this->Cell($w[5], 5, $aap, 'LR', 0, 'R', $fill);
-                $this->Cell($w[6], 5, $ca,  'LR', 0, 'R', $fill);
-                $this->Cell($w[7], 5, $cg,  'LR', 0, 'R', $fill);
-                $this->Cell($w[8], 5, $tr,  'LR', 0, 'R', $fill);
+                $this->Cell($w[6], 5, $ca, 'LR', 0, 'R', $fill);
+                $this->Cell($w[7], 5, $cg, 'LR', 0, 'R', $fill);
+                $this->Cell($w[8], 5, $tr, 'LR', 0, 'R', $fill);
                 $this->Cell($w[9], 5, number_format((float)$mov['saldo_acumulado'], 2, ',', '.'), 'LR', 0, 'R', $fill);
                 $this->Ln();
                 $fill = !$fill;
@@ -156,10 +168,10 @@ class MayorAnaliticoPdfService extends FPDF
             $this->Cell($w[2], 5, '', 'TB', 0, 'L', true);
             $this->Cell($w[3], 5, '', 'TB', 0, 'C', true);
             $this->Cell($w[4], 5, '', 'TB', 0, 'C', true);
-            $this->Cell($w[5], 5, number_format((float)$grupo['asignado_inicial'], 2, ',', '.'),    'TB', 0, 'R', true);
+            $this->Cell($w[5], 5, number_format((float)$grupo['asignado_inicial'], 2, ',', '.'), 'TB', 0, 'R', true);
             $this->Cell($w[6], 5, number_format((float)$grupo['creditos_adicionales'], 2, ',', '.'), 'TB', 0, 'R', true);
-            $this->Cell($w[7], 5, number_format((float)$grupo['gastos_causados'], 2, ',', '.'),      'TB', 0, 'R', true);
-            $this->Cell($w[8], 5, number_format((float)$grupo['traspasos_reduccion'], 2, ',', '.'),  'TB', 0, 'R', true);
+            $this->Cell($w[7], 5, number_format((float)$grupo['gastos_causados'], 2, ',', '.'), 'TB', 0, 'R', true);
+            $this->Cell($w[8], 5, number_format((float)$grupo['traspasos_reduccion'], 2, ',', '.'), 'TB', 0, 'R', true);
             $this->Cell($w[9], 5, number_format($totalDisp, 2, ',', '.'), 'TBR', 0, 'R', true);
             $this->Ln(7);
         }

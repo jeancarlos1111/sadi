@@ -1,0 +1,75 @@
+<div class="card card-success card-outline">
+  <div class="card-header">
+    <h3 class="card-title"><i class="fas fa-chart-line"></i> <?= htmlspecialchars($titulo) ?></h3>
+  </div>
+  <div class="card-body">
+    <form method="GET" action="" class="form-inline mb-4">
+      <input type="hidden" name="route" value="estados_financieros/estadoResultados">
+      <div class="form-group mr-3">
+        <label class="mr-2">Desde:</label>
+        <input type="date" name="fecha_desde" class="form-control" value="<?= htmlspecialchars($fechaDesde) ?>" required>
+      </div>
+      <div class="form-group mr-3">
+        <label class="mr-2">Hasta:</label>
+        <input type="date" name="fecha_hasta" class="form-control" value="<?= htmlspecialchars($fechaHasta) ?>" required>
+      </div>
+      <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Generar</button>
+      <button type="button" class="btn btn-default ml-2" onclick="window.print();"><i class="fas fa-print"></i> Imprimir</button>
+    </form>
+
+    <div class="table-responsive">
+      <table class="table table-sm">
+        <thead class="thead-light">
+          <tr>
+            <th>Código</th>
+            <th>Denominación</th>
+            <th class="text-right">Ingresos (Bs)</th>
+            <th class="text-right">Gastos (Bs)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php 
+          $totalIngresos = 0;
+          $totalGastos = 0;
+          if (empty($resultados)): 
+          ?>
+            <tr>
+              <td colspan="4" class="text-center text-muted py-4">No hay ingresos ni gastos registrados en este período.</td>
+            </tr>
+          <?php else: ?>
+            <?php foreach ($resultados as $row): 
+                $ingreso = (float)$row['saldo_ingreso'];
+                $gasto = (float)$row['saldo_gasto'];
+                if ($ingreso <= 0 && $gasto <= 0) continue; 
+                
+                $totalIngresos += max(0, $ingreso);
+                $totalGastos += max(0, $gasto);
+            ?>
+            <tr>
+              <td><code><?= htmlspecialchars($row['codigo']) ?></code></td>
+              <td><?= htmlspecialchars($row['denominacion']) ?></td>
+              <td class="text-right"><?= $ingreso > 0 ? number_format($ingreso, 2, ',', '.') : '' ?></td>
+              <td class="text-right"><?= $gasto > 0 ? number_format($gasto, 2, ',', '.') : '' ?></td>
+            </tr>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </tbody>
+        <?php if (!empty($resultados)): 
+            $resultadoEjercicio = $totalIngresos - $totalGastos;
+        ?>
+        <tfoot>
+          <tr class="font-weight-bold" style="border-top: 2px solid #ddd;">
+            <td colspan="2" class="text-right">TOTALES:</td>
+            <td class="text-right text-success"><?= number_format($totalIngresos, 2, ',', '.') ?></td>
+            <td class="text-right text-danger"><?= number_format($totalGastos, 2, ',', '.') ?></td>
+          </tr>
+          <tr class="font-weight-bold h5">
+            <td colspan="3" class="text-right"><?= $resultadoEjercicio >= 0 ? 'SUPERÁVIT DEL EJERCICIO:' : 'DÉFICIT DEL EJERCICIO:' ?></td>
+            <td class="text-right <?= $resultadoEjercicio >= 0 ? 'text-success' : 'text-danger' ?>"><?= number_format(abs($resultadoEjercicio), 2, ',', '.') ?></td>
+          </tr>
+        </tfoot>
+        <?php endif; ?>
+      </table>
+    </div>
+  </div>
+</div>

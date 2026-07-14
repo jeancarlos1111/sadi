@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -54,7 +56,7 @@ class UsuarioRepository extends Repository
 
     public function find(int $id): ?Usuario
     {
-        $row = $this->query()->where('id_usuario', '=', $id)->where('eliminado', '=', 0)->first();
+        $row = $this->query()->where('id_usuario', '=', $id)->where('eliminado', '=', 'false')->first();
         if (!$row) {
             return null;
         }
@@ -68,7 +70,7 @@ class UsuarioRepository extends Repository
 
     public function findByUsername(string $username): ?Usuario
     {
-        $row = $this->query()->where('usuario', '=', $username)->where('eliminado', '=', 0)->first();
+        $row = $this->query()->where('usuario', '=', $username)->where('eliminado', '=', 'false')->first();
         if (!$row) {
             return null;
         }

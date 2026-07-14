@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -14,7 +16,7 @@ class FichaRepository extends Repository
 
     public function find(int $id): ?Ficha
     {
-        $row = $this->query()->where('cod_ficha', '=', $id)->where('eliminado', '=', 0)->first();
+        $row = $this->query()->where('cod_ficha', '=', $id)->where('eliminado', '=', 'false')->first();
         if (!$row) {
             return null;
         }

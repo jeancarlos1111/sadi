@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 class ReportesCxpController extends BaseController
@@ -63,8 +65,8 @@ class ReportesCxpController extends BaseController
 
             foreach ($rows as $row) {
                 // Si la solicitud_pago está contabilizada, el saldo es 0 (ya pagado).
-                $pagado = ($row['contabilizada'] == 1) ? $row['monto_pagar_solicitud_pago'] : 0;
-                $estado = ($row['contabilizada'] == 1) ? 'PAGADO' : 'PENDIENTE';
+                $pagado = ((bool)$row['contabilizada']) ? $row['monto_pagar_solicitud_pago'] : 0;
+                $estado = ((bool)$row['contabilizada']) ? 'PAGADO' : 'PENDIENTE';
 
                 if ($estado === 'PENDIENTE') {
                     $saldoTotal += $row['monto_total_d'];

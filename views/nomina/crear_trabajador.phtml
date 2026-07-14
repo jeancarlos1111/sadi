@@ -38,7 +38,7 @@
             <select name="cod_cargo" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
                 <option value="">-- Seleccione Cargo --</option>
                 <?php foreach ($cargos as $c): ?>
-                    <option value="<?= $c->id ?>"><?= htmlspecialchars($c->nombre) ?></option>
+                    <option value="<?= htmlspecialchars((string)$c->id) ?>"><?= htmlspecialchars($c->nombre) ?></option>
                 <?php endforeach; ?>
             </select>
         </div>
@@ -47,7 +47,7 @@
             <select name="cod_nomina" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
                 <option value="">-- Seleccione Nómina --</option>
                 <?php foreach ($nominas as $n): ?>
-                    <option value="<?= $n->id ?>"><?= htmlspecialchars($n->nombre) ?></option>
+                    <option value="<?= htmlspecialchars((string)$n->id) ?>"><?= htmlspecialchars($n->nombre) ?></option>
                 <?php endforeach; ?>
             </select>
         </div>

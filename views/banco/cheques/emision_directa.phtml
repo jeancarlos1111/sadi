@@ -18,7 +18,7 @@
             <select name="id_cta_bancaria" required style="padding: 8px; width: 100%; box-sizing: border-box;">
                 <option value="">Seleccione una cuenta...</option>
                 <?php foreach ($cuentas as $c): ?>
-                    <option value="<?= $c['id_cta_bancaria'] ?>">
+                    <option value="<?= htmlspecialchars((string)$c['id_cta_bancaria']) ?>">
                         <?= htmlspecialchars($c['nombre_banco']) ?> - <?= htmlspecialchars($c['numero_cta_bancaria']) ?>
                     </option>
                 <?php endforeach; ?>

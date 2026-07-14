@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Repositories\DocumentoRepository;
@@ -20,7 +22,9 @@ class DocumentosPorPagarController extends HomeController
         $mes = $_GET['mes'] ?? '';
 
         try {
-            $documentos = $this->repo->all($search, $mes);
+            $page = (int)($_GET['page'] ?? 1);
+            $paginator = $this->repo->paginate($search, $mes, $page, 15);
+            $documentos = $paginator['data'];
         } catch (PDOException $e) {
             $documentos = [];
             $error = "Error al obtener documentos por pagar: " . $e->getMessage();
@@ -32,6 +36,7 @@ class DocumentosPorPagarController extends HomeController
             'search' => $search,
             'mes' => $mes,
             'error' => $error ?? null,
+                    'paginator' => $paginator,
         ]);
     }
 

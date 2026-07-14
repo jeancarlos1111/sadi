@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -105,12 +107,12 @@ class DocumentoRepository extends Repository
             JOIN orden_de_compra oc ON d.id_orden_de_compra = oc.id_orden_de_compra
             JOIN proveedor p ON d.id_proveedor = p.id_proveedor
             WHERE d.id_tipo_documento = 2 -- Notas de Entrega enviadas por Almacén
-            AND d.eliminado = 0
+            AND d.eliminado = false
             AND NOT EXISTS (
                 SELECT 1 FROM documento d_fac
                 WHERE d_fac.id_orden_de_compra = d.id_orden_de_compra
                 AND d_fac.id_tipo_documento = 1 -- Factura ya generada
-                AND (d_fac.eliminado = 0 OR d_fac.eliminado IS NULL)
+                AND (d_fac.eliminado = false OR d_fac.eliminado IS NULL)
             )
             ORDER BY d.id_orden_de_compra DESC
         ";
@@ -135,13 +137,13 @@ class DocumentoRepository extends Repository
                 os.id_proveedor
             FROM orden_de_servicio os
             JOIN proveedor p ON os.id_proveedor = p.id_proveedor
-            WHERE os.contabilizada = 1
-            AND os.eliminado = 0
+            WHERE os.contabilizada = true
+            AND os.eliminado = false
             AND NOT EXISTS (
                 SELECT 1 FROM documento d_fac
                 WHERE d_fac.id_orden_de_servicio = os.id_orden_de_servicio
                 AND d_fac.id_tipo_documento = 1 -- Factura ya generada
-                AND (d_fac.eliminado = 0 OR d_fac.eliminado IS NULL)
+                AND (d_fac.eliminado = false OR d_fac.eliminado IS NULL)
             )
             ORDER BY os.id_orden_de_servicio DESC
         ";
@@ -174,7 +176,7 @@ class DocumentoRepository extends Repository
                    os.concepto_os as concepto_odc, p.compania_proveedor, p.rif_proveedor
             FROM orden_de_servicio os
             JOIN proveedor p ON os.id_proveedor = p.id_proveedor
-            WHERE os.id_orden_de_servicio = ? AND os.contabilizada = 1 AND os.eliminado = false
+            WHERE os.id_orden_de_servicio = ? AND os.contabilizada = true AND os.eliminado = false
             LIMIT 1
         ";
         $stmt = $this->getPdo()->prepare($sql);
@@ -414,14 +416,14 @@ class DocumentoRepository extends Repository
             SELECT p.rif_proveedor, p.compania_proveedor,
                    d.nro_documento_d, d.fecha_emision_d, d.monto_total_d, d.monto_base_d, d.monto_impuesto_d,
                    td.denominacion_tipo_documento,
-                   CASE WHEN sp.contabilizada = 1 THEN 'PAGADO' ELSE 'PENDIENTE' END as estado_pago,
+                   CASE WHEN sp.contabilizada = true THEN 'PAGADO' ELSE 'PENDIENTE' END as estado_pago,
                    sp.id_solicitud_pago, sp.monto_pagar_solicitud_pago, sp.contabilizada
             FROM documento d
             JOIN proveedor p ON d.id_proveedor = p.id_proveedor
             JOIN tipo_documento td ON d.id_tipo_documento = td.id_tipo_documento
             LEFT JOIN solicitud_pago sp ON sp.id_documento = d.id_documento AND sp.eliminado = false
             WHERE d.eliminado = false
-            AND (sp.contabilizada IS NULL OR sp.contabilizada = 0)
+            AND (sp.contabilizada IS NULL OR sp.contabilizada = false)
             ORDER BY d.fecha_emision_d ASC
         ";
 
@@ -466,7 +468,7 @@ class DocumentoRepository extends Repository
             FROM factura F
             JOIN proveedor P ON F.id_proveedor = P.id_proveedor
             JOIN solicitud_pago SP ON F.id_factura = SP.id_documento
-            WHERE SP.contabilizada = 0 AND SP.eliminado = 0
+            WHERE SP.contabilizada = false AND SP.eliminado = false
             GROUP BY P.id_proveedor, P.rif_proveedor, P.compania_proveedor
             ORDER BY total_deuda DESC
         ";

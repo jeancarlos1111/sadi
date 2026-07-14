@@ -16,7 +16,7 @@
                         <select name="id_ramo" class="form-control" required>
                             <option value="">Seleccione el origen del dinero a estimar...</option>
                             <?php foreach ($ramos as $r): ?>
-                                <option value="<?= $r['id_ramo'] ?>">
+                                <option value="<?= htmlspecialchars((string)$r['id_ramo']) ?>">
                                     <?= htmlspecialchars($r['codigo_ramo'] . ' - ' . $r['denominacion_ramo']) ?>
                                 </option>
                             <?php endforeach; ?>

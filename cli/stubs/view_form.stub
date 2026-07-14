@@ -1,0 +1,37 @@
+<?php
+/**
+ * @var string           $titulo
+ * @var App\Models\{{ ClassName }}|null $item
+ */
+$isEditing = isset($item) && $item->id !== null;
+$action    = $isEditing ? '?route={{ routePrefix }}/update' : '?route={{ routePrefix }}/store';
+?>
+<div class="card card-outline card-primary" style="max-width: 720px; margin: 0 auto;">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+    </div>
+    <form method="POST" action="<?= htmlspecialchars($action) ?>">
+        <?php if ($isEditing): ?>
+            <input type="hidden" name="id" value="<?= htmlspecialchars((string)$item->id) ?>">
+        <?php endif; ?>
+
+        <div class="card-body">
+            <!-- TODO: agregar campos del formulario -->
+            <div class="form-group">
+                <label for="campo_ejemplo">Campo de Ejemplo</label>
+                <input type="text" id="campo_ejemplo" name="campo_ejemplo" class="form-control"
+                       value="<?= htmlspecialchars('') ?>" required>
+            </div>
+        </div>
+
+        <div class="card-footer d-flex justify-content-between">
+            <a href="?route={{ routePrefix }}/index" class="btn btn-default">
+                <i class="fas fa-arrow-left mr-1"></i> Volver
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save mr-1"></i>
+                <?= $isEditing ? 'Actualizar' : 'Guardar' ?>
+            </button>
+        </div>
+    </form>
+</div>

@@ -1,8 +1,12 @@
+<?php
+/** @var \App\DTOs\PresupuestoGastoDTO|null $partida */
+$partida ??= null;
+?>
 <div class="row">
     <div class="col-md-8 offset-md-2">
         <div class="card card-outline card-primary">
             <div class="card-header">
-                <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+                <h3 class="card-title"><?= htmlspecialchars(isset($titulo)) ?></h3>
             </div>
             <form method="POST" action="?route=presupuesto/guardar">
                 <div class="card-body">
@@ -14,8 +18,8 @@
                         </div>
                     <?php endif; ?>
 
-                    <?php if ($partida && $partida->id): ?>
-                        <input type="hidden" name="id" value="<?= $partida->id ?>">
+                    <?php if (isset($partida) && $partida->id): ?>
+                        <input type="hidden" name="id" value="<?= htmlspecialchars((string)$partida->id) ?>">
                     <?php endif; ?>
 
                     <div class="form-group row">
@@ -23,9 +27,9 @@
                         <div class="col-sm-8">
                             <select name="id_estruc_presupuestaria" class="form-control select2" required>
                                 <option value="">-- Seleccione --</option>
-                                <?php foreach ($estructuras as $e): ?>
-                                    <option value="<?= $e['id_estruc_presupuestaria'] ?>"
-                                        <?= ($partida && $partida->idEstructura == $e['id_estruc_presupuestaria']) ? 'selected' : '' ?>>
+                                <?php foreach ($estructuras ?? [] as $e): ?>
+                                    <option value="<?= htmlspecialchars((string)$e['id_estruc_presupuestaria']) ?>"
+                                        <?= (isset($partida) && $partida->idEstructura == $e['id_estruc_presupuestaria']) ? 'selected' : '' ?>>
                                         <?= htmlspecialchars($e['descripcion_ep']) ?>
                                     </option>
                                 <?php endforeach; ?>
@@ -38,10 +42,40 @@
                         <div class="col-sm-8">
                             <select name="id_codigo_plan_unico" class="form-control select2" required>
                                 <option value="">-- Seleccione --</option>
-                                <?php foreach ($planUnico as $p): ?>
-                                    <option value="<?= $p['id_codigo_plan_unico'] ?>"
-                                        <?= ($partida && $partida->idPlanUnico == $p['id_codigo_plan_unico']) ? 'selected' : '' ?>>
+                                <?php foreach ($planUnico ?? [] as $p): ?>
+                                    <option value="<?= htmlspecialchars((string)$p['id_codigo_plan_unico']) ?>"
+                                        <?= (isset($partida) && $partida->idPlanUnico == $p['id_codigo_plan_unico']) ? 'selected' : '' ?>>
                                         <?= htmlspecialchars($p['codigo_plan_unico']) ?> — <?= htmlspecialchars($p['denominacion']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-sm-4 col-form-label font-weight-bold">Fuente de Financiamiento:</label>
+                        <div class="col-sm-8">
+                            <select name="id_fuente_financiamiento" class="form-control select2">
+                                <option value="">-- No Asignada --</option>
+                                <?php foreach ($fuentes ?? [] as $f): ?>
+                                    <option value="<?= htmlspecialchars((string)$f->id) ?>"
+                                        <?= (isset($partida) && $partida->idFuenteFinanciamiento == $f->id) ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($f->denominacion) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-sm-4 col-form-label font-weight-bold">Unidad Ejecutora:</label>
+                        <div class="col-sm-8">
+                            <select name="id_unidad_administrativa" class="form-control select2">
+                                <option value="">-- No Asignada --</option>
+                                <?php foreach ($unidades ?? [] as $u): ?>
+                                    <option value="<?= htmlspecialchars((string)$u->id) ?>"
+                                        <?= (isset($partida) && $partida->idUnidadAdministrativa == $u->id) ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($u->denominacion) ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>
@@ -52,12 +86,12 @@
                         <label class="col-sm-4 col-form-label font-weight-bold">Monto Asignado (Bs):</label>
                         <div class="col-sm-8">
                             <input type="number" class="form-control form-control-lg text-primary font-weight-bold" name="monto_asignado" step="0.01" min="0.01" required
-                                value="<?= $partida ? number_format($partida->montoAsignado, 2, '.', '') : '' ?>">
+                                value="<?= isset($partida) ? number_format($partida->montoAsignado, 2, '.', '') : '' ?>">
                             <small class="form-text text-muted">Solo se puede modificar el Monto Asignado original. Comprometidos y Causados se calculan automáticamente.</small>
                         </div>
                     </div>
 
-                    <?php if ($partida && $partida->id): ?>
+                    <?php if (isset($partida) && $partida->id): ?>
                     <div class="alert alert-secondary mt-4">
                         <h5><i class="icon fas fa-chart-pie"></i> Estado de Ejecución Actual</h5>
                         <ul class="list-unstyled mb-0">

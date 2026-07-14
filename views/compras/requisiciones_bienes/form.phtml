@@ -65,7 +65,7 @@
                                         <select name="articulos[]" class="form-control form-control-sm select2" required>
                                             <option value="">-- SELECCIONE UN ARTICULO --</option>
                                             <?php foreach($articulosCatalogo as $catData): $cat = $catData['entity']; ?>
-                                                <option value="<?= $cat->id ?>" <?= ($cat->id == $art['id_articulo']) ? 'selected' : '' ?>>
+                                                <option value="<?= htmlspecialchars((string)$cat->id) ?>" <?= ($cat->id == $art['id_articulo']) ? 'selected' : '' ?>>
                                                     <?= htmlspecialchars($cat->denominacion) ?>
                                                 </option>
                                             <?php endforeach; ?>

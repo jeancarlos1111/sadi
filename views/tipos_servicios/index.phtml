@@ -1,63 +1,66 @@
 <div class="card card-outline card-primary">
-    <div class="card-header">
-        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
-        <div class="card-tools">
-            <a href="?route=tipos_servicios/form" class="btn btn-sm btn-success">
-                <i class="fas fa-plus"></i> Nuevo Tipo
-            </a>
-        </div>
+  <div class="card-header">
+    <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+    <div class="card-tools">
+      <a href="?route=tipos_servicios/form" class="btn btn-sm btn-success">
+        <i class="fas fa-plus"></i> Nuevo Tipo
+      </a>
     </div>
-    <div class="card-body">
-        <?php if (isset($error)): ?>
-            <div class="alert alert-danger alert-dismissible">
-                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                <h5><i class="icon fas fa-ban"></i> Error</h5>
-                <?= htmlspecialchars($error) ?>
-            </div>
-        <?php endif; ?>
+  </div>
+  <div class="card-body">
+    <?php if (isset($error)): ?>
+      <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <h5><i class="icon fas fa-ban"></i> Error</h5>
+        <?= htmlspecialchars($error) ?>
+      </div>
+    <?php endif; ?>
 
-        <form method="GET" action="" class="form-inline mb-4">
-            <input type="hidden" name="route" value="tipos_servicios/index">
-            <div class="input-group mr-2">
-                <input type="text" class="form-control" name="search" placeholder="Buscar..." value="<?= htmlspecialchars($search) ?>" style="width: 250px;">
-                <span class="input-group-append">
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
-                </span>
-            </div>
-            <a href="?route=tipos_servicios/index" class="btn btn-default">Limpiar</a>
-        </form>
+    <form method="GET" action="" class="form-inline mb-4">
+      <input type="hidden" name="route" value="tipos_servicios/index">
+      <div class="input-group mr-2">
+        <input type="text" class="form-control" name="search" placeholder="Buscar..." value="<?= htmlspecialchars($search) ?>" style="width: 250px;">
+        <span class="input-group-append">
+          <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
+        </span>
+      </div>
+      <a href="?route=tipos_servicios/index" class="btn btn-default">Limpiar</a>
+    </form>
 
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped dataTable w-100">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Denominación</th>
-                        <th>Descripción</th>
-                        <th width="15%" class="text-center">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($items)): ?>
-                        <tr><td colspan="3" class="text-center">No hay tipos de servicio registrados.</td></tr>
-                    <?php else: foreach ($items as $item): ?>
-                        <tr>
-                            <td><?= htmlspecialchars($item->denominacion) ?></td>
-                            <td><?= htmlspecialchars($item->descripcion ?? '') ?></td>
-                            <td class="text-center">
-                                <a href="?route=tipos_servicios/form&id=<?= $item->id ?>" class="btn btn-sm btn-info" title="Editar">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <form method="POST" action="?route=tipos_servicios/eliminar" onsubmit="return confirm('¿Eliminar?');" class="d-inline">
-                                    <input type="hidden" name="id" value="<?= $item->id ?>">
-                                    <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    <?php endforeach; endif; ?>
-                </tbody>
-            </table>
-        </div>
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped w-100">
+        <thead class="thead-dark">
+          <tr>
+            <th>Denominación</th>
+            <th>Descripción</th>
+            <th width="15%" class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php if (empty($items)): ?>
+            <tr><td colspan="3" class="text-center">No hay tipos de servicio registrados.</td></tr>
+          <?php else: foreach ($items as $item): ?>
+            <tr>
+              <td><?= htmlspecialchars($item->denominacion) ?></td>
+              <td><?= htmlspecialchars($item->descripcion ?? '') ?></td>
+              <td class="text-center">
+                <a href="?route=tipos_servicios/form&id=<?= htmlspecialchars((string)$item->id) ?>" class="btn btn-sm btn-info" title="Editar">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <form method="POST" action="?route=tipos_servicios/eliminar" onsubmit="return confirm('¿Eliminar?');" class="d-inline">
+                  <input type="hidden" name="id" value="<?= htmlspecialchars((string)$item->id) ?>">
+                  <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+          <?php endforeach; endif; ?>
+        </tbody>
+      </table>
+    <?php if (isset($paginator)): ?>
+      <?php include $partialsPath . 'pagination.phtml'; ?>
+    <?php endif; ?>
     </div>
+  </div>
 </div>

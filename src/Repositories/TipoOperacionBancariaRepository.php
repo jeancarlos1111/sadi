@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -16,7 +18,7 @@ class TipoOperacionBancariaRepository extends Repository
     public function all(): array
     {
         $db = $this->getPdo();
-        $stmt = $db->query("SELECT * FROM tipo_operacion_bancaria WHERE eliminado = 0 ORDER BY nombre_tipo_operacion_bancaria ASC");
+        $stmt = $db->query("SELECT * FROM tipo_operacion_bancaria WHERE eliminado = false ORDER BY nombre_tipo_operacion_bancaria ASC");
 
         $results = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
@@ -33,7 +35,7 @@ class TipoOperacionBancariaRepository extends Repository
     public function find(int $id): ?TipoOperacionBancaria
     {
         $db = $this->getPdo();
-        $stmt = $db->prepare("SELECT * FROM tipo_operacion_bancaria WHERE id_tipo_operacion_bancaria = ? AND eliminado = 0");
+        $stmt = $db->prepare("SELECT * FROM tipo_operacion_bancaria WHERE id_tipo_operacion_bancaria = ? AND eliminado = false");
         $stmt->execute([$id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -71,7 +73,7 @@ class TipoOperacionBancariaRepository extends Repository
     public function delete(int $id): bool
     {
         $db = $this->getPdo();
-        $stmt = $db->prepare("UPDATE tipo_operacion_bancaria SET eliminado = 1 WHERE id_tipo_operacion_bancaria = ?");
+        $stmt = $db->prepare("UPDATE tipo_operacion_bancaria SET eliminado = true WHERE id_tipo_operacion_bancaria = ?");
 
         return $stmt->execute([$id]);
     }

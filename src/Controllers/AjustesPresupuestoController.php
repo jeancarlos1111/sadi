@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
-use App\Repositories\ReformulacionRepository;
-use App\Repositories\EstrucPresupuestariaRepository;
-use App\Repositories\ComprobantePresupuestarioRepository;
-use App\Repositories\MovimientoPresupuestarioRepository;
+use App\Database\Connection;
 use App\Models\ComprobantePresupuestario;
 use App\Models\MovimientoPresupuestario;
-use App\Database\Connection;
+use App\Repositories\ComprobantePresupuestarioRepository;
+use App\Repositories\EstrucPresupuestariaRepository;
+use App\Repositories\MovimientoPresupuestarioRepository;
+use App\Repositories\ReformulacionRepository;
 use Exception;
 
 /**
@@ -109,8 +111,8 @@ class AjustesPresupuestoController extends HomeController
         $comparativa = $this->reformRepo->getComparativa($id_estruc);
 
         // Separar diferencias positivas (AU) de las negativas (DI)
-        $aumentos    = array_filter($comparativa, fn($r) => (float)$r['diferencia'] > 0);
-        $disminucion = array_filter($comparativa, fn($r) => (float)$r['diferencia'] < 0);
+        $aumentos    = array_filter($comparativa, fn ($r) => (float)$r['diferencia'] > 0);
+        $disminucion = array_filter($comparativa, fn ($r) => (float)$r['diferencia'] < 0);
 
         if (empty($aumentos) && empty($disminucion)) {
             $_SESSION['error'] = 'No hay diferencias entre Formulación y Reformulación. Nada que ajustar.';

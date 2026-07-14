@@ -27,8 +27,8 @@ El sistema es una reescritura desde cero de SIGAFS, conservando la fidelidad fun
 
 | Herramienta        | Descripción                                 |
 |--------------------|---------------------------------------------|
-| PHP 8.4+ (CLI)     | Para ejecutar el servidor embebido          |
-| SQLite 3           | Base de datos de desarrollo rápido          |
+| PHP 8.4+ (CLI)     | Para ejecutar el CLI y herramientas         |
+| Podman / Docker    | Orquestación de servicios locales (BD, Web) |
 | Composer           | Gestión de dependencias PHP                 |
 | php-cs-fixer       | Corrección de estilo PSR-12 (dev)           |
 
@@ -166,20 +166,24 @@ cd sadi
 composer install
 ```
 
-### 2. Preparar la base de datos de desarrollo (SQLite)
+### 2. Preparar la base de datos de desarrollo
+
+El proyecto utiliza PostgreSQL. Asegúrate de tener el motor corriendo (puedes usar Podman/Docker con `compose.yaml`) y luego usa el CLI integrado para inicializar la estructura y los catálogos maestros:
 
 ```bash
-sqlite3 database/sadi.sqlite < database/schema.sql
-php database/seed.php
+php cli/sadi db:migrate
+php cli/sadi db:seed
 ```
 
 ### 3. Iniciar el servidor de desarrollo
 
+Te recomendamos levantar el proyecto usando Podman o Docker. Así tendrás Nginx, PHP-FPM y PostgreSQL configurados con un solo comando:
+
 ```bash
-php -S localhost:8080 -t public/
+podman compose up --build -d
 ```
 
-Acceder en el navegador: [http://localhost:8080](http://localhost:8080)
+Acceder en el navegador: [http://localhost:8000](http://localhost:8000)
 
 ### 4. Convenciones de código
 
@@ -210,20 +214,34 @@ php -l src/Controllers/MiController.php
 
 ### 5. Añadir un nuevo módulo
 
-Seguir siempre el orden: **Model → Repository → Controller → Views**
+Para garantizar la estandarización de DTOs y Arquitectura Limpia, **utiliza el CLI de SADI** para generar módulos. No crees los archivos manualmente.
 
+```bash
+php cli/sadi make:section MiEntidad
 ```
-1. src/Models/MiEntidad.php
-2. src/Repositories/MiEntidadRepository.php
-3. src/Controllers/MiEntidadController.php
-4. views/mi_entidad/index.phtml
-5. views/mi_entidad/form.phtml  (si aplica)
-```
+
+Esto generará automáticamente:
+
+1. `src/Models/MiEntidad.php` (Readonly DTO)
+2. `src/Repositories/MiEntidadRepository.php`
+3. `src/Controllers/MiEntidadController.php`
+4. `database/migrations/mi_entidads.sql`
+5. Vistas CRUD en `views/mi_entidad/`
+
+**[Ver Manual Técnico del CLI](docs/MANUAL_TECNICO_CLI.md)** para más detalles y comandos avanzados.
 
 El módulo estará disponible automáticamente en:
-`http://localhost:8080/?route=mi_entidad/index`
+`http://localhost:8000/?route=mi_entidad/index`
 
-### 6. Generar reportes PDF
+### 6. Arquitectura y Guías de Desarrollo
+
+El proyecto utiliza un patrón Repositorio estricto con DTOs inmutables, evitando ORMs activos. Para entender cómo interactuar con la base de datos, revisa estas guías obligatorias:
+
+- 📖 **[Tutorial: Creación de un Módulo CRUD desde Cero](docs/TUTORIAL_CREAR_MODULO.md)**: Guía paso a paso desde el scaffolding hasta los tests de Pest.
+- 📖 **[Manejo de Relaciones entre Modelos](docs/MANEJO_DE_RELACIONES.md)**: Cómo hacer JOINs y evitar el problema N+1 sin usar Lazy Loading.
+- 📖 **[Operaciones CRUD y Queries SQL](docs/CRUD_Y_QUERIES.md)**: Uso obligatorio de PDO Prepared Statements y convenciones de Inserción, Soft Deletes y Búsquedas.
+
+### 7. Generar reportes PDF
 
 Se usa **FPDF** a través de `App\Services\PdfService`. Recordar limpiar output buffers antes de enviar:
 
@@ -241,10 +259,11 @@ exit;
 
 | Entorno      | Motor       | Archivo / Conexión            |
 |--------------|-------------|-------------------------------|
-| Desarrollo   | SQLite 3    | `database/sadi.sqlite`        |
+| Desarrollo   | PostgreSQL  | `.env` y Podman/Docker        |
 | Producción   | PostgreSQL  | Variable de entorno / config  |
+| Pruebas      | PostgreSQL  | `.env.testing` (`sadi_test`)  |
 
-El schema en `database/schema.sql` es compatible con ambos motores en la mayoría de los casos. Ver el archivo de reglas del proyecto para la tabla de equivalencias SQLite ↔ PostgreSQL.
+El esquema maestro se encuentra en `database/schema.sql` y las migraciones generadas por el CLI van a `database/migrations/`.
 
 ---
 
@@ -255,8 +274,7 @@ El schema en `database/schema.sql` es compatible con ambos motores en la mayorí
 | [Composer](https://getcomposer.org/) | Gestión de dependencias y autoloading PSR-4 |
 | [PHP CS Fixer](https://github.com/PHP-CS-Fixer/PHP-CS-Fixer) | Formateo automático PSR-12 |
 | [FPDF](http://www.fpdf.org/) | Generación de reportes en PDF |
-| SQLite 3 | Base de datos embebida para desarrollo |
-| PostgreSQL | Base de datos de producción |
+| PostgreSQL | Motor de Base de Datos para Pruebas, Desarrollo y Producción |
 
 ---
 
@@ -268,3 +286,25 @@ El schema en `database/schema.sql` es compatible con ambos motores en la mayorí
 | Fase 5.1 | Catálogos de Presupuesto (Proyectos, Acciones Centralizadas, PUC) | ✅ Completado |
 | Fase 5.2 | Procesos Presupuestarios (Apertura, CG/CA/TR, Períodos, Disponibilidad, Reformulación) | ✅ Completado |
 | Fase 5.3 | Reportes — Mayor Analítico PDF | ✅ Completado |
+
+---
+
+## 🐳 Despliegue Local (Docker / Podman)
+
+El proyecto cuenta con una configuración completa en contenedores para levantar el ecosistema (`PostgreSQL`, `PHP-FPM`, `Nginx`) con un solo comando de forma nativa.
+
+### Cómo ejecutarlo
+1. Asegúrate de tener instalado `podman-compose` o `docker-compose`.
+2. Ejecuta en la raíz del proyecto:
+   ```bash
+   podman compose up --build -d
+   ```
+
+### Accesos Rápidos
+- **Aplicación Web:** Abre en tu navegador [http://localhost:8000](http://localhost:8000)
+- **Base de Datos directa:** Usa un cliente SQL apuntando a `127.0.0.1` en el puerto `5433` (User: `sadi`, BD: `sadi_db`, Pass: `sadi`).
+
+### Credenciales de Prueba
+El sistema incluye datos iniciales generados en el esquema para que inicies sesión rápidamente:
+- **Usuario:** `ADMINISTRADOR`
+- **Contraseña:** `123456`

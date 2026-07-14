@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Models\SolicitudPago;
@@ -35,7 +37,9 @@ class SolicitudesPagoController extends HomeController
         $mes = $_GET['mes'] ?? '';
 
         try {
-            $solicitudes = $this->repo->all($search, $mes);
+            $page = (int)($_GET['page'] ?? 1);
+            $paginator = $this->repo->paginate($search, $mes, $page, 15);
+            $solicitudes = $paginator['data'];
         } catch (PDOException $e) {
             $solicitudes = [];
             $error = "Error al obtener solicitudes: " . $e->getMessage();
@@ -47,6 +51,7 @@ class SolicitudesPagoController extends HomeController
             'search' => $search,
             'mes' => $mes,
             'error' => $error ?? null,
+                    'paginator' => $paginator,
         ]);
     }
 

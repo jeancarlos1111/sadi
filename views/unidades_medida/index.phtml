@@ -1,52 +1,55 @@
 <div class="card card-outline card-primary">
-    <div class="card-header">
-        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
-        <div class="card-tools">
-            <a href="?route=unidades_medida/form" class="btn btn-sm btn-success">
-                <i class="fas fa-plus"></i> Nueva Unidad
-            </a>
-        </div>
+  <div class="card-header">
+    <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+    <div class="card-tools">
+      <a href="?route=unidades_medida/form" class="btn btn-sm btn-success">
+        <i class="fas fa-plus"></i> Nueva Unidad
+      </a>
     </div>
-    <div class="card-body">
-        <?php if (isset($error)): ?>
-            <div class="alert alert-danger alert-dismissible">
-                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                <h5><i class="icon fas fa-ban"></i> Error</h5>
-                <?= htmlspecialchars($error) ?>
-            </div>
-        <?php endif; ?>
+  </div>
+  <div class="card-body">
+    <?php if (isset($error)): ?>
+      <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <h5><i class="icon fas fa-ban"></i> Error</h5>
+        <?= htmlspecialchars($error) ?>
+      </div>
+    <?php endif; ?>
 
-        <table class="table table-bordered table-striped dataTable w-100">
-            <thead>
-                <tr>
-                    <th>Denominación</th>
-                    <th>Sigla/Unidad</th>
-                    <th>Observación</th>
-                    <th width="15%">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-        <?php if (empty($items)): ?>
-            <tr><td colspan="4" style="text-align:center;">No hay unidades registradas.</td></tr>
-        <?php else: foreach ($items as $item): ?>
-            <tr>
-                <td><?= htmlspecialchars($item->denominacion) ?></td>
-                <td><?= htmlspecialchars($item->unidades) ?></td>
-                <td><?= htmlspecialchars($item->observacion ?? '') ?></td>
-                <td class="text-center">
-                    <a href="?route=unidades_medida/form&id=<?= $item->id ?>" class="btn btn-sm btn-info" title="Editar">
-                        <i class="fas fa-edit"></i>
-                    </a>
-                    <form method="POST" action="?route=unidades_medida/eliminar" onsubmit="return confirm('¿Eliminar?');" style="display:inline;">
-                        <input type="hidden" name="id" value="<?= $item->id ?>">
-                        <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </form>
-                </td>
-            </tr>
-            <?php endforeach; endif; ?>
-        </tbody>
-        </table>
-    </div>
+    <table class="table table-bordered table-striped w-100">
+      <thead>
+        <tr>
+          <th>Denominación</th>
+          <th>Sigla/Unidad</th>
+          <th>Observación</th>
+          <th width="15%">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+    <?php if (empty($items)): ?>
+      <tr><td colspan="4" style="text-align:center;">No hay unidades registradas.</td></tr>
+    <?php else: foreach ($items as $item): ?>
+      <tr>
+        <td><?= htmlspecialchars($item->denominacion) ?></td>
+        <td><?= htmlspecialchars($item->unidades) ?></td>
+        <td><?= htmlspecialchars($item->observacion ?? '') ?></td>
+        <td class="text-center">
+          <a href="?route=unidades_medida/form&id=<?= htmlspecialchars((string)$item->id) ?>" class="btn btn-sm btn-info" title="Editar">
+            <i class="fas fa-edit"></i>
+          </a>
+          <form method="POST" action="?route=unidades_medida/eliminar" onsubmit="return confirm('¿Eliminar?');" style="display:inline;">
+            <input type="hidden" name="id" value="<?= htmlspecialchars((string)$item->id) ?>">
+            <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </form>
+        </td>
+      </tr>
+      <?php endforeach; endif; ?>
+    </tbody>
+    </table>
+    <?php if (isset($paginator)): ?>
+      <?php include $partialsPath . 'pagination.phtml'; ?>
+    <?php endif; ?>
+  </div>
 </div>

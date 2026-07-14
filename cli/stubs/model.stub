@@ -1,0 +1,30 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Models;
+
+readonly class {{ ClassName }}
+{
+    public function __construct(
+        // TODO: agregar propiedades del modelo
+        public ?int $id = null
+    ) {
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            // TODO: agregar propiedades
+        ];
+    }
+
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            id: $data['id'] ?? null,
+            // TODO: mapear propiedades
+        );
+    }
+}

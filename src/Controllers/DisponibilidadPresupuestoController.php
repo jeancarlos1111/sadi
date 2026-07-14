@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
-use App\Repositories\MovimientoPresupuestarioRepository;
 use App\Repositories\EstrucPresupuestariaRepository;
+use App\Repositories\MovimientoPresupuestarioRepository;
 use App\Repositories\PlanUnicoCuentasRepository;
 
 class DisponibilidadPresupuestoController extends HomeController
@@ -25,14 +27,23 @@ class DisponibilidadPresupuestoController extends HomeController
         $id_estruc = isset($_GET['id_estruc']) && $_GET['id_estruc'] !== '' ? (int)$_GET['id_estruc'] : null;
         $id_cuenta = isset($_GET['id_cuenta']) && $_GET['id_cuenta'] !== '' ? (int)$_GET['id_cuenta'] : null;
 
-        $resumen     = $this->movimientoRepo->getResumenDisponibilidad($id_estruc, $id_cuenta);
-        $estructuras = $this->estructurasRepo->all();
-        $planCuentas = $this->planUnicoRepo->all();
+        try {
+            $fResumen     = \Amp\async(fn() => $this->movimientoRepo->getResumenDisponibilidadAsync($id_estruc, $id_cuenta));
+            $fEstructuras = \Amp\async(fn() => $this->estructurasRepo->allAsync());
+            $fPlanCuentas = \Amp\async(fn() => $this->planUnicoRepo->allAsync());
+
+            [$resumen, $estructuras, $planCuentas] = \Amp\Future\await([$fResumen, $fEstructuras, $fPlanCuentas]);
+        } catch (\Throwable $e) {
+            error_log("Error asíncrono en DisponibilidadPresupuestaria: " . $e->getMessage());
+            $resumen     = [];
+            $estructuras = [];
+            $planCuentas = [];
+        }
 
         // Totales globales del filtro
         $totales = [
             'asignado_inicial'    => array_sum(array_column($resumen, 'asignado_inicial')),
-            'creditos_adicionales'=> array_sum(array_column($resumen, 'creditos_adicionales')),
+            'creditos_adicionales' => array_sum(array_column($resumen, 'creditos_adicionales')),
             'gastos_causados'     => array_sum(array_column($resumen, 'gastos_causados')),
             'traspasos_reduccion' => array_sum(array_column($resumen, 'traspasos_reduccion')),
             'disponible'          => array_sum(array_column($resumen, 'disponible')),

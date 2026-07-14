@@ -21,7 +21,7 @@
             <table width="100%" cellpadding="6" style="margin-bottom: 20px; font-size: 0.9em;">
                 <?php foreach ($filas as $f): if($f['tipo_cuenta'] === 'ACTIVO' && $f['saldo'] != 0): ?>
                     <tr>
-                        <td width="20%" style="color: #666;"><?= $f['codigo_cuenta'] ?></td>
+                        <td width="20%" style="color: #666;"><?= htmlspecialchars((string)$f['codigo_cuenta']) ?></td>
                         <td width="50%"><?= htmlspecialchars($f['denominacion_cuenta']) ?></td>
                         <td width="30%" align="right">Bs <?= number_format($f['saldo'], 2, ',', '.') ?></td>
                     </tr>
@@ -41,7 +41,7 @@
             <table width="100%" cellpadding="6" style="margin-bottom: 20px; font-size: 0.9em;">
                 <?php foreach ($filas as $f): if($f['tipo_cuenta'] === 'PASIVO' && $f['saldo'] != 0): ?>
                     <tr>
-                        <td width="20%" style="color: #666;"><?= $f['codigo_cuenta'] ?></td>
+                        <td width="20%" style="color: #666;"><?= htmlspecialchars((string)$f['codigo_cuenta']) ?></td>
                         <td width="50%"><?= htmlspecialchars($f['denominacion_cuenta']) ?></td>
                         <td width="30%" align="right">Bs <?= number_format($f['saldo'], 2, ',', '.') ?></td>
                     </tr>
@@ -57,7 +57,7 @@
             <table width="100%" cellpadding="6" style="margin-bottom: 20px; font-size: 0.9em;">
                 <?php foreach ($filas as $f): if($f['tipo_cuenta'] === 'PATRIMONIO' && $f['saldo'] != 0): ?>
                     <tr>
-                        <td width="20%" style="color: #666;"><?= $f['codigo_cuenta'] ?></td>
+                        <td width="20%" style="color: #666;"><?= htmlspecialchars((string)$f['codigo_cuenta']) ?></td>
                         <td width="50%"><?= htmlspecialchars($f['denominacion_cuenta']) ?></td>
                         <td width="30%" align="right">Bs <?= number_format($f['saldo'], 2, ',', '.') ?></td>
                     </tr>

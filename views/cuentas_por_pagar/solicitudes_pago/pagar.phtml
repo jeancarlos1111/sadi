@@ -18,7 +18,7 @@
         <select name="id_cta_bancaria" required style="width: 100%; padding: 8px;">
             <option value="">-- Seleccione una Cuenta --</option>
             <?php foreach ($cuentas as $cta): ?>
-                <option value="<?= $cta->id ?>">
+                <option value="<?= htmlspecialchars((string)$cta->id) ?>">
                     <?= htmlspecialchars($cta->nombreBanco) ?> - <?= htmlspecialchars($cta->numeroCuenta) ?>
                 </option>
             <?php endforeach; ?>
@@ -30,7 +30,7 @@
         <select name="id_tipo_operacion_bancaria" required style="width: 100%; padding: 8px;">
             <option value="">-- Seleccione Tipo Operación --</option>
             <?php foreach ($operaciones as $op): ?>
-                <option value="<?= $op['id_tipo_operacion_bancaria'] ?>">
+                <option value="<?= htmlspecialchars((string)$op['id_tipo_operacion_bancaria']) ?>">
                     <?= htmlspecialchars($op['nombre_tipo_operacion_bancaria']) ?> (<?= htmlspecialchars($op['acronimo_tipo_operacion_bancaria']) ?>)
                 </option>
             <?php endforeach; ?>

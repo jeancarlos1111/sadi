@@ -1,112 +1,112 @@
 <div class="card card-outline card-primary">
-    <div class="card-header">
-        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
-    </div>
-    <div class="card-body">
-        <div class="callout callout-info mb-4">
-            <form method="GET" action="">
-                <input type="hidden" name="route" value="banco/estadoCuenta">
-                <div class="row align-items-end">
-                    <div class="col-md-5">
-                        <div class="form-group mb-0">
-                            <label>Seleccione Cuenta</label>
-                            <select class="form-control" name="id_cta_bancaria" required>
-                                <option value="">--- Seleccione una cuenta ---</option>
-                                <?php foreach ($cuentas as $cta): ?>
-                                    <option value="<?= $cta['id_cta_bancaria'] ?>" <?= ($idCuenta == $cta['id_cta_bancaria']) ? 'selected' : '' ?>>
-                                        <?= htmlspecialchars($cta['nombre_banco']) ?> - <?= htmlspecialchars($cta['numero_cta_bancaria']) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group mb-0">
-                            <label>Desde</label>
-                            <input type="date" class="form-control" name="desde" value="<?= htmlspecialchars($desde) ?>">
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group mb-0">
-                            <label>Hasta</label>
-                            <input type="date" class="form-control" name="hasta" value="<?= htmlspecialchars($hasta) ?>">
-                        </div>
-                    </div>
-                    <div class="col-md-1">
-                        <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-search"></i> Consultar</button>
-                    </div>
-                </div>
-            </form>
+  <div class="card-header">
+    <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+  </div>
+  <div class="card-body">
+    <div class="callout callout-info mb-4">
+      <form method="GET" action="">
+        <input type="hidden" name="route" value="banco/estadoCuenta">
+        <div class="row align-items-end">
+          <div class="col-md-5">
+            <div class="form-group mb-0">
+              <label>Seleccione Cuenta</label>
+              <select class="form-control" name="id_cta_bancaria" required>
+                <option value="">--- Seleccione una cuenta ---</option>
+                <?php foreach ($cuentas as $cta): ?>
+                  <option value="<?= htmlspecialchars((string)$cta['id_cta_bancaria']) ?>" <?= ($idCuenta == $cta['id_cta_bancaria']) ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($cta['nombre_banco']) ?> - <?= htmlspecialchars($cta['numero_cta_bancaria']) ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="form-group mb-0">
+              <label>Desde</label>
+              <input type="date" class="form-control" name="desde" value="<?= htmlspecialchars($desde) ?>">
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="form-group mb-0">
+              <label>Hasta</label>
+              <input type="date" class="form-control" name="hasta" value="<?= htmlspecialchars($hasta) ?>">
+            </div>
+          </div>
+          <div class="col-md-1">
+            <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-search"></i> Consultar</button>
+          </div>
         </div>
-
-        <?php if ($idCuenta && $cuentaSel): ?>
-            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
-                <div>
-                    <strong class="h5 mb-0 text-primary">
-                        <i class="fas fa-money-check-alt"></i> Movimientos de: <?= htmlspecialchars($cuentaSel->nombreBanco) ?> | <?= htmlspecialchars($cuentaSel->numeroCuenta) ?>
-                    </strong>
-                </div>
-                <a href="?route=banco/estadoCuenta&id_cta_bancaria=<?= $idCuenta ?>&desde=<?= $desde ?>&hasta=<?= $hasta ?>&pdf=1" target="_blank" class="btn btn-sm btn-danger">
-                    <i class="fas fa-file-pdf"></i> Exportar PDF
-                </a>
-            </div>
-
-            <div class="table-responsive">
-                <table class="table table-bordered table-striped dataTable w-100 table-sm">
-                    <thead class="bg-light">
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Referencia</th>
-                            <th>Tipo / Concepto</th>
-                            <th class="text-right">Monto (Bs)</th>
-                            <th class="text-right">Saldo (Bs)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Saldo Anterior -->
-                        <tr class="table-secondary">
-                            <td colspan="3" class="text-right font-weight-bold">Saldo Anterior al <?= date('d/m/Y', strtotime($desde)) ?></td>
-                            <td class="text-right text-muted">---</td>
-                            <td class="text-right font-weight-bold <?= $saldoAnterior < 0 ? 'text-danger' : 'text-success' ?>">
-                                <?= number_format($saldoAnterior, 2, ',', '.') ?>
-                            </td>
-                        </tr>
-
-                        <?php 
-                        $runningSaldo = $saldoAnterior;
-                        if (empty($movimientos)): ?>
-                            <tr><td colspan="5" class="text-center py-4">No hay movimientos en este periodo.</td></tr>
-                        <?php else: ?>
-                            <?php foreach ($movimientos as $m): 
-                                $runningSaldo += (float)$m['monto'];
-                            ?>
-                                <tr>
-                                    <td><?= date('d/m/Y', strtotime($m['fecha'])) ?></td>
-                                    <td class="font-weight-bold"><?= htmlspecialchars($m['referencia']) ?></td>
-                                    <td>
-                                        <span class="badge badge-info"><?= $m['acronimo_tipo_operacion_bancaria'] ?></span> 
-                                        <?= htmlspecialchars($m['nombre_tipo_operacion_bancaria']) ?>
-                                    </td>
-                                    <td class="text-right font-weight-bold <?= $m['monto'] < 0 ? 'text-danger' : 'text-primary' ?>">
-                                        <?= number_format($m['monto'], 2, ',', '.') ?>
-                                    </td>
-                                    <td class="text-right font-weight-bold">
-                                        <?= number_format($runningSaldo, 2, ',', '.') ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                    <tfoot class="thead-dark">
-                        <tr>
-                            <td colspan="4" class="text-right font-weight-bold h6 pt-3">Saldo Disponible Final al <?= date('d/m/Y', strtotime($hasta)) ?>:</td>
-                            <td class="text-right font-weight-bold text-success h5 pt-2 mb-0">
-                                <?= number_format($runningSaldo, 2, ',', '.') ?> Bs.
-                            </td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-        <?php endif; ?>
+      </form>
     </div>
+
+    <?php if ($idCuenta && $cuentaSel): ?>
+      <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+        <div>
+          <strong class="h5 mb-0 text-primary">
+            <i class="fas fa-money-check-alt"></i> Movimientos de: <?= htmlspecialchars($cuentaSel->nombreBanco) ?> | <?= htmlspecialchars($cuentaSel->numeroCuenta) ?>
+          </strong>
+        </div>
+        <a href="?route=banco/estadoCuenta&id_cta_bancaria=<?= htmlspecialchars((string)$idCuenta) ?>&desde=<?= htmlspecialchars((string)$desde) ?>&hasta=<?= htmlspecialchars((string)$hasta) ?>&pdf=1" target="_blank" class="btn btn-sm btn-danger">
+          <i class="fas fa-file-pdf"></i> Exportar PDF
+        </a>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped w-100 table-sm">
+          <thead class="bg-light">
+            <tr>
+              <th>Fecha</th>
+              <th>Referencia</th>
+              <th>Tipo / Concepto</th>
+              <th class="text-right">Monto (Bs)</th>
+              <th class="text-right">Saldo (Bs)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Saldo Anterior -->
+            <tr class="table-secondary">
+              <td colspan="3" class="text-right font-weight-bold">Saldo Anterior al <?= date('d/m/Y', strtotime($desde)) ?></td>
+              <td class="text-right text-muted">---</td>
+              <td class="text-right font-weight-bold <?= $saldoAnterior < 0 ? 'text-danger' : 'text-success' ?>">
+                <?= number_format($saldoAnterior, 2, ',', '.') ?>
+              </td>
+            </tr>
+
+            <?php 
+            $runningSaldo = $saldoAnterior;
+            if (empty($movimientos)): ?>
+              <tr><td colspan="5" class="text-center py-4">No hay movimientos en este periodo.</td></tr>
+            <?php else: ?>
+              <?php foreach ($movimientos as $m): 
+                $runningSaldo += (float)$m['monto'];
+              ?>
+                <tr>
+                  <td><?= date('d/m/Y', strtotime($m['fecha'])) ?></td>
+                  <td class="font-weight-bold"><?= htmlspecialchars($m['referencia']) ?></td>
+                  <td>
+                    <span class="badge badge-info"><?= htmlspecialchars((string)$m['acronimo_tipo_operacion_bancaria']) ?></span> 
+                    <?= htmlspecialchars($m['nombre_tipo_operacion_bancaria']) ?>
+                  </td>
+                  <td class="text-right font-weight-bold <?= $m['monto'] < 0 ? 'text-danger' : 'text-primary' ?>">
+                    <?= number_format($m['monto'], 2, ',', '.') ?>
+                  </td>
+                  <td class="text-right font-weight-bold">
+                    <?= number_format($runningSaldo, 2, ',', '.') ?>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            <?php endif; ?>
+          </tbody>
+          <tfoot class="thead-dark">
+            <tr>
+              <td colspan="4" class="text-right font-weight-bold h6 pt-3">Saldo Disponible Final al <?= date('d/m/Y', strtotime($hasta)) ?>:</td>
+              <td class="text-right font-weight-bold text-success h5 pt-2 mb-0">
+                <?= number_format($runningSaldo, 2, ',', '.') ?> Bs.
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    <?php endif; ?>
+  </div>
 </div>

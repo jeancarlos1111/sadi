@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -19,7 +21,7 @@ class TipoServicioRepository extends Repository
     {
         $query = $this->query()
                       ->select('*')
-                      ->where('eliminado', '=', 0)
+                      ->where('eliminado', '=', 'false')
                       ->orderBy('denominacion', 'ASC');
 
         if ($search !== '') {
@@ -36,7 +38,7 @@ class TipoServicioRepository extends Repository
         $row = $this->query()
                     ->select('*')
                     ->where('id_tipo_servicio', '=', $id)
-                    ->where('eliminado', '=', 0)
+                    ->where('eliminado', '=', 'false')
                     ->first();
 
         return $row ? $this->mapRowToEntity($row) : null;
@@ -60,7 +62,7 @@ class TipoServicioRepository extends Repository
 
     public function delete(int $id): bool
     {
-        return $this->query()->where('id_tipo_servicio', '=', $id)->update(['eliminado' => 1]);
+        return $this->query()->where('id_tipo_servicio', '=', $id)->update(['eliminado' => 'true']);
     }
 
     private function mapRowToEntity(array $row): TipoServicio

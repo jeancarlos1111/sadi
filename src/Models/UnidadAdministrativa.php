@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
-class UnidadAdministrativa
+readonly class UnidadAdministrativa
 {
     /* private(set) */ public ?int $id;
 
@@ -12,5 +14,23 @@ class UnidadAdministrativa
         ?int          $id = null
     ) {
         $this->id = $id;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'codigo' => $this->codigo,
+            'denominacion' => $this->denominacion,
+        ];
+    }
+
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            $data['codigo'] ?? null,
+            $data['denominacion'] ?? null,
+            $data['id'] ?? null,
+        );
     }
 }

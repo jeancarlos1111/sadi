@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Database\Repository;
@@ -24,10 +26,10 @@ class OrdenServicioRepository extends Repository
             SELECT os.*, p.compania_proveedor
             FROM orden_de_servicio os
             JOIN proveedor p ON os.id_proveedor = p.id_proveedor
-            WHERE os.eliminado = 0
+            WHERE os.eliminado = false
         ";
         if ($mes !== '') {
-            $sql .= " AND strftime('%m', os.fecha_os) = :mes";
+            $sql .= " AND to_char(os.fecha_os, 'MM') = :mes";
         }
         if ($search !== '') {
             $sql .= " AND (os.concepto_os LIKE :s OR p.compania_proveedor LIKE :s)";
@@ -69,7 +71,7 @@ class OrdenServicioRepository extends Repository
     {
         $db = $this->getPdo();
 
-        $stmt = $db->prepare("SELECT * FROM orden_de_servicio WHERE id_orden_de_servicio = :id AND eliminado = 0");
+        $stmt = $db->prepare("SELECT * FROM orden_de_servicio WHERE id_orden_de_servicio = :id AND eliminado = false");
         $stmt->execute(['id' => $id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -106,6 +108,47 @@ class OrdenServicioRepository extends Repository
         $db->beginTransaction();
 
         try {
+            // VERIFICACIÓN DE DISPONIBILIDAD PRESUPUESTARIA (PRE-COMPROMISO)
+            $pctIva = (float)$cabecera['porcentaje_iva'];
+            $compromisosPartidas = [];
+
+            foreach ($detalles as $item) {
+                $stmtSrv = $db->prepare("SELECT id_codigo_plan_unico FROM servicio WHERE id_servicio = ?");
+                $stmtSrv->execute([$item['id_servicio']]);
+                $idPartida = $stmtSrv->fetchColumn();
+
+                if (!$idPartida) {
+                    throw new Exception("El servicio seleccionado no tiene una Partida Presupuestaria asignada.");
+                }
+
+                $montoRenglon = $item['cantidad'] * $item['costo'];
+                if (!empty($item['aplica_iva'])) {
+                    $montoRenglon += ($montoRenglon * ($pctIva / 100));
+                }
+
+                if (!isset($compromisosPartidas[$idPartida])) {
+                    $compromisosPartidas[$idPartida] = 0;
+                }
+                $compromisosPartidas[$idPartida] += $montoRenglon;
+            }
+
+            foreach ($compromisosPartidas as $idPartida => $montoComprometer) {
+                // FOR UPDATE: bloquea la fila de esta partida en presupuesto_gastos
+                // para evitar condición de carrera entre usuarios concurrentes.
+                $stmtCheck = $db->prepare("
+                    SELECT (monto_asignado - monto_comprometido) AS disponible
+                    FROM presupuesto_gastos
+                    WHERE id_codigo_plan_unico = ?
+                    FOR UPDATE
+                ");
+                $stmtCheck->execute([$idPartida]);
+                $disponible = (float)$stmtCheck->fetchColumn();
+
+                if ($montoComprometer > $disponible) {
+                    throw new Exception("Pre-compromiso fallido: Insuficiente disponibilidad para la partida $idPartida. Faltan Bs " . number_format($montoComprometer - $disponible, 2, ',', '.'));
+                }
+            }
+
             $stmt = $db->prepare("
                 INSERT INTO orden_de_servicio 
                 (fecha_os, concepto_os, id_proveedor, porcentaje_iva_os, monto_base_os, monto_iva_os, monto_total_os) 
@@ -188,7 +231,13 @@ class OrdenServicioRepository extends Repository
 
             $stmtPresupuesto = $db->prepare("UPDATE presupuesto_gastos SET monto_comprometido = monto_comprometido + :monto WHERE id_codigo_plan_unico = :id_partida");
             foreach ($compromisosPartidas as $idPartida => $montoComprometer) {
-                $stmtCheck = $db->prepare("SELECT (monto_asignado - monto_comprometido) as disponible FROM presupuesto_gastos WHERE id_codigo_plan_unico = ?");
+                // FOR UPDATE: bloquea la fila durante la contabilización.
+                $stmtCheck = $db->prepare("
+                    SELECT (monto_asignado - monto_comprometido) AS disponible
+                    FROM presupuesto_gastos
+                    WHERE id_codigo_plan_unico = ?
+                    FOR UPDATE
+                ");
                 $stmtCheck->execute([$idPartida]);
                 $disponible = (float)$stmtCheck->fetchColumn();
 
@@ -198,7 +247,7 @@ class OrdenServicioRepository extends Repository
                 $stmtPresupuesto->execute([':monto' => $montoComprometer, ':id_partida' => $idPartida]);
             }
 
-            $db->prepare("UPDATE orden_de_servicio SET contabilizada = 1 WHERE id_orden_de_servicio = ?")->execute([$id]);
+            $db->prepare("UPDATE orden_de_servicio SET contabilizada = true WHERE id_orden_de_servicio = ?")->execute([$id]);
             $db->commit();
 
             return true;
@@ -253,7 +302,7 @@ class OrdenServicioRepository extends Repository
                 $stmtPresupuesto->execute([':monto' => $monto, ':id_partida' => $idPartida]);
             }
 
-            $db->prepare("UPDATE orden_de_servicio SET contabilizada = 0 WHERE id_orden_de_servicio = ?")->execute([$id]);
+            $db->prepare("UPDATE orden_de_servicio SET contabilizada = false WHERE id_orden_de_servicio = ?")->execute([$id]);
             $db->commit();
 
             return true;
@@ -266,6 +315,6 @@ class OrdenServicioRepository extends Repository
 
     public function delete(int $id): bool
     {
-        return $this->query()->where('id_orden_de_servicio', '=', $id)->where('contabilizada', '=', 0)->update(['eliminado' => 1]);
+        return $this->query()->where('id_orden_de_servicio', '=', $id)->where('contabilizada', '=', 'false')->update(['eliminado' => 'true']);
     }
 }
