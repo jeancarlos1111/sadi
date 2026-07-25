@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Models\Articulo;
 use App\Repositories\ArticuloRepository;
 use App\Repositories\TipoArticuloRepository;
@@ -15,19 +17,23 @@ class ArticulosController extends HomeController
     private ArticuloRepository $repo;
     private TipoArticuloRepository $tipoArticuloRepo;
     private UnidadMedidaRepository $unidadMedidaRepo;
+    private \App\Repositories\CuentaContableRepository $cuentaContableRepo;
 
     public function __construct(
         ArticuloRepository $repo,
         TipoArticuloRepository $tipoArticuloRepo,
-        UnidadMedidaRepository $unidadMedidaRepo
+        UnidadMedidaRepository $unidadMedidaRepo,
+        \App\Repositories\CuentaContableRepository $cuentaContableRepo
     ) {
         $this->repo = $repo;
         $this->tipoArticuloRepo = $tipoArticuloRepo;
         $this->unidadMedidaRepo = $unidadMedidaRepo;
+        $this->cuentaContableRepo = $cuentaContableRepo;
     }
 
     public function index(): void
     {
+        Gate::authorize('inventario.articulos.ver');
         $search = $_GET['search'] ?? '';
 
         try {
@@ -51,6 +57,8 @@ class ArticulosController extends HomeController
     public function form(): void
     {
         $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'inventario.articulos.editar' : 'inventario.articulos.crear');
+        $id = $_GET['id'] ?? null;
         $articulo = null;
         $error = null;
 
@@ -61,10 +69,12 @@ class ArticulosController extends HomeController
             }
             $tiposArticulo = $this->tipoArticuloRepo->all();
             $unidadesMedida = $this->unidadMedidaRepo->all();
+            $cuentasContables = $this->cuentaContableRepo->all();
         } catch (PDOException | \Exception $e) {
             $error = "Error referencial BD: " . $e->getMessage();
             $tiposArticulo = [];
             $unidadesMedida = [];
+            $cuentasContables = [];
         }
 
         $this->renderView('compras/articulos/form', [
@@ -72,6 +82,7 @@ class ArticulosController extends HomeController
             'articulo' => $articulo,
             'tiposArticulo' => $tiposArticulo,
             'unidadesMedida' => $unidadesMedida,
+            'cuentasContables' => $cuentasContables,
             'error' => $error,
         ]);
     }
@@ -105,6 +116,7 @@ class ArticulosController extends HomeController
 
     public function eliminar(): void
     {
+        Gate::authorize('inventario.articulos.eliminar');
         $id = $_POST['id'] ?? null;
         if ($id) {
             try {

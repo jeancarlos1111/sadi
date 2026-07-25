@@ -15,19 +15,7 @@
     <?php endif; ?>
 
     <?php if (isset($_GET['error'])): ?>
-      <div class="alert alert-danger alert-dismissible">
-        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-        <h5><i class="icon fas fa-ban"></i> Error</h5>
-        <?= htmlspecialchars($_GET['error']) ?>
-      </div>
-    <?php endif; ?>
-
-    <?php if (isset($error)): ?>
-      <div class="alert alert-danger alert-dismissible">
-        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-        <h5><i class="icon fas fa-ban"></i> Error</h5>
-        <?= htmlspecialchars($error) ?>
-      </div>
+      <?= render_component('alert', ['type' => 'danger', 'message' => $error]) ?>
     <?php endif; ?>
 
     <form method="GET" action="" class="form-inline mb-4">
@@ -75,7 +63,7 @@
                 <td class="text-center align-middle"><strong><?= htmlspecialchars((string)$oc->id) ?></strong></td>
                 <td class="text-center align-middle"><?= htmlspecialchars($oc->fecha) ?></td>
                 <td class="align-middle"><?= htmlspecialchars($proveedor) ?></td>
-                <td class="align-middle"><?= htmlspecialchars($oc->concepto) ?></td>
+                <td class="align-middle"><?= htmlspecialchars($oc->concepto ?? '') ?></td>
                 <td class="text-center align-middle">
                   <?php if (isset($oc->contabilizada) && $oc->contabilizada): ?>
                     <span class="badge badge-success px-2 py-1"><i class="fas fa-check-circle"></i> Contabilizada</span>

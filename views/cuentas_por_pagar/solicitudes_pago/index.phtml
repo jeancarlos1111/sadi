@@ -9,11 +9,7 @@
   </div>
   <div class="card-body">
     <?php if (isset($error)): ?>
-      <div class="alert alert-danger alert-dismissible">
-        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-        <h5><i class="icon fas fa-ban"></i> Error</h5>
-        <?= htmlspecialchars($error) ?>
-      </div>
+      <?= render_component('alert', ['type' => 'danger', 'message' => $error]) ?>
     <?php endif; ?>
 
     <form method="GET" action="" class="form-inline mb-4">
@@ -83,15 +79,11 @@
                     </a>
                   <?php endif; ?>
                   
-                  <a href="?route=solicitudes_pago/form&id=<?= urlencode((string)$sp->id) ?>" class="btn btn-sm btn-info" title="Editar">
-                    <i class="fas fa-edit"></i>
-                  </a>
-                  <form method="POST" action="?route=solicitudes_pago/eliminar" onsubmit="return confirm('¿Seguro de eliminar esta solicitud?');" class="d-inline">
-                    <input type="hidden" name="id" value="<?= htmlspecialchars((string)$sp->id) ?>">
-                    <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
-                      <i class="fas fa-trash-alt"></i>
-                    </button>
-                  </form>
+                  <?= render_component('table_actions', [
+                'editUrl' => '?route=solicitudes_pago/form&id=' . $sp->id,
+                'deleteUrl' => '?route=solicitudes_pago/eliminar',
+                'deleteId' => $sp->id
+            ]) ?>
                 </td>
               </tr>
             <?php endforeach; ?>

@@ -25,6 +25,7 @@ class ProveedorRepository extends Repository
             SELECT 
                 P.id_proveedor, P.rif_proveedor, P.nit_proveedor, P.compania_proveedor, 
                 P.id_tipo_organizacion, P.direccion_proveedor, P.telefono_proveedor, P.id_codigo_contable,
+                P.numero_rnc, P.fecha_vencimiento_rnc,
                 T_O.nombre_tipo_organizacion
             FROM proveedor AS P
             LEFT JOIN tipo_organizacion AS T_O ON P.id_tipo_organizacion = T_O.id_tipo_organizacion
@@ -52,6 +53,8 @@ class ProveedorRepository extends Repository
                 $row['telefono_proveedor'],
                 $row['nit_proveedor'],
                 $row['id_codigo_contable'] ? (int)$row['id_codigo_contable'] : null,
+                $row['numero_rnc'],
+                $row['fecha_vencimiento_rnc'],
                 (int)$row['id_proveedor']
             );
             $results[] = [
@@ -74,6 +77,7 @@ class ProveedorRepository extends Repository
             SELECT 
                 P.id_proveedor, P.rif_proveedor, P.nit_proveedor, P.compania_proveedor, 
                 P.id_tipo_organizacion, P.direccion_proveedor, P.telefono_proveedor, P.id_codigo_contable,
+                P.numero_rnc, P.fecha_vencimiento_rnc,
                 T_O.nombre_tipo_organizacion
             FROM proveedor AS P
             LEFT JOIN tipo_organizacion AS T_O ON P.id_tipo_organizacion = T_O.id_tipo_organizacion
@@ -99,6 +103,8 @@ class ProveedorRepository extends Repository
                 $row['telefono_proveedor'],
                 $row['nit_proveedor'],
                 $row['id_codigo_contable'] ? (int)$row['id_codigo_contable'] : null,
+                $row['numero_rnc'],
+                $row['fecha_vencimiento_rnc'],
                 (int)$row['id_proveedor']
             );
             $results[] = [
@@ -132,6 +138,8 @@ class ProveedorRepository extends Repository
             $row['telefono_proveedor'],
             $row['nit_proveedor'],
             $row['id_codigo_contable'] ? (int)$row['id_codigo_contable'] : null,
+            $row['numero_rnc'],
+            $row['fecha_vencimiento_rnc'],
             (int)$row['id_proveedor']
         );
     }
@@ -146,6 +154,8 @@ class ProveedorRepository extends Repository
             'direccion_proveedor'  => $item->direccion,
             'telefono_proveedor'   => $item->telefono,
             'id_codigo_contable'   => $item->idCodigoContable,
+            'numero_rnc'           => $item->numeroRnc,
+            'fecha_vencimiento_rnc'=> $item->fechaVencimientoRnc,
         ];
 
         if ($item->id) {

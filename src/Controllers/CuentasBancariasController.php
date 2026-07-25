@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Models\CuentaBancaria;
 use App\Repositories\BancoRepository;
 use App\Repositories\CuentaBancariaRepository;
@@ -18,7 +20,7 @@ class CuentasBancariasController extends BaseController
     {
         $this->repo = $repo;
         $this->bancoRepo = $bancoRepo;
-        if (!isset($_SESSION['usuario'])) {
+        if (!isset($_SESSION['usuario_id'])) {
             header('Location: ?route=auth/login');
             exit;
         }
@@ -26,6 +28,7 @@ class CuentasBancariasController extends BaseController
 
     public function index(): void
     {
+        Gate::authorize('tesoreria.cuentas_bancarias.ver');
         $page = (int)($_GET['page'] ?? 1);
         $paginator = $this->repo->paginate('', $page, 15);
         $cuentas = $paginator['data'];
@@ -40,6 +43,8 @@ class CuentasBancariasController extends BaseController
 
     public function form(): void
     {
+        $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'tesoreria.cuentas_bancarias.editar' : 'tesoreria.cuentas_bancarias.crear');
         $id = (int)($_GET['id'] ?? 0);
         $cuenta = $id ? $this->repo->find($id) : null;
         $bancos = $this->bancoRepo->all();
@@ -81,6 +86,7 @@ class CuentasBancariasController extends BaseController
 
     public function eliminar(): void
     {
+        Gate::authorize('tesoreria.cuentas_bancarias.eliminar');
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: ?route=cuentas_bancarias/index');
             exit;

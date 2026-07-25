@@ -71,10 +71,6 @@ class EstrucPresupuestariaRepository extends Repository
 
         $id = $this->query()->insert($data);
         if ($id) {
-            // El modelo tiene $id como public en el constructor, pero no podemos cambiarlo si es readonly o similar
-            // En este caso es public.
-            $item->id = (int)$id;
-
             return true;
         }
 

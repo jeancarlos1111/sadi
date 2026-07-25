@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Models\Banco;
 use App\Repositories\BancoRepository;
 use Exception;
@@ -15,7 +17,7 @@ class BancosController extends BaseController
     public function __construct(BancoRepository $repo)
     {
         $this->repo = $repo;
-        if (!isset($_SESSION['usuario'])) {
+        if (!isset($_SESSION['usuario_id'])) {
             header('Location: ?route=auth/login');
             exit;
         }
@@ -23,6 +25,7 @@ class BancosController extends BaseController
 
     public function index(): void
     {
+        Gate::authorize('tesoreria.bancos.ver');
         $page = (int)($_GET['page'] ?? 1);
         $paginator = $this->repo->paginate('', $page, 15);
         $bancos = $paginator['data'];
@@ -37,6 +40,8 @@ class BancosController extends BaseController
 
     public function form(): void
     {
+        $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'tesoreria.bancos.editar' : 'tesoreria.bancos.crear');
         $id = (int)($_GET['id'] ?? 0);
         $banco = $id ? $this->repo->find($id) : null;
 
@@ -75,6 +80,7 @@ class BancosController extends BaseController
 
     public function eliminar(): void
     {
+        Gate::authorize('tesoreria.bancos.eliminar');
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: ?route=bancos/index');
             exit;

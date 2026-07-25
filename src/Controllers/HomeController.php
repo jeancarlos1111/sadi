@@ -9,10 +9,7 @@ class HomeController extends BaseController
     public function __construct()
     {
         // Protected route check
-        if (!isset($_SESSION['usuario'])) {
-            header('Location: ?route=auth/login');
-            exit;
-        }
+        $this->requireAuth();
     }
 
     public function index(): void

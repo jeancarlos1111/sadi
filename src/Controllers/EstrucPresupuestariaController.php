@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Models\EstructuraPresupuestaria;
 use App\Repositories\EstrucPresupuestariaRepository;
 use Exception;
@@ -20,6 +22,7 @@ class EstrucPresupuestariaController extends HomeController
 
     public function index(): void
     {
+        Gate::authorize('presupuesto.estructuras.ver');
         $search = $_GET['search'] ?? '';
         $estructuras = [];
 
@@ -41,6 +44,8 @@ class EstrucPresupuestariaController extends HomeController
 
     public function form(): void
     {
+        $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'presupuesto.estructuras.editar' : 'presupuesto.estructuras.crear');
         $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
         $estructura = $id ? $this->repo->find($id) : null;
 
@@ -72,8 +77,18 @@ class EstrucPresupuestariaController extends HomeController
         }
 
         try {
+            $datosAntes = null;
+            if ($id) {
+                $modeloAnterior = $this->repo->find($id);
+                $datosAntes = $modeloAnterior ? $modeloAnterior->toArray() : null;
+            }
+
             $ep = new EstructuraPresupuestaria($id ?: 0, $descripcion);
-            $this->repo->save($ep);
+            $nuevoId = $this->repo->save($ep);
+
+            $modeloDespues = $this->repo->find($nuevoId);
+            $this->audit('estructura_presupuestaria', $id ? 'EDITAR' : 'CREAR', $nuevoId, $datosAntes, $modeloDespues ? $modeloDespues->toArray() : null);
+
             header('Location: ?route=estruc_presupuestaria/index&success=Estructura+guardada');
             exit;
         } catch (Exception $e) {
@@ -87,9 +102,14 @@ class EstrucPresupuestariaController extends HomeController
 
     public function eliminar(): void
     {
+        Gate::authorize('presupuesto.estructuras.eliminar');
         $id = $_POST['id'] ?? null;
         if ($id) {
-            $this->repo->delete((int)$id);
+            $id = (int)$id;
+            $modeloAnterior = $this->repo->find($id);
+            $datosAntes = $modeloAnterior ? $modeloAnterior->toArray() : null;
+            $this->repo->delete($id);
+            $this->audit('estructura_presupuestaria', 'ELIMINAR', $id, $datosAntes, null);
         }
         header('Location: ?route=estruc_presupuestaria/index&success=Estructura+eliminada');
         exit;

@@ -9,11 +9,7 @@
   </div>
   <div class="card-body">
     <?php if (isset($error)): ?>
-      <div class="alert alert-danger alert-dismissible">
-        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-        <h5><i class="icon fas fa-ban"></i> Error</h5>
-        <?= htmlspecialchars($error) ?>
-      </div>
+      <?= render_component('alert', ['type' => 'danger', 'message' => $error]) ?>
     <?php endif; ?>
 
     <form method="GET" action="" class="form-inline mb-4">
@@ -44,15 +40,11 @@
               <td><?= htmlspecialchars($item->denominacion) ?></td>
               <td><?= htmlspecialchars($item->descripcion ?? '') ?></td>
               <td class="text-center">
-                <a href="?route=tipos_servicios/form&id=<?= htmlspecialchars((string)$item->id) ?>" class="btn btn-sm btn-info" title="Editar">
-                  <i class="fas fa-edit"></i>
-                </a>
-                <form method="POST" action="?route=tipos_servicios/eliminar" onsubmit="return confirm('¿Eliminar?');" class="d-inline">
-                  <input type="hidden" name="id" value="<?= htmlspecialchars((string)$item->id) ?>">
-                  <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
-                    <i class="fas fa-trash-alt"></i>
-                  </button>
-                </form>
+                <?= render_component('table_actions', [
+                'editUrl' => '?route=tipos_servicios/form&id=' . $item->id,
+                'deleteUrl' => '?route=tipos_servicios/eliminar',
+                'deleteId' => $item->id
+            ]) ?>
               </td>
             </tr>
           <?php endforeach; endif; ?>

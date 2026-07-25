@@ -1,0 +1,108 @@
+<?php 
+/**
+ * @var string $titulo
+ * @var \App\Models\Institucion $config
+ * @var string|null $error
+ * @var bool $success
+ */
+?>
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-building mr-2 text-dark"></i> <?= htmlspecialchars($titulo) ?></h1>
+</div>
+
+<?php if (isset($error) && $error): ?>
+    <?= render_component('alert', ['type' => 'danger', 'message' => $error]) ?>
+<?php endif; ?>
+
+<?php if (isset($success) && $success): ?>
+    <div class="alert alert-success alert-dismissible fade show">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <i class="fas fa-check-circle mr-2"></i> Datos institucionales actualizados correctamente.
+    </div>
+<?php endif; ?>
+
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title">Configuración Legal y de Contacto</h3>
+        <div class="card-tools">
+            <?php if (\App\Auth\Gate::allows('admin.usuarios.editar')): ?>
+                <a href="?route=admin/institucionEditar" class="btn btn-sm btn-primary">
+                    <i class="fas fa-edit"></i> Editar Configuración
+                </a>
+            <?php endif; ?>
+        </div>
+    </div>
+    
+    <div class="card-body">
+        
+        <div class="row">
+            <!-- Columna Izquierda: Datos Básicos -->
+            <div class="col-md-6">
+                <h5 class="text-primary border-bottom pb-2 mb-3">Datos Básicos y Legales</h5>
+                
+                <div class="form-group">
+                    <label>Nombre de la Institución</label>
+                    <p class="form-control-plaintext"><?= htmlspecialchars($config->nombre) ?: '<span class="text-muted">No definido</span>' ?></p>
+                </div>
+
+                <div class="form-group">
+                    <label>R.I.F.</label>
+                    <p class="form-control-plaintext"><?= htmlspecialchars($config->rif) ?: '<span class="text-muted">No definido</span>' ?></p>
+                </div>
+
+                <div class="form-group">
+                    <label>Base Legal (Gaceta, Decreto de Creación)</label>
+                    <p class="form-control-plaintext"><?= htmlspecialchars($config->base_legal ?? '') ?: '<span class="text-muted">No definido</span>' ?></p>
+                </div>
+
+                <div class="form-group">
+                    <label>Código ONAPRE</label>
+                    <p class="form-control-plaintext"><?= htmlspecialchars($config->codigo_onapre ?? '') ?: '<span class="text-muted">No definido</span>' ?></p>
+                </div>
+                
+                <div class="form-group">
+                    <label>Dirección Fiscal</label>
+                    <p class="form-control-plaintext"><?= nl2br(htmlspecialchars($config->direccion)) ?: '<span class="text-muted">No definido</span>' ?></p>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Contacto y Logo -->
+            <div class="col-md-6">
+                <h5 class="text-primary border-bottom pb-2 mb-3">Contacto y Autoridades</h5>
+                
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label>Teléfono</label>
+                        <p class="form-control-plaintext"><?= htmlspecialchars($config->telefono ?? '') ?: '<span class="text-muted">No definido</span>' ?></p>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Correo Electrónico</label>
+                        <p class="form-control-plaintext"><?= htmlspecialchars($config->correo ?? '') ?: '<span class="text-muted">No definido</span>' ?></p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Nombre Máxima Autoridad (Cuentadante)</label>
+                    <p class="form-control-plaintext"><?= htmlspecialchars($config->maxima_autoridad ?? '') ?: '<span class="text-muted">No definido</span>' ?></p>
+                </div>
+
+                <div class="form-group">
+                    <label>Cargo Máxima Autoridad</label>
+                    <p class="form-control-plaintext"><?= htmlspecialchars($config->cargo_autoridad ?? '') ?: '<span class="text-muted">No definido</span>' ?></p>
+                </div>
+
+                <div class="form-group mt-4">
+                    <label>Logo de la Institución</label>
+                    <?php if ($config->logo_path): ?>
+                        <div class="mt-2">
+                            <img src="<?= htmlspecialchars($config->logo_path) ?>" alt="Logo Institución" class="img-thumbnail" style="max-height: 150px;">
+                        </div>
+                    <?php else: ?>
+                        <p class="form-control-plaintext"><span class="text-muted">Sin Logo</span></p>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

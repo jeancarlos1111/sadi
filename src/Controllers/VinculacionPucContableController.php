@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Database\Connection;
 use App\Models\VinculacionPucContable;
 use App\Repositories\VinculacionPucContableRepository;
@@ -16,7 +18,7 @@ class VinculacionPucContableController extends BaseController
     public function __construct(VinculacionPucContableRepository $repo)
     {
         $this->repo = $repo;
-        if (!isset($_SESSION['usuario'])) {
+        if (!isset($_SESSION['usuario_id'])) {
             header('Location: ?route=auth/login');
             exit;
         }
@@ -24,6 +26,7 @@ class VinculacionPucContableController extends BaseController
 
     public function index(): void
     {
+        Gate::authorize('presupuesto.vinculacion_puc.ver');
         try {
             $page = (int)($_GET['page'] ?? 1);
             $paginator = $this->repo->paginate('', $page, 15);
@@ -74,7 +77,10 @@ class VinculacionPucContableController extends BaseController
                     $_POST['tipo_operacion'],
                     $_POST['descripcion'] ?? ''
                 );
-                $this->repo->save($item);
+                $nuevoId = $this->repo->save($item);
+
+                $modeloDespues = $this->repo->findById($nuevoId);
+                $this->audit('vinculacion_puc_contable', 'CREAR', $nuevoId, null, $modeloDespues ? $modeloDespues->toArray() : null);
 
                 header('Location: ?route=vinculacion_puc_contable/index&success=Vínculo contable agregado correctamente.');
                 exit;
@@ -86,11 +92,15 @@ class VinculacionPucContableController extends BaseController
 
     public function eliminar(): void
     {
+        Gate::authorize('presupuesto.vinculacion_puc.eliminar');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $id = (int)($_POST['id_vinculacion'] ?? 0);
                 if ($id) {
+                    $modeloAnterior = $this->repo->findById($id);
+                    $datosAntes = $modeloAnterior ? $modeloAnterior->toArray() : null;
                     $this->repo->delete($id);
+                    $this->audit('vinculacion_puc_contable', 'ELIMINAR', $id, $datosAntes, null);
                 }
                 header('Location: ?route=vinculacion_puc_contable/index&success=El vínculo fue deshabilitado exitosamente.');
                 exit;

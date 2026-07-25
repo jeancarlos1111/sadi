@@ -1,0 +1,126 @@
+<?php
+/** @var string $titulo */
+/** @var \App\Models\TomaInventario $toma */
+/** @var array $detalles */
+/** @var string|null $error */
+/** @var string|null $success */
+
+$esAbierta = $toma->estado === 'ABIERTA';
+?>
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+        <div class="card-tools">
+            <span class="badge <?= $esAbierta ? 'badge-warning' : 'badge-success' ?> p-2">
+                ESTADO: <?= $toma->estado ?>
+            </span>
+        </div>
+    </div>
+    
+    <div class="card-body">
+        <?php if ($error): ?>
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h5><i class="icon fas fa-ban"></i> Error</h5>
+                <?= htmlspecialchars($error) ?>
+            </div>
+        <?php endif; ?>
+        <?php if ($success): ?>
+            <div class="alert alert-success alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h5><i class="icon fas fa-check"></i> Éxito</h5>
+                <?= htmlspecialchars($success) ?>
+            </div>
+        <?php endif; ?>
+
+        <div class="row mb-4 bg-light p-3 border rounded">
+            <div class="col-md-4">
+                <strong>Fecha de Toma:</strong> <?= date('d/m/Y', strtotime($toma->fechaToma)) ?>
+            </div>
+            <div class="col-md-4">
+                <strong>Responsable:</strong> <?= htmlspecialchars($toma->responsable) ?>
+            </div>
+            <div class="col-md-4">
+                <strong>Cierre:</strong> <?= $toma->fechaCierre ? date('d/m/Y H:i', strtotime($toma->fechaCierre)) : 'No cerrada' ?>
+            </div>
+            <?php if ($toma->observaciones): ?>
+            <div class="col-md-12 mt-2">
+                <strong>Observaciones:</strong> <?= nl2br(htmlspecialchars($toma->observaciones)) ?>
+            </div>
+            <?php endif; ?>
+        </div>
+
+        <form method="POST" action="?route=toma_inventario/actualizarDetalle">
+            <input type="hidden" name="id_toma" value="<?= $toma->idToma ?>">
+            
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped table-sm w-100">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th style="width: 10%">Tipo</th>
+                            <th style="width: 15%">Código</th>
+                            <th style="width: 35%">Denominación del Artículo</th>
+                            <th style="width: 10%" class="text-center">Cant. Sistema</th>
+                            <th style="width: 10%" class="text-center">Cant. Física</th>
+                            <th style="width: 10%" class="text-center">Diferencia</th>
+                            <th style="width: 10%">Justificación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($detalles)): ?>
+                            <tr><td colspan="7" class="text-center">No hay artículos registrados para esta toma.</td></tr>
+                        <?php else: ?>
+                            <?php foreach ($detalles as $d): ?>
+                                <tr>
+                                    <td><?= $d['tipo'] === 'BIEN' ? '<span class="badge badge-info">BIEN</span>' : '<span class="badge badge-secondary">INSUMO</span>' ?></td>
+                                    <td><?= htmlspecialchars($d['codigo_a']) ?></td>
+                                    <td><?= htmlspecialchars($d['denominacion_a']) ?></td>
+                                    <td class="text-center font-weight-bold bg-light align-middle"><?= $d['cantidad_sistema'] ?></td>
+                                    <td class="text-center">
+                                        <?php if ($esAbierta): ?>
+                                            <input type="hidden" name="id_detalle[]" value="<?= $d['id_detalle'] ?>">
+                                            <input type="number" name="cantidad_fisica[]" class="form-control form-control-sm text-center" value="<?= $d['cantidad_fisica'] ?>" min="0" required>
+                                        <?php else: ?>
+                                            <?= $d['cantidad_fisica'] ?>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="text-center align-middle <?= $d['diferencia'] < 0 ? 'text-danger font-weight-bold' : ($d['diferencia'] > 0 ? 'text-success font-weight-bold' : '') ?>">
+                                        <?= $d['diferencia'] > 0 ? '+' . $d['diferencia'] : $d['diferencia'] ?>
+                                    </td>
+                                    <td>
+                                        <?php if ($esAbierta): ?>
+                                            <input type="text" name="justificacion[]" class="form-control form-control-sm" value="<?= htmlspecialchars($d['justificacion'] ?? '') ?>" placeholder="Ej: Pérdida, dañado...">
+                                        <?php else: ?>
+                                            <?= htmlspecialchars($d['justificacion'] ?? '-') ?>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <?php if ($esAbierta): ?>
+            <div class="mt-3">
+                <button type="submit" class="btn btn-info">
+                    <i class="fas fa-save"></i> Guardar Progreso del Conteo
+                </button>
+            </div>
+            <?php endif; ?>
+        </form>
+    </div>
+    
+    <div class="card-footer bg-light">
+        <a href="?route=toma_inventario/index" class="btn btn-default"><i class="fas fa-arrow-left"></i> Volver</a>
+        
+        <?php if ($esAbierta): ?>
+            <form method="POST" action="?route=toma_inventario/cerrar" class="float-right">
+                <input type="hidden" name="id_toma" value="<?= $toma->idToma ?>">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('¿Está seguro de cerrar la toma? Una vez cerrada no podrá modificar el conteo y se podrán generar los ajustes de inventario.');">
+                    <i class="fas fa-lock"></i> Cerrar Toma Definitivamente
+                </button>
+            </form>
+        <?php endif; ?>
+    </div>
+</div>

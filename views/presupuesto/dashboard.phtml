@@ -8,7 +8,7 @@
 </div>
 
 <?php if (isset($error)): ?>
-    <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+    <?= render_component('alert', ['type' => 'danger', 'message' => $error]) ?>
 <?php endif; ?>
 
 <div class="row mb-4">
@@ -57,7 +57,7 @@
                 <?php foreach ($fuentes as $f): ?>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         <?= htmlspecialchars($f['nombre']) ?>
-                        <span class="badge bg-success rounded-pill">Bs. <?= number_format($f['total'], 2, ',', '.') ?></span>
+                        <span class="badge bg-success rounded-pill">Bs. <?= number_format((float)($f['asignado'] ?? 0), 2, ',', '.') ?></span>
                     </li>
                 <?php endforeach; ?>
                 <?php if(empty($fuentes)): ?>

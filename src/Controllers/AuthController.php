@@ -4,39 +4,57 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\AuthService;
+
 class AuthController extends BaseController
 {
+    public function __construct(
+        private readonly AuthService $authService
+    ) {
+    }
+
     public function login(): void
     {
-        // Si ya hay sesión, redirigir al home
-        if (isset($_SESSION['usuario'])) {
+        if ($this->authService->isLoggedIn()) {
             header('Location: ?route=home/index');
             exit;
         }
 
         $error = null;
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $usuario = $_POST['usuario'] ?? '';
+            $usuario  = trim($_POST['usuario'] ?? '');
             $password = $_POST['password'] ?? '';
 
-            // En un caso real, validaríamos contra la BD (por ej. tabla `usuario`).
-            // Para propósitos de este piloto de SADI, simulamos un login básico si el usuario no está vacío.
-            if ($usuario === 'admin' && $password === '1234') { // Hardcoded for demo
-                $_SESSION['usuario'] = $usuario;
-                $_SESSION['BDnombre_base_datos'] = 'sigafs'; // Needed by Connection mapping
-                header('Location: ?route=home/index');
-                exit;
+            if (empty($usuario) || empty($password)) {
+                $error = 'Por favor ingrese usuario y contraseña.';
+            } elseif (strlen($password) < 8) {
+                $error = 'La contraseña debe tener al menos 8 caracteres.';
             } else {
-                $error = "Usuario o contraseña incorrectos. (Pista: admin / 1234)";
+                try {
+                    $autenticado = $this->authService->login($usuario, $password);
+
+                    if ($autenticado) {
+                        header('Location: ?route=home/index');
+                        exit;
+                    } else {
+                        $error = 'Usuario o contraseña incorrectos.';
+                    }
+                } catch (\InvalidArgumentException $e) {
+                    $error = $e->getMessage();
+                }
             }
         }
 
-        $this->renderView('auth/login', ['error' => $error]);
+        $this->renderView('auth/login', [
+            'titulo' => 'Iniciar Sesión – SADI',
+            'error'  => $error,
+        ]);
     }
 
     public function logout(): void
     {
-        session_destroy();
+        $this->authService->logout();
         header('Location: ?route=auth/login');
         exit;
     }

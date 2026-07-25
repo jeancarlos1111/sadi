@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Models\UnidadMedida;
 use App\Repositories\UnidadMedidaRepository;
 use PDOException;
@@ -19,6 +21,7 @@ class UnidadesMedidaController extends HomeController
 
     public function index(): void
     {
+        Gate::authorize('inventario.unidades_medida.ver');
         $search = $_GET['search'] ?? '';
 
         try {
@@ -40,6 +43,8 @@ class UnidadesMedidaController extends HomeController
 
     public function form(): void
     {
+        $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'inventario.unidades_medida.editar' : 'inventario.unidades_medida.crear');
         $id    = $_GET['id'] ?? null;
         $item  = null;
         $error = null;
@@ -83,6 +88,7 @@ class UnidadesMedidaController extends HomeController
 
     public function eliminar(): void
     {
+        Gate::authorize('inventario.unidades_medida.eliminar');
         $id = $_POST['id'] ?? null;
         if ($id) {
             try {

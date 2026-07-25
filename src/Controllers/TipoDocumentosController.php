@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Models\TipoDocumento;
 use App\Repositories\TipoDocumentoRepository;
 
@@ -18,6 +20,7 @@ class TipoDocumentosController extends HomeController
 
     public function index(): void
     {
+        Gate::authorize('documental.tipos_documentos.ver');
         $page = (int)($_GET['page'] ?? 1);
         $paginator = $this->repo->paginate('', $page, 15);
         $items = $paginator['data'];
@@ -30,6 +33,8 @@ class TipoDocumentosController extends HomeController
 
     public function form(): void
     {
+        $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'documental.tipos_documentos.editar' : 'documental.tipos_documentos.crear');
         $id   = $_GET['id'] ?? null;
         $item = $id ? $this->repo->findById((int)$id) : null;
 
@@ -64,6 +69,7 @@ class TipoDocumentosController extends HomeController
 
     public function eliminar(): void
     {
+        Gate::authorize('documental.tipos_documentos.eliminar');
         $id = $_POST['id'] ?? null;
         if ($id) {
             try {

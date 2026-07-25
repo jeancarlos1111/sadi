@@ -21,12 +21,15 @@ if ($isLoginPage) {
  <!-- Google Font: Source Sans Pro -->
  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
  <!-- Font Awesome -->
- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
- <!-- Bootstrap 4 (Requiere cargar antes de AdminLTE si hay fallos) -->
- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.2/css/bootstrap.min.css">
+ <link rel="stylesheet" href="/assets/css/all.min.css">
+ <!-- Bootstrap 4 -->
+ <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
 
+ <!-- Select2 -->
+ <link rel="stylesheet" href="/assets/css/select2.min.css">
+ <link rel="stylesheet" href="/assets/css/select2-bootstrap4.min.css">
  <!-- Theme style plugin - AdminLTE -->
- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/css/adminlte.min.css">
+ <link rel="stylesheet" href="/assets/css/adminlte.min.css">
 </head>
 <body class="<?= htmlspecialchars((string)$bodyClass) ?>">
 
@@ -66,11 +69,74 @@ if ($isLoginPage) {
 <?php endif; ?>
 
 <!-- jQuery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="/assets/js/jquery.min.js"></script>
 <!-- Bootstrap 4 -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/js/bootstrap.bundle.min.js"></script>
 
 <!-- AdminLTE App -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/js/adminlte.min.js"></script>
+<script src="/assets/js/adminlte.min.js"></script>
+<!-- Select2 -->
+<script src="/assets/js/select2.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    let searchTimeout;
+
+    function showLoading() {
+        $('.ajax-table-container').css('position', 'relative');
+        if ($('.ajax-table-container .ajax-loading-overlay').length === 0) {
+            $('.ajax-table-container').append(
+                '<div class="ajax-loading-overlay" style="position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(255,255,255,0.6); display:flex; align-items:center; justify-content:center; z-index:10; border-radius:0.25rem;">' +
+                '<i class="fas fa-2x fa-spinner fa-spin text-primary"></i>' +
+                '</div>'
+            );
+        }
+    }
+
+    // AJAX Search input
+    $(document).on('input', '.ajax-search-form input[name="search"]', function(e) {
+        clearTimeout(searchTimeout);
+        let form = $(this).closest('form');
+        
+        searchTimeout = setTimeout(function() {
+            let url = form.attr('action') || window.location.pathname;
+            let data = form.serialize();
+            let fullUrl = url + '?' + data;
+            
+            window.history.pushState({}, '', fullUrl);
+            let fetchUrl = fullUrl + '&ajax=1';
+            
+            showLoading();
+            $.get(fetchUrl, function(html) {
+                let newTable = $(html).find('.ajax-table-container').html();
+                if (!newTable) newTable = html; 
+                $('.ajax-table-container').html(newTable);
+            }).fail(function() {
+                $('.ajax-table-container .ajax-loading-overlay').remove();
+            });
+        }, 400);
+    });
+
+    // AJAX Pagination links
+    $(document).on('click', '.ajax-table-container .pagination a', function(e) {
+        e.preventDefault();
+        let url = $(this).attr('href');
+        if (!url || url === '#') return;
+        
+        window.history.pushState({}, '', url);
+        let fetchUrl = url + (url.indexOf('?') === -1 ? '?ajax=1' : '&ajax=1');
+        
+        showLoading();
+        $.get(fetchUrl, function(html) {
+            let newTable = $(html).find('.ajax-table-container').html();
+            if (!newTable) newTable = html;
+            $('.ajax-table-container').html(newTable);
+            $('html, body').animate({ scrollTop: $('.ajax-table-container').offset().top - 100 }, 300);
+        }).fail(function() {
+            $('.ajax-table-container .ajax-loading-overlay').remove();
+        });
+    });
+});
+</script>
 </body>
 </html>

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Database\Connection;
 use App\Models\ComprobantePresupuestario;
 use App\Models\MovimientoPresupuestario;
@@ -38,6 +40,7 @@ class AjustesPresupuestoController extends HomeController
     /** Muestra la comparativa Formulación vs Reformulación con diferencias */
     public function index(): void
     {
+        Gate::authorize('presupuesto.ajustes.ver');
         $id_estruc = isset($_GET['id_estruc']) && $_GET['id_estruc'] !== '' ? (int)$_GET['id_estruc'] : null;
 
         $comparativa = $this->reformRepo->getComparativa($id_estruc);
@@ -87,6 +90,7 @@ class AjustesPresupuestoController extends HomeController
                     $this->reformRepo->upsert($id_estruc, $id_cpu, $monto, $observacion ?: null);
                 }
             }
+            $this->audit('reformulacion', 'EDITAR_MASIVO', $id_estruc, null, ['montos' => $montos, 'id_cuentas' => $id_cuentas]);
             $_SESSION['success'] = "Montos de reformulación guardados. Ahora puede 'Generar Comprobantes de Ajuste'.";
         } catch (Exception $e) {
             $_SESSION['error'] = 'Error al guardar la reformulación: ' . $e->getMessage();
@@ -169,6 +173,7 @@ class AjustesPresupuestoController extends HomeController
             }
 
             $db->commit();
+            $this->audit('comprobante_presupuestario', 'GENERAR_AJUSTES', $id_estruc ?? 0, null, ['comprobantes_generados' => $generados]);
             $_SESSION['success'] = 'Comprobantes generados: ' . implode(', ', $generados) . '. El presupuesto ha sido ajustado a la reformulación.';
         } catch (Exception $e) {
             $db->rollBack();

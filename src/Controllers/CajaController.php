@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Models\CajaChica;
 use App\Repositories\CajaChicaRepository;
 use Exception;
@@ -16,7 +18,7 @@ class CajaController extends BaseController
     {
         $this->repo = $repo;
 
-        if (!isset($_SESSION['usuario'])) {
+        if (!isset($_SESSION['usuario_id'])) {
             header('Location: ?route=auth/login');
             exit;
         }
@@ -25,6 +27,7 @@ class CajaController extends BaseController
     /** Listado de cajas chicas */
     public function index(): void
     {
+        Gate::authorize('tesoreria.caja.ver');
         $page = (int)($_GET['page'] ?? 1);
         $paginator = $this->repo->paginate('', $page, 15);
         $cajas = $paginator['data'];
@@ -38,6 +41,8 @@ class CajaController extends BaseController
     /** Formulario crear/editar caja */
     public function form(): void
     {
+        $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'tesoreria.caja.editar' : 'tesoreria.caja.crear');
         $id   = isset($_GET['id']) ? (int)$_GET['id'] : null;
         $caja = $id ? $this->repo->find($id) : null;
         $this->renderView('caja/form', [
@@ -163,6 +168,7 @@ class CajaController extends BaseController
     /** POST: eliminar caja chica */
     public function eliminar(): void
     {
+        Gate::authorize('tesoreria.caja.eliminar');
         $id = (int)($_POST['id'] ?? 0);
         if ($id) {
             $this->repo->delete($id);

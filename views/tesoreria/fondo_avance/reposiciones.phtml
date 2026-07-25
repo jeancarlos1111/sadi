@@ -1,0 +1,83 @@
+<?php
+/** @var string $titulo */
+/** @var \App\Models\FondoAvance $fondo */
+/** @var array $reposiciones */
+/** @var string|null $error */
+/** @var string|null $success */
+?>
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+        <div class="card-tools">
+            <form method="POST" action="?route=fondo_avance/nuevaReposicion">
+                <input type="hidden" name="id_fondo" value="<?= $fondo->idFondo ?>">
+                <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('¿Iniciar una nueva rendición/reposición para este fondo?');">
+                    <i class="fas fa-plus"></i> Iniciar Rendición
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="card-body">
+        <?php if ($error): ?>
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <?= htmlspecialchars($error) ?>
+            </div>
+        <?php endif; ?>
+        <?php if ($success): ?>
+            <div class="alert alert-success alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <?= htmlspecialchars($success) ?>
+            </div>
+        <?php endif; ?>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped dataTable w-100">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>N° Rendición</th>
+                        <th>Fecha Inicio</th>
+                        <th>Monto Rendido (Bs)</th>
+                        <th>Estado</th>
+                        <th>Solicitud Pago Asoc.</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($reposiciones)): ?>
+                        <tr><td colspan="6" class="text-center">No se encontraron rendiciones para este fondo.</td></tr>
+                    <?php else: ?>
+                        <?php foreach ($reposiciones as $rep): ?>
+                            <tr>
+                                <td>R-<?= str_pad((string)$rep['id_reposicion'], 4, '0', STR_PAD_LEFT) ?></td>
+                                <td><?= date('d/m/Y', strtotime($rep['fecha_reposicion'])) ?></td>
+                                <td class="text-right font-weight-bold"><?= number_format((float)$rep['monto_rendido'], 2, ',', '.') ?></td>
+                                <td>
+                                    <?php
+                                        $badge = 'secondary';
+                                        if ($rep['estado'] === 'PENDIENTE') $badge = 'warning';
+                                        if ($rep['estado'] === 'APROBADA') $badge = 'info';
+                                        if ($rep['estado'] === 'PAGADA') $badge = 'success';
+                                    ?>
+                                    <span class="badge badge-<?= $badge ?>"><?= $rep['estado'] ?></span>
+                                </td>
+                                <td>
+                                    <?= $rep['numero_solicitud'] ? htmlspecialchars($rep['numero_solicitud']) : '<span class="text-muted">Ninguna</span>' ?>
+                                </td>
+                                <td class="text-center">
+                                    <a href="?route=fondo_avance/gastos&id_reposicion=<?= $rep['id_reposicion'] ?>" class="btn btn-sm btn-info" title="Ver / Cargar Gastos">
+                                        <i class="fas fa-list"></i> Ver Gastos
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer">
+        <a href="?route=fondo_avance/index" class="btn btn-default"><i class="fas fa-arrow-left"></i> Volver a Fondos</a>
+    </div>
+</div>

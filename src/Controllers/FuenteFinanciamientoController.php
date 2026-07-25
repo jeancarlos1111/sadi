@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Models\FuenteFinanciamiento;
 use App\Repositories\FuenteFinanciamientoRepository;
 use PDOException;
@@ -19,6 +21,7 @@ class FuenteFinanciamientoController extends BaseController
 
     public function index(): void
     {
+        Gate::authorize('presupuesto.fuentes.ver');
         $search = $_GET['search'] ?? '';
         $items = [];
 
@@ -40,6 +43,8 @@ class FuenteFinanciamientoController extends BaseController
 
     public function form(): void
     {
+        $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'presupuesto.fuentes.editar' : 'presupuesto.fuentes.crear');
         $id   = $_GET['id'] ?? null;
         $item = null;
 
@@ -59,14 +64,26 @@ class FuenteFinanciamientoController extends BaseController
 
     public function save(): void
     {
+        $id = $_POST['id'] ?? null;
+        Gate::authorize($id ? 'presupuesto.fuentes.editar' : 'presupuesto.fuentes.crear');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
+                $id = !empty($_POST['id']) ? (int)$_POST['id'] : null;
+                $datosAntes = null;
+                if ($id) {
+                    $modeloAnterior = $this->repo->findById($id);
+                    $datosAntes = $modeloAnterior ? $modeloAnterior->toArray() : null;
+                }
+
                 $item = new FuenteFinanciamiento(
                     trim($_POST['denominacion'] ?? ''),
-                    !empty($_POST['id']) ? (int)$_POST['id'] : null
+                    $id
                 );
 
-                $this->repo->save($item);
+                $nuevoId = $this->repo->save($item);
+
+                $modeloDespues = $this->repo->findById($nuevoId);
+                $this->audit('fuente_financiamiento', $id ? 'EDITAR' : 'CREAR', $nuevoId, $datosAntes, $modeloDespues ? $modeloDespues->toArray() : null);
 
                 header('Location: ?route=fuente_financiamiento/index');
                 exit;
@@ -81,11 +98,16 @@ class FuenteFinanciamientoController extends BaseController
 
     public function delete(): void
     {
+        Gate::authorize('presupuesto.fuentes.eliminar');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = $_POST['id'] ?? null;
             if ($id) {
                 try {
-                    $this->repo->delete((int)$id);
+                    $id = (int)$id;
+                    $modeloAnterior = $this->repo->findById($id);
+                    $datosAntes = $modeloAnterior ? $modeloAnterior->toArray() : null;
+                    $this->repo->delete($id);
+                    $this->audit('fuente_financiamiento', 'ELIMINAR', $id, $datosAntes, null);
                 } catch (PDOException $e) {
                     error_log("Error deleting fuente_financiamiento: " . $e->getMessage());
                 }

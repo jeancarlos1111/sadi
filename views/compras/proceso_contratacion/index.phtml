@@ -1,0 +1,87 @@
+<div class="card card-outline card-primary">
+  <div class="card-header">
+    <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+    <div class="card-tools">
+      <a href="?route=proceso_contratacion/form" class="btn btn-sm btn-success">
+        <i class="fas fa-plus"></i> Nuevo Proceso
+      </a>
+    </div>
+  </div>
+  <div class="card-body">
+    
+    <?php if (isset($_GET['success'])): ?>
+      <div class="alert alert-success alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <h5><i class="icon fas fa-check"></i> Éxito</h5>
+        <?= htmlspecialchars($_GET['success']) ?>
+      </div>
+    <?php endif; ?>
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <div class="input-group">
+                <input type="text" id="searchProcessInput" class="form-control" placeholder="Buscar expediente o descripción..." value="<?= htmlspecialchars($search) ?>">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" id="btnSearch">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor Server-Driven UI -->
+    <div class="ajax-table-container" id="procesosTableContainer">
+        <?php include 'partials/table.phtml'; ?>
+    </div>
+
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchProcessInput');
+    const container = document.getElementById('procesosTableContainer');
+    
+    let debounceTimer;
+
+    const fetchTable = (search, page = 1) => {
+        container.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i></div>';
+        
+        fetch(`?route=proceso_contratacion/index&ajax=1&search=${encodeURIComponent(search)}&page=${page}`)
+            .then(res => res.text())
+            .then(html => {
+                container.innerHTML = html;
+                attachPaginationEvents();
+            })
+            .catch(err => {
+                console.error('Error fetching table:', err);
+                container.innerHTML = '<div class="alert alert-danger">Error al cargar los datos.</div>';
+            });
+    };
+
+    const attachPaginationEvents = () => {
+        const pageLinks = container.querySelectorAll('.page-link');
+        pageLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const url = new URL(link.href, window.location.origin);
+                const page = url.searchParams.get('page');
+                const search = searchInput.value;
+                if (page) {
+                    fetchTable(search, page);
+                }
+            });
+        });
+    };
+
+    searchInput.addEventListener('keyup', (e) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            fetchTable(e.target.value);
+        }, 300);
+    });
+
+    attachPaginationEvents();
+});
+</script>

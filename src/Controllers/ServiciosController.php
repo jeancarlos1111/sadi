@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Models\Servicio;
 use App\Repositories\PlanUnicoCuentasRepository;
 use App\Repositories\ServicioRepository;
@@ -28,6 +30,7 @@ class ServiciosController extends HomeController
 
     public function index(): void
     {
+        Gate::authorize('inventario.servicios.ver');
         $search = $_GET['search'] ?? '';
 
         try {
@@ -49,6 +52,8 @@ class ServiciosController extends HomeController
 
     public function form(): void
     {
+        $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'inventario.servicios.editar' : 'inventario.servicios.crear');
         $id   = $_GET['id'] ?? null;
         $item = null;
 
@@ -101,6 +106,7 @@ class ServiciosController extends HomeController
 
     public function eliminar(): void
     {
+        Gate::authorize('inventario.servicios.eliminar');
         $id = $_POST['id'] ?? null;
         if ($id) {
             try {

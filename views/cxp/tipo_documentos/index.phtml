@@ -43,15 +43,11 @@
                 <?php endif; ?>
               </td>
               <td class="text-center text-nowrap">
-                <a href="?route=tipo_documentos/form&id=<?= htmlspecialchars((string)$item->id) ?>" class="btn btn-sm btn-info" title="Editar">
-                  <i class="fas fa-edit"></i>
-                </a>
-                <form method="POST" action="?route=tipo_documentos/eliminar" onsubmit="return confirm('¿Eliminar?');" class="d-inline">
-                  <input type="hidden" name="id" value="<?= htmlspecialchars((string)$item->id) ?>">
-                  <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
-                    <i class="fas fa-trash-alt"></i>
-                  </button>
-                </form>
+                <?= render_component('table_actions', [
+                'editUrl' => '?route=tipo_documentos/form&id=' . $item->id,
+                'deleteUrl' => '?route=tipo_documentos/eliminar',
+                'deleteId' => $item->id
+            ]) ?>
               </td>
             </tr>
           <?php endforeach; endif; ?>

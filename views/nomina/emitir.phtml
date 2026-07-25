@@ -1,45 +1,83 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
+<?php
+/**
+ * @var string $titulo
+ * @var \App\Models\Nomina[] $nominasActivas
+ * @var string|null $error
+ */
+?>
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+    </div>
+    <div class="card-body">
 
-<div style="background-color: #f8f9fa; padding: 20px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 20px;">
-    <h3>Procesamiento por Lotes</h3>
-    <p>Esta acción calculará automáticamente todas las asignaciones (sueldos base, bonos) y deducciones (SSO, FAOV, etc) aplicables para cada trabajador activo en la nómina seleccionada.</p>
-    <p style="color: #856404; background-color: #fff3cd; padding: 10px; border-radius: 4px; border: 1px solid #ffeeba;">
-        <strong>Atención:</strong> De manera simultánea SADI afectará las partidas presupuestarias en las fases Compromiso/Causado, y además generará la respectiva Solicitud de Pago al Tesorero para su liquidación.
-    </p>
+        <?php if (isset($_GET['error']) && !empty($_GET['error'])): ?>
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-ban"></i> Error al Procesar Nómina</h5>
+                <?= htmlspecialchars($_GET['error']) ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if (isset($error) && !empty($error)): ?>
+            <div class="alert alert-warning alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-exclamation-triangle"></i> Advertencia</h5>
+                <?= htmlspecialchars($error) ?>
+            </div>
+        <?php endif; ?>
+
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Atención:</strong> Esta acción calculará <strong>todas las asignaciones y deducciones</strong> (SSO, FAOV, ISLR, etc.) para cada trabajador activo en la nómina seleccionada. Simultáneamente, SADI afectará las <strong>partidas presupuestarias</strong> (Compromiso/Causado) y generará la <strong>Solicitud de Pago</strong> al Tesorero. Verifique bien los datos antes de continuar.
+        </div>
+
+        <form method="POST" action="?route=nomina/procesar"
+              onsubmit="return confirm('¿Confirma que desea PROCESAR Y CONTABILIZAR esta nómina? Esta acción causará el presupuesto general del ente.');">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="id_nomina">Nómina a Procesar: <span class="text-danger">*</span></label>
+                        <select name="id_nomina" id="id_nomina" required class="form-control">
+                            <option value="">-- Seleccione Tipo de Nómina --</option>
+                            <?php foreach ($nominasActivas as $n): ?>
+                                <option value="<?= htmlspecialchars((string)$n->id) ?>">
+                                    <?= htmlspecialchars($n->nombre) ?> (<?= htmlspecialchars($n->tipoPeriodo) ?>)
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <?php if (empty($nominasActivas)): ?>
+                            <small class="text-danger">
+                                <i class="fas fa-exclamation-circle"></i>
+                                No hay tipos de nómina creados. <a href="?route=nomina/crearNomina">Cree uno aquí</a>.
+                            </small>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="periodo">Período Descriptivo: <span class="text-danger">*</span></label>
+                        <input type="text" name="periodo" id="periodo" required class="form-control"
+                               placeholder="Ej: Segunda Quincena Mayo 2026">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="fecha_emision">Fecha de Emisión: <span class="text-danger">*</span></label>
+                        <input type="date" name="fecha_emision" id="fecha_emision" required
+                               class="form-control" value="<?= date('Y-m-d') ?>">
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-right mt-3">
+                <a href="?route=nomina/index" class="btn btn-default mr-2">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-success btn-lg" <?= empty($nominasActivas) ? 'disabled' : '' ?>>
+                    <i class="fas fa-bolt"></i> Ejecutar Motor de Nómina
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
-
-<?php if (isset($error)): ?>
-    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
-        <?= htmlspecialchars($error) ?>
-    </div>
-<?php endif; ?>
-
-<form method="POST" action="?route=nomina/procesar" style="max-width: 600px; border: 1px solid #0056b3; padding: 20px; border-radius: 8px;" onsubmit="return confirm('¿Confirma que desea PROCESAR Y CONTABILIZAR la nómina en lote? Esta acción causará el presupuesto general de la nación.');">
-
-    <div style="margin-bottom: 15px;">
-        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Seleccione Nómina a Pagar:</label>
-        <select name="id_nomina" required style="width: 100%; padding: 10px;">
-            <option value="">-- Seleccione Nómina Activa --</option>
-            <?php foreach ($nominasActivas as $n): ?>
-                <option value="<?= htmlspecialchars((string)$n->id) ?>"><?= htmlspecialchars($n->nombre) ?> (Periodicidad: <?= htmlspecialchars($n->tipoPeriodo) ?>)</option>
-            <?php endforeach; ?>
-        </select>
-    </div>
-
-    <div style="margin-bottom: 15px;">
-        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Período a Liquidar (Descriptivo):</label>
-        <input type="text" name="periodo" required placeholder="Ej: Segunda Quincena Mayo 2026" style="width: 100%; padding: 10px;">
-    </div>
-
-    <div style="margin-bottom: 20px;">
-        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Fecha de Emisión de Planilla:</label>
-        <input type="date" name="fecha_emision" required value="<?= date('Y-m-d') ?>" style="width: 100%; padding: 10px;">
-    </div>
-
-    <div style="text-align: right;">
-        <a href="?route=nomina/index" style="margin-right: 15px; text-decoration: none; color: #555;">Cancelar</a>
-        <button type="submit" style="background-color: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 4px; font-size: 1.1em; font-weight: bold; cursor: pointer;">
-            ⚡ Ejecutar Motor de Nómina
-        </button>
-    </div>
-</form>

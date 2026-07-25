@@ -1,0 +1,64 @@
+<div class="card card-outline card-primary">
+  <div class="card-header">
+    <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+    <div class="card-tools">
+      <a href="?route=vacacion/crear" class="btn btn-sm btn-primary">
+        <i class="fas fa-plus"></i> Registrar Vacaciones
+      </a>
+    </div>
+  </div>
+  <div class="card-body">
+    <?php if (isset($_GET['msg'])): ?>
+      <div class="alert alert-success alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <h5><i class="icon fas fa-check"></i> ¡Éxito!</h5>
+        <?= htmlspecialchars($_GET['msg']) ?>
+      </div>
+    <?php endif; ?>
+
+    <?php if (isset($_GET['error'])): ?>
+      <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <h5><i class="icon fas fa-ban"></i> ¡Atención!</h5>
+        <?= htmlspecialchars($_GET['error']) ?>
+      </div>
+    <?php endif; ?>
+
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped w-100 table-sm">
+        <thead class="thead-dark">
+          <tr>
+            <th>ID</th>
+            <th>Trabajador</th>
+            <th class="text-center">Salida</th>
+            <th class="text-center">Retorno</th>
+            <th class="text-center">Días Disfrute</th>
+            <th class="text-right">Total Pago (Bs)</th>
+            <th class="text-center">Estatus</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php if (empty($vacaciones)): ?>
+            <tr><td colspan="7" class="text-center">No hay registros de vacaciones.</td></tr>
+          <?php else: ?>
+            <?php foreach ($vacaciones as $v): ?>
+              <tr>
+                <td>#<?= htmlspecialchars((string)$v->id) ?></td>
+                <td><strong><?= htmlspecialchars($v->nombreTrabajador ?? 'N/A') ?></strong></td>
+                <td class="text-center"><?= htmlspecialchars($v->fechaSalida) ?></td>
+                <td class="text-center"><?= htmlspecialchars($v->fechaRetorno) ?></td>
+                <td class="text-center"><?= htmlspecialchars((string)$v->diasDisfrute) ?></td>
+                <td class="text-right font-weight-bold text-success">
+                  Bs <?= number_format($v->montoTotal, 2, ',', '.') ?>
+                </td>
+                <td class="text-center">
+                  <span class="badge badge-info"><?= htmlspecialchars($v->estatus) ?></span>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

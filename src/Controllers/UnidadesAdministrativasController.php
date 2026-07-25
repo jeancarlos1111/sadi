@@ -66,12 +66,22 @@ class UnidadesAdministrativasController extends HomeController
 
         try {
             $id   = !empty($_POST['id']) ? (int)$_POST['id'] : null;
+            $datosAntes = null;
+            if ($id) {
+                $modeloAnterior = $this->repo->findById($id);
+                $datosAntes = $modeloAnterior ? $modeloAnterior->toArray() : null;
+            }
+
             $item = new UnidadAdministrativa(
                 trim($_POST['codigo']       ?? ''),
                 trim($_POST['denominacion'] ?? ''),
                 $id
             );
-            $this->repo->save($item);
+            $nuevoId = $this->repo->save($item);
+
+            $modeloDespues = $this->repo->findById($nuevoId);
+            $this->audit('unidad_administrativa', $id ? 'EDITAR' : 'CREAR', $nuevoId, $datosAntes, $modeloDespues ? $modeloDespues->toArray() : null);
+
             header('Location: ?route=unidades_administrativas/index');
             exit;
         } catch (PDOException | \Exception $e) {
@@ -84,7 +94,11 @@ class UnidadesAdministrativasController extends HomeController
         $id = $_POST['id'] ?? null;
         if ($id) {
             try {
-                $this->repo->delete((int)$id);
+                $id = (int)$id;
+                $modeloAnterior = $this->repo->findById($id);
+                $datosAntes = $modeloAnterior ? $modeloAnterior->toArray() : null;
+                $this->repo->delete($id);
+                $this->audit('unidad_administrativa', 'ELIMINAR', $id, $datosAntes, null);
             } catch (PDOException | \Exception $e) {
                 die("Error: " . $e->getMessage());
             }

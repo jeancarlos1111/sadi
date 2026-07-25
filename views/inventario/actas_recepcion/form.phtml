@@ -1,0 +1,38 @@
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Registrar Nueva Acta de Recepción</h5>
+    </div>
+    <div class="card-body">
+        <form action="?route=inventario_recepcion/guardar" method="POST">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label class="form-label">Número de Acta</label>
+                    <input type="text" name="numero_acta" class="form-control" required placeholder="Ej. AR-2026-001">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Fecha de Recepción</label>
+                    <input type="date" name="fecha_recepcion" class="form-control" required value="<?= date('Y-m-d') ?>">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">ID Orden de Compra</label>
+                    <input type="number" name="id_orden_de_compra" class="form-control" required>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Observaciones</label>
+                <textarea name="observaciones" class="form-control" rows="3"></textarea>
+            </div>
+            
+            <!-- Aquí irían los inputs dinámicos para artículos -->
+            <div class="alert alert-info">
+                La carga de artículos se simplificará para propósitos de interfaz. En el futuro, esto se pre-cargará de la Orden de Compra.
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <a href="?route=inventario_recepcion/index" class="btn btn-secondary me-2">Cancelar</a>
+                <button type="submit" class="btn btn-success">Guardar y Aumentar Stock</button>
+            </div>
+        </form>
+    </div>
+</div>

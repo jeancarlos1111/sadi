@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Models\TipoOperacionBancaria;
 use App\Repositories\TipoOperacionBancariaRepository;
 use Exception;
@@ -15,7 +17,7 @@ class TiposOperacionesBancariasController extends BaseController
     public function __construct(TipoOperacionBancariaRepository $repo)
     {
         $this->repo = $repo;
-        if (!isset($_SESSION['usuario'])) {
+        if (!isset($_SESSION['usuario_id'])) {
             header('Location: ?route=auth/login');
             exit;
         }
@@ -23,6 +25,7 @@ class TiposOperacionesBancariasController extends BaseController
 
     public function index(): void
     {
+        Gate::authorize('tesoreria.operaciones_bancarias.ver');
         $page = (int)($_GET['page'] ?? 1);
         $paginator = $this->repo->paginate('', $page, 15);
         $tipos = $paginator['data'];
@@ -37,6 +40,8 @@ class TiposOperacionesBancariasController extends BaseController
 
     public function form(): void
     {
+        $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'tesoreria.operaciones_bancarias.editar' : 'tesoreria.operaciones_bancarias.crear');
         $id = (int)($_GET['id'] ?? 0);
         $tipo = $id ? $this->repo->find($id) : null;
 
@@ -76,6 +81,7 @@ class TiposOperacionesBancariasController extends BaseController
 
     public function eliminar(): void
     {
+        Gate::authorize('tesoreria.operaciones_bancarias.eliminar');
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: ?route=tipos_operaciones_bancarias/index');
             exit;

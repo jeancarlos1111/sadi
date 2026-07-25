@@ -1,55 +1,80 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
-
-<?php if (isset($error)): ?>
-    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
-        <?= htmlspecialchars($error) ?>
+<?php
+/** @var string $titulo */
+/** @var array $insumos */
+/** @var string $search */
+/** @var string|null $error */
+?>
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+        <div class="card-tools">
+            <a href="?route=inventario/entradas" class="btn btn-sm btn-success mr-1">
+                <i class="fas fa-truck-loading"></i> Entradas (+ Recepción)
+            </a>
+            <a href="?route=inventario/despachos" class="btn btn-sm btn-warning">
+                <i class="fas fa-dolly"></i> Salidas / Despachos
+            </a>
+        </div>
     </div>
-<?php endif; ?>
-
-<div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-    <form method="GET" action="" style="margin: 0;">
-        <input type="hidden" name="route" value="inventario/index">
-        <input type="text" name="search" placeholder="Buscar Artículo o Almacén..." value="<?= htmlspecialchars($search) ?>" style="padding: 5px; width: 300px;">
-        <button type="submit" style="padding: 5px;">Buscar</button>
-        <a href="?route=inventario/index" style="margin-left: 10px;">Limpiar</a>
-    </form>
-    <div>
-        <a href="?route=inventario/entradas" style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px; margin-right: 10px;">Entradas (+ Recepción)</a>
-        <a href="?route=inventario/despachos" style="background-color: #ffc107; color: black; padding: 10px 15px; text-decoration: none; border-radius: 4px;">Salidas / Despachos</a>
-    </div>
-</div>
-
-<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
-    <thead style="background-color: #0056b3; color: white;">
-        <tr>
-            <th>Artículo / Insumo</th>
-            <th>Unidad de Medida</th>
-            <th>Stock (Existencia Actual)</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php if (empty($insumos)): ?>
-            <tr>
-                <td colspan="5" style="text-align: center;">No hay artículos en existencia.</td>
-            </tr>
-        <?php else: ?>
-            <?php foreach ($insumos as $data): ?>
-                <?php $item = $data['entity']; ?>
-                <tr>
-                    <td><strong><?= htmlspecialchars($data['articulo_desc']) ?></strong></td>
-                    <td><?= htmlspecialchars($data['unidad']) ?></td>
-                    <td style="font-weight: bold; color: <?= $item->cantidad > 0 ? 'green' : 'red' ?>;">
-                        <?= number_format($item->cantidad, 2, ',', '.') ?>
-                    </td>
-                    <td>
-                        <a href="#">Kardex</a>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
+    
+    <div class="card-body">
+        <?php if ($error): ?>
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <?= htmlspecialchars($error) ?>
+            </div>
         <?php endif; ?>
-    </tbody>
-</table>
-        <?php if (isset($paginator)): ?>
+
+        <form method="GET" action="" class="form-inline mb-3">
+            <input type="hidden" name="route" value="inventario/index">
+            <div class="input-group">
+                <input type="text" name="search" class="form-control" placeholder="Buscar Artículo o Almacén..." value="<?= htmlspecialchars($search) ?>">
+                <span class="input-group-append">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
+                    <a href="?route=inventario/index" class="btn btn-default">Limpiar</a>
+                </span>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped dataTable w-100">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Artículo / Insumo</th>
+                        <th>Unidad de Medida</th>
+                        <th class="text-right">Stock (Existencia Actual)</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($insumos)): ?>
+                        <tr>
+                            <td colspan="4" class="text-center">No hay artículos en existencia.</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($insumos as $data): ?>
+                            <?php $item = $data['entity']; ?>
+                            <tr>
+                                <td><strong><?= htmlspecialchars($data['articulo_desc']) ?></strong></td>
+                                <td><?= htmlspecialchars($data['unidad']) ?></td>
+                                <td class="text-right font-weight-bold <?= $item->cantidad > 0 ? 'text-success' : 'text-danger' ?>">
+                                    <?= number_format($item->cantidad, 2, ',', '.') ?>
+                                </td>
+                                <td class="text-center">
+                                    <a href="#" class="btn btn-sm btn-info" title="Ver Kardex">
+                                        <i class="fas fa-clipboard-list"></i> Kardex
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <?php if (isset($paginator)): ?>
+        <div class="card-footer clearfix">
             <?php include $partialsPath . 'pagination.phtml'; ?>
-        <?php endif; ?>
+        </div>
+    <?php endif; ?>
+</div>

@@ -17,8 +17,16 @@ class DbSeedCommand extends Command
 
     public function handle(Input $input, Output $output): int
     {
+        $force = $input->hasOption('force');
         // Load the correct environment DB Connection
         $env = $this->loadEnv($input->getOption('env', ''));
+
+        if (($env['APP_ENV'] ?? '') === 'production' && !$force) {
+            $output->warn("Estás en un entorno de producción (APP_ENV=production).");
+            $output->warn("Para ejecutar los seeders en producción, usa la opción --force.");
+            return 1;
+        }
+
         $dsn = "pgsql:host={$env['DB_HOST']};port={$env['DB_PORT']};dbname={$env['DB_DATABASE']}";
 
         try {
@@ -31,31 +39,52 @@ class DbSeedCommand extends Command
             return 1;
         }
 
-        $seedDir = $this->basePath('database');
-        $files   = glob($seedDir . '/seed_*.php') ?: [];
+        $className = $input->getOption('class');
 
-        if (empty($files)) {
-            $output->warn("No se encontraron archivos seed_*.php en database/");
-            return 0;
+        if ($className) {
+            if (!str_contains($className, '\\')) {
+                $className = 'Database\\Seeders\\' . $className;
+            }
+
+            if (!class_exists($className)) {
+                $output->error("No se encontró la clase seeder: {$className}");
+                return 1;
+            }
+
+            $output->title("Ejecutando seeder: {$className}");
+            try {
+                $seeder = new $className();
+                if (method_exists($seeder, 'run')) {
+                    $seeder->run();
+                }
+                $output->success("{$className} completado.");
+                return 0;
+            } catch (\Throwable $e) {
+                $output->error("El seeder {$className} falló: " . $e->getMessage());
+                return 1;
+            }
         }
 
         $output->title("Ejecutando seeders");
 
-        foreach ($files as $file) {
-            $name = basename($file);
-            $output->info("  → Ejecutando {$name}...");
-
+        // Execute default class based seeder if it exists
+        $defaultSeeder = 'Database\\Seeders\\DatabaseSeeder';
+        if (class_exists($defaultSeeder)) {
+            $output->info("  → Ejecutando {$defaultSeeder}...");
             try {
-                require_once $file;
-                $output->success("{$name} completado.");
+                $seeder = new $defaultSeeder();
+                if (method_exists($seeder, 'run')) {
+                    $seeder->run();
+                }
+                $output->success("{$defaultSeeder} completado.");
             } catch (\Throwable $e) {
-                $output->error("{$name} falló: " . $e->getMessage());
+                $output->error("{$defaultSeeder} falló: " . $e->getMessage());
                 return 1;
             }
         }
 
         $output->line();
-        $output->success(count($files) . " seeder(s) ejecutados correctamente.");
+        $output->success("Seeding completado correctamente.");
         return 0;
     }
 

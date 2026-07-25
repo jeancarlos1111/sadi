@@ -1,0 +1,100 @@
+<?= render_component('page_header', [
+    'title' => $titulo,
+    'icon' => 'fas fa-history'
+]) ?>
+
+<div class="card card-primary card-outline">
+    <div class="card-body">
+        <form method="GET" action="" class="form-inline mb-3">
+            <input type="hidden" name="route" value="auditoria/index">
+            <input type="text" name="usuario" class="form-control form-control-sm mr-2" placeholder="Usuario..." value="<?= htmlspecialchars($_GET['usuario'] ?? '') ?>">
+            <input type="text" name="tabla" class="form-control form-control-sm mr-2" placeholder="Tabla..." value="<?= htmlspecialchars($_GET['tabla'] ?? '') ?>">
+            <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-search"></i> Filtrar</button>
+            <a href="?route=auditoria/index" class="btn btn-default btn-sm ml-2">Limpiar</a>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-sm" style="font-size: 13px;">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>ID Log</th>
+                        <th>Fecha y Hora</th>
+                        <th>Usuario</th>
+                        <th>IP</th>
+                        <th>Tabla</th>
+                        <th>Acción</th>
+                        <th>ID Reg.</th>
+                        <th>Detalle</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($logs as $log): ?>
+                        <tr>
+                            <td><?= $log['id_log'] ?></td>
+                            <td><?= $log['fecha_hora'] ?></td>
+                            <td><?= htmlspecialchars($log['usuario_nombre']) ?></td>
+                            <td><?= htmlspecialchars((string)$log['ip_address']) ?></td>
+                            <td><span class="badge badge-info"><?= htmlspecialchars($log['tabla']) ?></span></td>
+                            <td>
+                                <?php if($log['accion'] === 'INSERT'): ?>
+                                    <span class="badge badge-success">INSERT</span>
+                                <?php elseif($log['accion'] === 'UPDATE'): ?>
+                                    <span class="badge badge-warning">UPDATE</span>
+                                <?php else: ?>
+                                    <span class="badge badge-danger"><?= htmlspecialchars($log['accion']) ?></span>
+                                <?php endif; ?>
+                            </td>
+                            <td><?= $log['id_registro'] ?></td>
+                            <td>
+                                <button class="btn btn-xs btn-outline-primary" onclick="showDiff(this)" data-antes='<?= htmlspecialchars((string)$log['datos_antes'], ENT_QUOTES) ?>' data-despues='<?= htmlspecialchars((string)$log['datos_despues'], ENT_QUOTES) ?>'>Ver Detalle</button>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        
+        <?php
+        $totalPages = ceil($total / $perPage);
+        include dirname(__DIR__, 2) . '/partials/pagination.phtml';
+        ?>
+    </div>
+</div>
+
+<div class="modal fade" id="modalDiff" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Detalle de Cambios</h5>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="row m-0">
+            <div class="col-6 p-3 bg-light border-right">
+                <h6><strong>Antes</strong></h6>
+                <pre id="preAntes" style="white-space: pre-wrap; font-size: 11px;"></pre>
+            </div>
+            <div class="col-6 p-3 bg-light">
+                <h6><strong>Después</strong></h6>
+                <pre id="preDespues" style="white-space: pre-wrap; font-size: 11px;"></pre>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showDiff(btn) {
+    let antes = btn.getAttribute('data-antes');
+    let despues = btn.getAttribute('data-despues');
+    
+    try { antes = JSON.stringify(JSON.parse(antes), null, 2); } catch(e) {}
+    try { despues = JSON.stringify(JSON.parse(despues), null, 2); } catch(e) {}
+    
+    document.getElementById('preAntes').textContent = antes || 'N/A';
+    document.getElementById('preDespues').textContent = despues || 'N/A';
+    
+    $('#modalDiff').modal('show');
+}
+</script>

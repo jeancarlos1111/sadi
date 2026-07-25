@@ -1630,7 +1630,7 @@ class FPDF
         $this->_put('endobj');
         // Page content
         if (!empty($this->AliasNbPages)) {
-            $this->pages[$n] = str_replace($this->AliasNbPages, $this->page, $this->pages[$n]);
+            $this->pages[$n] = str_replace($this->AliasNbPages, (string)$this->page, $this->pages[$n]);
         }
         $this->_putstreamobject($this->pages[$n]);
         // Link annotations

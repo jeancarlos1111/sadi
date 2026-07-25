@@ -1,0 +1,73 @@
+<?php
+/**
+ * @var string $titulo
+ * @var \App\Models\Nomina[] $nominas
+ */
+?>
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+        <div class="card-tools">
+            <a href="?route=nomina/crearNomina" class="btn btn-sm btn-primary">
+                <i class="fas fa-plus"></i> Nueva Nómina
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <?php if (isset($_GET['success'])): ?>
+            <div class="alert alert-success alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <i class="icon fas fa-check"></i> <?= htmlspecialchars($_GET['success']) ?>
+            </div>
+        <?php endif; ?>
+        <?php if (isset($_GET['error'])): ?>
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <i class="icon fas fa-ban"></i> <?= htmlspecialchars($_GET['error']) ?>
+            </div>
+        <?php endif; ?>
+
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> Los <strong>Tipos de Nómina</strong> definen los grupos de pago del personal (ej: Nómina Mensual, Quincenal, Obreros). Cada trabajador en su ficha queda vinculado a uno de estos tipos. Al emitir una planilla, se selecciona el tipo a procesar.
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-sm">
+                <thead class="thead-dark">
+                    <tr>
+                        <th class="text-center" style="width:80px;">Código</th>
+                        <th>Denominación</th>
+                        <th class="text-center">Tipo de Período</th>
+                        <th class="text-center" style="width:120px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($nominas)): ?>
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">
+                                <i class="fas fa-exclamation-circle"></i> No hay tipos de nómina registrados. Cree uno para poder emitir planillas.
+                            </td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($nominas as $n): ?>
+                            <tr>
+                                <td class="text-center"><?= htmlspecialchars((string)$n->id) ?></td>
+                                <td><?= htmlspecialchars($n->nombre) ?></td>
+                                <td class="text-center">
+                                    <span class="badge badge-info"><?= htmlspecialchars($n->tipoPeriodo) ?></span>
+                                </td>
+                                <td class="text-center">
+                                    <?= render_component('table_actions', [
+                                        'editUrl'  => '?route=nomina/editarNomina&id=' . $n->id,
+                                        'deleteUrl' => '?route=nomina/eliminarNomina&id=' . $n->id,
+                                        'deleteId' => $n->id
+                                    ]) ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

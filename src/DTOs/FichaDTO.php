@@ -15,7 +15,14 @@ class FichaDTO
         public int $idNomina,
         public string $fechaIngreso,
         public float $sueldoBasico,
-        public bool $eliminado = false
+        public int $diasUtilidades = 30,
+        public int $diasBonoVacacional = 15,
+        public float $porcentajeIslr = 0.0,
+        public bool $eliminado = false,
+        public string $tipoRelacionLaboral = 'FIJO',
+        public ?string $banco = null,
+        public ?string $numeroCuenta = null,
+        public string $tipoCuenta = 'CORRIENTE'
     ) {
     }
 
@@ -28,7 +35,14 @@ class FichaDTO
             $model->idNomina,
             $model->fechaIngreso,
             $model->sueldoBasico,
-            $model->eliminado
+            $model->diasUtilidades,
+            $model->diasBonoVacacional,
+            $model->porcentajeIslr,
+            $model->eliminado,
+            $model->tipoRelacionLaboral,
+            $model->banco,
+            $model->numeroCuenta,
+            $model->tipoCuenta
         );
     }
 }

@@ -1,0 +1,54 @@
+<div class="card card-outline card-success">
+  <div class="card-header">
+    <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+  </div>
+  <div class="card-body">
+    <form method="POST" action="?route=tipo_retencion/guardar">
+      <input type="hidden" name="id_tipo_retencion" value="<?= htmlspecialchars((string)($tipo?->id ?? 0)) ?>">
+      
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label>Código <span class="text-danger">*</span></label>
+          <input type="text" name="codigo" class="form-control" required value="<?= htmlspecialchars($tipo?->codigo ?? '') ?>" placeholder="Ej: ISLR_HONORARIOS_PROF">
+          <small class="form-text text-muted">Identificador único (sin espacios).</small>
+        </div>
+        <div class="col-md-8 mb-3">
+          <label>Denominación (Descripción SENIAT) <span class="text-danger">*</span></label>
+          <input type="text" name="denominacion" class="form-control" required value="<?= htmlspecialchars($tipo?->denominacion ?? '') ?>">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label>Porcentaje de Retención (%) <span class="text-danger">*</span></label>
+          <input type="number" step="0.01" min="0" max="100" name="porcentaje" class="form-control" required value="<?= htmlspecialchars((string)($tipo?->porcentaje ?? '0.00')) ?>">
+        </div>
+        <div class="col-md-4 mb-3">
+          <label>Sustraendo (Bs)</label>
+          <input type="number" step="0.01" min="0" name="sustraendo" class="form-control" value="<?= htmlspecialchars((string)($tipo?->sustraendo ?? '0.00')) ?>">
+          <small class="form-text text-muted">Aplica a Personas Naturales Residentes.</small>
+        </div>
+        <div class="col-md-4 mb-3">
+          <label>Aplica a <span class="text-danger">*</span></label>
+          <select name="aplica_a" class="form-control" required>
+            <option value="AMBAS" <?= ($tipo?->aplicaA === 'AMBAS') ? 'selected' : '' ?>>Ambas (Naturales y Jurídicas)</option>
+            <option value="NATURAL" <?= ($tipo?->aplicaA === 'NATURAL') ? 'selected' : '' ?>>Solo Personas Naturales</option>
+            <option value="JURIDICA" <?= ($tipo?->aplicaA === 'JURIDICA') ? 'selected' : '' ?>>Solo Personas Jurídicas</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="custom-control custom-switch">
+            <input type="checkbox" class="custom-control-input" id="activoCheck" name="activo" value="1" <?= ($tipo === null || $tipo?->activo) ? 'checked' : '' ?>>
+            <label class="custom-control-label" for="activoCheck">Configuración Activa</label>
+        </div>
+      </div>
+
+      <div class="text-right mt-3">
+        <a href="?route=tipo_retencion/index" class="btn btn-secondary mr-2">Cancelar</a>
+        <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -9,11 +9,7 @@
   </div>
   <div class="card-body">
     <?php if (isset($error)): ?>
-      <div class="alert alert-danger alert-dismissible">
-        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-        <h5><i class="icon fas fa-ban"></i> Error</h5>
-        <?= htmlspecialchars($error) ?>
-      </div>
+      <?= render_component('alert', ['type' => 'danger', 'message' => $error]) ?>
     <?php endif; ?>
 
     <form method="GET" action="" class="form-inline mb-4">
@@ -67,15 +63,11 @@
                   <a href="?route=documental/documentoCxP&id=<?= urlencode((string)$doc->id) ?>" target="_blank" class="btn btn-sm btn-success" title="Ver PDF">
                     <i class="fas fa-file-pdf"></i>
                   </a>
-                  <a href="?route=documentos_por_pagar/form&id=<?= urlencode((string)$doc->id) ?>" class="btn btn-sm btn-info" title="Editar">
-                    <i class="fas fa-edit"></i>
-                  </a>
-                  <form method="POST" action="?route=documentos_por_pagar/eliminar" onsubmit="return confirm('¿Seguro de eliminar este documento?');" class="d-inline">
-                    <input type="hidden" name="id" value="<?= htmlspecialchars((string)$doc->id) ?>">
-                    <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
-                      <i class="fas fa-trash-alt"></i>
-                    </button>
-                  </form>
+                  <?= render_component('table_actions', [
+                'editUrl' => '?route=documentos_por_pagar/form&id=' . $doc->id,
+                'deleteUrl' => '?route=documentos_por_pagar/eliminar',
+                'deleteId' => $doc->id
+            ]) ?>
                 </td>
               </tr>
             <?php endforeach; ?>

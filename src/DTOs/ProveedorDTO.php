@@ -13,10 +13,12 @@ class ProveedorDTO
         public string $rif,
         public string $compania,
         public int $idTipoOrganizacion,
-        public string $direccion,
-        public string $telefono,
+        public ?string $direccion = null,
+        public ?string $telefono = null,
         public ?string $nit = null,
-        public ?int $idCodigoContable = null
+        public ?int $idCodigoContable = null,
+        public ?string $numeroRnc = null,
+        public ?string $fechaVencimientoRnc = null
     ) {
     }
 
@@ -30,7 +32,9 @@ class ProveedorDTO
             $model->direccion,
             $model->telefono,
             $model->nit,
-            $model->idCodigoContable
+            $model->idCodigoContable,
+            $model->numeroRnc,
+            $model->fechaVencimientoRnc
         );
     }
 }

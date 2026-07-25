@@ -1,0 +1,76 @@
+<?php
+/** @var string $titulo */
+/** @var array $bienes */
+/** @var string $search */
+/** @var string|null $error */
+/** @var string|null $success */
+?>
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+    </div>
+    
+    <div class="card-body">
+        <?php if ($error): ?>
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h5><i class="icon fas fa-ban"></i> Error</h5>
+                <?= htmlspecialchars($error) ?>
+            </div>
+        <?php endif; ?>
+        <?php if ($success): ?>
+            <div class="alert alert-success alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h5><i class="icon fas fa-check"></i> Éxito</h5>
+                <?= htmlspecialchars($success) ?>
+            </div>
+        <?php endif; ?>
+
+        <form method="GET" class="form-inline mb-4">
+            <input type="hidden" name="route" value="inventario_bienes/index">
+            <div class="input-group w-50">
+                <input type="text" name="search" class="form-control" placeholder="Buscar por código o denominación..." value="<?= htmlspecialchars($search) ?>">
+                <span class="input-group-append">
+                    <button type="submit" class="btn btn-info btn-flat"><i class="fas fa-search"></i> Buscar</button>
+                </span>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped dataTable w-100">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Código Bien</th>
+                        <th>Denominación</th>
+                        <th>Fecha Adquisición</th>
+                        <th>Costo (Bs)</th>
+                        <th>Vida Útil (Meses)</th>
+                        <th>Valor Residual</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($bienes)): ?>
+                        <tr><td colspan="7" class="text-center">No se encontraron bienes registrados.</td></tr>
+                    <?php else: ?>
+                        <?php foreach ($bienes as $item): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($item['codigo_a']) ?>-<?= $item['id_inventario_bienes'] ?></td>
+                                <td><?= htmlspecialchars($item['denominacion_a']) ?></td>
+                                <td class="text-center"><?= date('d/m/Y', strtotime($item['fecha_compra_ib'])) ?></td>
+                                <td class="text-right"><?= number_format((float)$item['costo_ib'], 2, ',', '.') ?></td>
+                                <td class="text-center"><?= $item['vida_util_meses'] ?></td>
+                                <td class="text-right"><?= number_format((float)$item['valor_residual'], 2, ',', '.') ?></td>
+                                <td class="text-center">
+                                    <?= render_component('table_actions', [
+                                        'editUrl' => '?route=inventario_bienes/form&id=' . $item['id_inventario_bienes']
+                                    ]) ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

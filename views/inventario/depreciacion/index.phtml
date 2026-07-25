@@ -1,0 +1,92 @@
+<?php
+/** @var string $titulo */
+/** @var int $mes */
+/** @var int $anio */
+/** @var bool $yaProcesado */
+/** @var array $preview */
+/** @var string|null $error */
+/** @var string|null $success */
+?>
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+    </div>
+    
+    <div class="card-body">
+        <?php if ($error): ?>
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h5><i class="icon fas fa-ban"></i> Error</h5>
+                <?= htmlspecialchars($error) ?>
+            </div>
+        <?php endif; ?>
+        <?php if ($success): ?>
+            <div class="alert alert-success alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h5><i class="icon fas fa-check"></i> Éxito</h5>
+                <?= htmlspecialchars($success) ?>
+            </div>
+        <?php endif; ?>
+
+        <form method="GET" class="form-inline mb-4">
+            <input type="hidden" name="route" value="depreciacion/index">
+            <label class="mr-2">Período:</label>
+            <select name="mes" class="form-control form-control-sm mr-2">
+                <?php for($i=1; $i<=12; $i++): ?>
+                    <option value="<?= $i ?>" <?= $i == $mes ? 'selected' : '' ?>><?= str_pad((string)$i, 2, '0', STR_PAD_LEFT) ?></option>
+                <?php endfor; ?>
+            </select>
+            <input type="number" name="anio" class="form-control form-control-sm mr-2" value="<?= $anio ?>" min="2000" max="2100">
+            <button type="submit" class="btn btn-info btn-sm">Consultar</button>
+        </form>
+
+        <?php if ($yaProcesado): ?>
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i> El proceso de depreciación para este período ya fue ejecutado.
+            </div>
+        <?php else: ?>
+            <form method="POST" action="?route=depreciacion/procesar">
+                <input type="hidden" name="mes" value="<?= $mes ?>">
+                <input type="hidden" name="anio" value="<?= $anio ?>">
+                <button type="submit" class="btn btn-success mb-3" onclick="return confirm('¿Está seguro de procesar la depreciación para el período seleccionado?');">
+                    <i class="fas fa-cogs"></i> Procesar Depreciación <?= str_pad((string)$mes, 2, '0', STR_PAD_LEFT) ?>/<?= $anio ?>
+                </button>
+            </form>
+        <?php endif; ?>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped dataTable w-100">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Código Bien</th>
+                        <th>Denominación</th>
+                        <th>Costo Adquisición</th>
+                        <th>Vida Útil (Meses)</th>
+                        <th>Valor Residual</th>
+                        <th>Valor Actual Libros</th>
+                        <th>Cuota Depreciación</th>
+                        <th>Nuevo Valor Libros</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($preview)): ?>
+                        <tr><td colspan="8" class="text-center">No hay bienes sujetos a depreciación en este período.</td></tr>
+                    <?php else: ?>
+                        <?php foreach ($preview as $item): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($item['codigo']) ?></td>
+                                <td><?= htmlspecialchars($item['denominacion']) ?></td>
+                                <td class="text-right"><?= number_format($item['costo'], 2, ',', '.') ?></td>
+                                <td class="text-center"><?= $item['vida_util'] ?></td>
+                                <td class="text-right"><?= number_format($item['residual'], 2, ',', '.') ?></td>
+                                <td class="text-right"><?= number_format($item['valor_actual'], 2, ',', '.') ?></td>
+                                <td class="text-right text-danger"><?= number_format($item['cuota'], 2, ',', '.') ?></td>
+                                <td class="text-right font-weight-bold"><?= number_format($item['nuevo_valor'], 2, ',', '.') ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

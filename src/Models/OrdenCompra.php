@@ -10,7 +10,7 @@ readonly class OrdenCompra
 
     public function __construct(
         public string $fecha,
-        public string $concepto,
+        public ?string $concepto,
         public int $idProveedor,
         public float $porcentajeIva,
         public float $montoBase,

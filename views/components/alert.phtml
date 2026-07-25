@@ -1,0 +1,35 @@
+<?php
+/**
+ * @var string $type    Tipo de alerta: success, danger, info, warning
+ * @var string $message Mensaje a mostrar
+ * @var string|null $icon    Icono FontAwesome (ej: fas fa-check). Si no se provee, se auto-asigna según el $type.
+ * @var bool $dismissible Si se puede cerrar (por defecto true).
+ */
+
+$type = $type ?? 'info';
+$dismissible = $dismissible ?? true;
+
+if (!isset($icon)) {
+    $icon = match($type) {
+        'success' => 'fas fa-check',
+        'danger' => 'fas fa-ban',
+        'warning' => 'fas fa-exclamation-triangle',
+        'info' => 'fas fa-info',
+        default => 'fas fa-info'
+    };
+}
+$title = match($type) {
+    'success' => '¡Éxito!',
+    'danger' => '¡Error!',
+    'warning' => '¡Atención!',
+    'info' => 'Información',
+    default => ''
+};
+?>
+<div class="alert alert-<?= htmlspecialchars($type) ?> <?= $dismissible ? 'alert-dismissible' : '' ?>">
+    <?php if ($dismissible): ?>
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+    <?php endif; ?>
+    <h5><i class="icon <?= htmlspecialchars($icon) ?>"></i> <?= $title ?></h5>
+    <?= htmlspecialchars($message) ?>
+</div>

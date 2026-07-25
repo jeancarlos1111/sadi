@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Repositories\OrdenServicioRepository;
 use App\Repositories\ProveedorRepository;
 use App\Repositories\ServicioRepository;
@@ -26,6 +28,7 @@ class OrdenesServicioController extends HomeController
     }
     public function index(): void
     {
+        Gate::authorize('compras.ordenes_servicio.ver');
         $search = $_GET['search'] ?? '';
         $mes    = $_GET['mes'] ?? '';
 
@@ -49,6 +52,8 @@ class OrdenesServicioController extends HomeController
 
     public function form(): void
     {
+        $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'compras.ordenes_servicio.editar' : 'compras.ordenes_servicio.crear');
         $id = $_GET['id'] ?? null;
         $orden = null;
 
@@ -147,6 +152,7 @@ class OrdenesServicioController extends HomeController
 
     public function eliminar(): void
     {
+        Gate::authorize('compras.ordenes_servicio.eliminar');
         $id = $_POST['id'] ?? null;
         if ($id) {
             try {

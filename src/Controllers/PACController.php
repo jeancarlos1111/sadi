@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Models\PAC;
 use App\Repositories\AccionCentralizadaRepository;
 use App\Repositories\ArticuloRepository;
@@ -35,6 +37,7 @@ class PACController extends BaseController
 
     public function index(): void
     {
+        Gate::authorize('presupuesto.pac.ver');
         $search = $_GET['search'] ?? '';
         $items = [];
 
@@ -56,6 +59,8 @@ class PACController extends BaseController
 
     public function form(): void
     {
+        $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'presupuesto.pac.editar' : 'presupuesto.pac.crear');
         $id   = $_GET['id'] ?? null;
         $item = null;
 
@@ -87,8 +92,17 @@ class PACController extends BaseController
 
     public function save(): void
     {
+        $id = $_POST['id'] ?? null;
+        Gate::authorize($id ? 'presupuesto.pac.editar' : 'presupuesto.pac.crear');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
+                $id = !empty($_POST['id']) ? (int)$_POST['id'] : null;
+                $datosAntes = null;
+                if ($id) {
+                    $modeloAnterior = $this->repo->findById($id);
+                    $datosAntes = $modeloAnterior ? $modeloAnterior->toArray() : null;
+                }
+
                 $item = new PAC(
                     !empty($_POST['id_proyecto']) ? (int)$_POST['id_proyecto'] : null,
                     !empty($_POST['id_accion_centralizada']) ? (int)$_POST['id_accion_centralizada'] : null,
@@ -100,10 +114,13 @@ class PACController extends BaseController
                     (float)($_POST['trim_4'] ?? 0),
                     (float)($_POST['costo_estimado'] ?? 0),
                     'PLANIFICADO',
-                    !empty($_POST['id']) ? (int)$_POST['id'] : null
+                    $id
                 );
 
-                $this->repo->save($item);
+                $nuevoId = $this->repo->save($item);
+
+                $modeloDespues = $this->repo->findById($nuevoId);
+                $this->audit('pac', $id ? 'EDITAR' : 'CREAR', $nuevoId, $datosAntes, $modeloDespues ? $modeloDespues->toArray() : null);
 
                 header('Location: ?route=p_a_c/index');
                 exit;
@@ -117,11 +134,16 @@ class PACController extends BaseController
 
     public function delete(): void
     {
+        Gate::authorize('presupuesto.pac.eliminar');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = $_POST['id'] ?? null;
             if ($id) {
                 try {
-                    $this->repo->delete((int)$id);
+                    $id = (int)$id;
+                    $modeloAnterior = $this->repo->findById($id);
+                    $datosAntes = $modeloAnterior ? $modeloAnterior->toArray() : null;
+                    $this->repo->delete($id);
+                    $this->audit('pac', 'ELIMINAR', $id, $datosAntes, null);
                 } catch (PDOException $e) {
                     error_log("Error deleting PAC: " . $e->getMessage());
                 }
@@ -137,9 +159,11 @@ class PACController extends BaseController
             $id = $_POST['id'] ?? null;
             if ($id) {
                 try {
-                    $pac = $this->repo->findById((int)$id);
+                    $id = (int)$id;
+                    $pac = $this->repo->findById($id);
                     if ($pac && $pac->estatus !== 'APROBADO') {
-                        $this->repo->aprobar((int)$id);
+                        $datosAntes = $pac->toArray();
+                        $this->repo->aprobar($id);
 
                         // Buscar el articulo para ver su plan unico
                         $articulo = $this->artRepo->findById($pac->id_articulo);
@@ -159,6 +183,8 @@ class PACController extends BaseController
                                 }
                             }
                         }
+                        $pacDespues = $this->repo->findById($id);
+                        $this->audit('pac', 'APROBAR', $id, $datosAntes, $pacDespues ? $pacDespues->toArray() : null);
                     }
                 } catch (PDOException $e) {
                     error_log("Error aprobando PAC: " . $e->getMessage());

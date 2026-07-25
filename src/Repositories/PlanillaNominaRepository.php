@@ -7,6 +7,7 @@ namespace App\Repositories;
 use App\Database\Repository;
 use App\Models\AsientoContable;
 use App\Services\FormulaEvaluator;
+use App\Services\IntegracionContableService;
 use Exception;
 use PDO;
 
@@ -36,7 +37,7 @@ class PlanillaNominaRepository extends Repository
 
             // 2. Obtener trabajadores activos
             $fichas = $db->prepare("
-                SELECT f.cod_ficha, f.sueldo_basico
+                SELECT f.cod_ficha, f.sueldo_basico, f.porcentaje_islr
                 FROM ficha f
                 WHERE f.nomina_cod_nomina = ? AND f.eliminado = false
             ");
@@ -85,6 +86,7 @@ class PlanillaNominaRepository extends Repository
                                 'TOTAL_ASIG'     => $totalAsignacionTrab,
                                 'SALARIO_MINIMO' => 0.0,
                                 'CESTATICKET'    => 0.0,
+                                'PORCENTAJE_ISLR'=> (float)($trabajador['porcentaje_islr'] ?? 0.0),
                             ]);
                             $montoCalculado = max(0.0, $evaluator->evaluate($concepto->formulaExpr));
                         } catch (\InvalidArgumentException $e) {
@@ -136,19 +138,16 @@ class PlanillaNominaRepository extends Repository
             ")->execute([$totalAsignacionesGlobal, $totalAsignacionesGlobal]);
 
             // Asiento contable del Causado
-            $convRepo = new VinculacionPucContableRepository();
-            $idPartidaNomina = 4;
-            $idCuentaGasto = $convRepo->getCuentaContableId($idPartidaNomina, 'NOMINA_ASIGNACION');
-            $idCuentaPasivo = $convRepo->getCuentaContableId($idPartidaNomina, 'NOMINA_DEDUCCION');
-
-            $asientoDetalles = [];
-            $asientoDetalles[] = ['id_cuenta_contable' => $idCuentaGasto ?: 6, 'tipo' => 'D', 'monto' => $totalAsignacionesGlobal];
-            $asientoDetalles[] = ['id_cuenta_contable' => $idCuentaPasivo ?: 3, 'tipo' => 'H', 'monto' => $totalAsignacionesGlobal];
-
-            AsientoContable::registrarDesdeTransaccion(
+            $partidasCausado = [
+                ['id_codigo_plan_unico' => 4, 'monto' => $totalAsignacionesGlobal]
+            ];
+            
+            $integracionService = new IntegracionContableService();
+            $integracionService->registrarCausadoFactura(
+                $idPlanilla,
                 $fechaEmision,
                 "Causado de Nómina - Planilla N° {$idPlanilla}",
-                $asientoDetalles
+                $partidasCausado
             );
 
             // 7. Impacto Transaccional 2: TESORERÍA
@@ -169,15 +168,29 @@ class PlanillaNominaRepository extends Repository
         }
     }
 
-    public function all(): array
+    public function countAll(): int
     {
         $db = $this->getPdo();
+        $stmt = $db->query("SELECT COUNT(*) FROM planilla_nomina");
+        return (int)$stmt->fetchColumn();
+    }
 
-        return $db->query("
+    public function all(?int $limit = null, ?int $offset = null): array
+    {
+        $db = $this->getPdo();
+        $sql = "
             SELECT p.*, n.denom as nombre_nomina 
             FROM planilla_nomina p
             JOIN nomina n ON p.nomina_cod_nomina = n.cod_nomina
             ORDER BY p.id_planilla DESC
-        ")->fetchAll(PDO::FETCH_ASSOC);
+        ";
+        if ($limit !== null) {
+            $sql .= " LIMIT " . (int)$limit;
+        }
+        if ($offset !== null) {
+            $sql .= " OFFSET " . (int)$offset;
+        }
+
+        return $db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 }

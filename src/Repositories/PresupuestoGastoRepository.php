@@ -122,8 +122,6 @@ class PresupuestoGastoRepository extends Repository
 
         $id = $this->query()->insert($data);
         if ($id) {
-            $item->/* private(set) */ id = (int)$id;
-
             return true;
         }
 

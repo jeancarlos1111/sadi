@@ -18,7 +18,7 @@ class NominaRepository extends Repository
     public function all(): array
     {
         $db = $this->getPdo();
-        $stmt = $db->query("SELECT * FROM nomina WHERE eliminado = false");
+        $stmt = $db->query("SELECT * FROM nomina WHERE eliminado = false ORDER BY denom ASC");
 
         $results = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
@@ -26,6 +26,13 @@ class NominaRepository extends Repository
         }
 
         return $results;
+    }
+
+    public function countAll(): int
+    {
+        $db = $this->getPdo();
+        $stmt = $db->query("SELECT COUNT(*) FROM nomina WHERE eliminado = false");
+        return (int)$stmt->fetchColumn();
     }
 
     public function find(int $id): ?Nomina
@@ -36,5 +43,25 @@ class NominaRepository extends Repository
         }
 
         return new Nomina((int)$row['cod_nomina'], $row['denom'], $row['tipo_periodo']);
+    }
+
+    public function save(Nomina $nomina): int|bool
+    {
+        $data = [
+            'denom'       => $nomina->nombre,
+            'tipo_periodo' => $nomina->tipoPeriodo,
+        ];
+
+        if ($nomina->id) {
+            return $this->query()->where('cod_nomina', '=', $nomina->id)->update($data);
+        }
+
+        $id = $this->query()->insert($data);
+        return $id ? (int)$id : false;
+    }
+
+    public function delete(int $id): bool
+    {
+        return $this->query()->where('cod_nomina', '=', $id)->update(['eliminado' => 'true']);
     }
 }

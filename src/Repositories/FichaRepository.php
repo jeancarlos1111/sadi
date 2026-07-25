@@ -24,7 +24,17 @@ class FichaRepository extends Repository
         return $this->mapRowToEntity($row);
     }
 
-    public function save(Ficha $item): bool
+    /**
+     * @return Ficha[]
+     */
+    public function allActivos(): array
+    {
+        $db = $this->getPdo();
+        $stmt = $db->query("SELECT * FROM ficha WHERE eliminado = false ORDER BY cod_ficha DESC");
+        return array_map(fn ($row) => clone $this->mapRowToEntity($row), $stmt->fetchAll(\PDO::FETCH_ASSOC));
+    }
+
+    public function save(Ficha $item): int|bool
     {
         $data = [
             'personal_cod_personal' => $item->idPersonal,
@@ -32,6 +42,13 @@ class FichaRepository extends Repository
             'nomina_cod_nomina' => $item->idNomina,
             'ingreso' => $item->fechaIngreso,
             'sueldo_basico' => $item->sueldoBasico,
+            'dias_utilidades' => $item->diasUtilidades,
+            'dias_bono_vacacional' => $item->diasBonoVacacional,
+            'porcentaje_islr' => $item->porcentajeIslr,
+            'tipo_relacion_laboral' => $item->tipoRelacionLaboral,
+            'banco' => $item->banco,
+            'numero_cuenta' => $item->numeroCuenta,
+            'tipo_cuenta' => $item->tipoCuenta,
         ];
 
         if ($item->id) {
@@ -39,13 +56,7 @@ class FichaRepository extends Repository
         }
 
         $id = $this->query()->insert($data);
-        if ($id) {
-            $item->id = (int)$id;
-
-            return true;
-        }
-
-        return false;
+        return (int)$id;
     }
 
     private function mapRowToEntity(array $row): Ficha
@@ -57,7 +68,14 @@ class FichaRepository extends Repository
             (int)$row['nomina_cod_nomina'],
             $row['ingreso'],
             (float)$row['sueldo_basico'],
-            (bool)$row['eliminado']
+            (int)($row['dias_utilidades'] ?? 30),
+            (int)($row['dias_bono_vacacional'] ?? 15),
+            (float)($row['porcentaje_islr'] ?? 0.0),
+            (bool)$row['eliminado'],
+            $row['tipo_relacion_laboral'] ?? 'FIJO',
+            $row['banco'] ?? null,
+            $row['numero_cuenta'] ?? null,
+            $row['tipo_cuenta'] ?? 'CORRIENTE'
         );
     }
 }

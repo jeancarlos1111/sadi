@@ -11,7 +11,24 @@ ini_set('display_errors', '1');
 // Cargar Autoloader de Composer (PSR-4 estricto)
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
+// Cargar Helpers Globales
+require_once dirname(__DIR__) . '/src/Core/helpers.php';
+
 use App\Core\Container;
+
+// ── Middleware de Sesión ──────────────────────────────────────────────────────
+// Todas las rutas que no sean auth/* requieren sesión activa.
+$routeRaw    = $_GET['route'] ?? 'home/index';
+$routeParts  = explode('/', trim($routeRaw, '/'));
+$moduloRuta  = strtolower($routeParts[0] ?? 'home');
+
+$rutasPublicas = ['auth'];
+
+if (!in_array($moduloRuta, $rutasPublicas, true) && !isset($_SESSION['usuario_id'])) {
+    header('Location: ?route=auth/login');
+    exit;
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 // Very Basic Router
 $route = $_GET['route'] ?? 'home/index';
@@ -23,9 +40,11 @@ if (!empty($parts[0])) {
     // Aliases for common abbreviations
     if ($rawModule === 'cxp') $parts[0] = 'cuentas_por_pagar';
     if ($rawModule === 'ppto') $parts[0] = 'presupuesto';
-    
+
     if ($rawModule === 'deducciones_cxp') {
         $controllerName = 'DeduccionesCxP';
+    } elseif ($rawModule === 'admin') {
+        $controllerName = 'Admin';
     } else {
         $controllerName = str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $parts[0])));
     }
@@ -49,8 +68,7 @@ if (class_exists($controllerClass) && method_exists($controllerClass, $action)) 
         $controller->$action();
     } catch (\Exception $e) {
         http_response_code(500);
-        echo "<h1>500 Internal Server Error</h1>";
-        echo "<p>Error de Inyección de Dependencias: " . htmlspecialchars($e->getMessage()) . "</p>";
+        require_once dirname(__DIR__) . '/views/errors/500.phtml';
     }
 } else {
     http_response_code(404);

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 class ReportesCxpController extends BaseController
 {
     private \App\Repositories\DocumentoRepository $repo;
@@ -18,7 +20,7 @@ class ReportesCxpController extends BaseController
         $this->repo = $repo;
         $this->proveedorRepo = $proveedorRepo;
         $this->retencionRepo = $retencionRepo;
-        if (!isset($_SESSION['usuario'])) {
+        if (!isset($_SESSION['usuario_id'])) {
             header('Location: ?route=auth/login');
             exit;
         }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Models\SolicitudPago;
 use App\Repositories\BancoRepository;
 use App\Repositories\CuentaBancariaRepository;
@@ -33,6 +35,7 @@ class SolicitudesPagoController extends HomeController
 
     public function index(): void
     {
+        Gate::authorize('cxp.solicitudes_pago.ver');
         $search = $_GET['search'] ?? '';
         $mes = $_GET['mes'] ?? '';
 
@@ -108,6 +111,8 @@ class SolicitudesPagoController extends HomeController
     /** Formulario para crear una solicitud de pago manualmente */
     public function form(): void
     {
+        $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'cxp.solicitudes_pago.editar' : 'cxp.solicitudes_pago.crear');
         $this->renderView('cuentas_por_pagar/solicitudes_pago/form', [
             'titulo' => 'Nueva Solicitud de Pago',
             'error'  => null,

@@ -29,7 +29,7 @@ class BancoController extends BaseController
         $this->solRepo = $solRepo;
         $this->pdfService = $pdfService;
 
-        if (!isset($_SESSION['usuario'])) {
+        if (!isset($_SESSION['usuario_id'])) {
             header('Location: ?route=auth/login');
             exit;
         }
@@ -245,6 +245,91 @@ class BancoController extends BaseController
             }
         } catch (Exception $e) {
             header('Location: ?route=banco/index&error=' . urlencode($e->getMessage()));
+        }
+    }
+
+    public function conciliacion(): void
+    {
+        $idCuenta = (int)($_GET['id_cta_bancaria'] ?? 0);
+        $mes = (int)($_GET['mes'] ?? date('m'));
+        $anio = (int)($_GET['anio'] ?? date('Y'));
+        
+        $cuentas = $this->ctaRepo->all();
+        $movimientos = [];
+        $saldoLibros = 0.0;
+        $cuentaSel = null;
+        $fechaConciliacion = sprintf('%04d-%02d-%02d', $anio, $mes, cal_days_in_month(CAL_GREGORIAN, $mes, $anio));
+
+        if ($idCuenta) {
+            $cuentaSel = $this->ctaRepo->find($idCuenta);
+            $movimientos = $this->movRepo->getMovimientosParaConciliar($idCuenta, $fechaConciliacion, $fechaConciliacion);
+            $saldoLibros = $this->movRepo->getSaldoLibros($idCuenta, $fechaConciliacion);
+        }
+
+        $this->renderView('banco/reportes/conciliacion', [
+            'titulo'      => 'Conciliación Bancaria',
+            'cuentas'     => $cuentas,
+            'movimientos' => $movimientos,
+            'saldoLibros' => $saldoLibros,
+            'idCuenta'    => $idCuenta,
+            'mes'         => $mes,
+            'anio'        => $anio,
+            'cuentaSel'   => $cuentaSel,
+            'fechaConciliacion' => $fechaConciliacion,
+            'error'       => $_GET['error'] ?? null,
+            'success'     => $_GET['success'] ?? null,
+        ]);
+    }
+
+    public function procesarConciliacion(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ?route=banco/conciliacion');
+            exit;
+        }
+
+        $idCuenta = (int)($_POST['id_cta_bancaria'] ?? 0);
+        $fechaConciliacion = $_POST['fecha_conciliacion'] ?? '';
+        $saldoBancoStr = $_POST['saldo_estado_cuenta'] ?? '0';
+        $idsSeleccionados = $_POST['movimientos'] ?? []; 
+        $idsSeleccionados = array_map('intval', $idsSeleccionados);
+
+        if (!$idCuenta || !$fechaConciliacion) {
+            header('Location: ?route=banco/conciliacion&error=' . urlencode("Faltan parámetros requeridos"));
+            exit;
+        }
+
+        try {
+            $saldoBancoStr = str_replace('.', '', $saldoBancoStr);
+            $saldoBancoStr = str_replace(',', '.', $saldoBancoStr);
+            $saldoBanco = (float)$saldoBancoStr;
+
+            $saldoLibros = $this->movRepo->getSaldoLibros($idCuenta, $fechaConciliacion);
+            
+            $movimientosEnPantalla = $this->movRepo->getMovimientosParaConciliar($idCuenta, $fechaConciliacion, $fechaConciliacion);
+            
+            $sumaNoConciliados = 0.0;
+            foreach ($movimientosEnPantalla as $mov) {
+                if (!in_array((int)$mov['id_movimiento_bancario'], $idsSeleccionados)) {
+                    $sumaNoConciliados += (float)$mov['monto'];
+                }
+            }
+
+            $saldoCalculado = $saldoBanco + $sumaNoConciliados;
+
+            if (abs($saldoCalculado - $saldoLibros) > 0.01) {
+                throw new Exception("El saldo no cuadra. Libros: " . number_format($saldoLibros, 2, ',', '.') . " | Calculado: " . number_format($saldoCalculado, 2, ',', '.'));
+            }
+
+            $this->movRepo->procesarConciliacionMasiva($idCuenta, $fechaConciliacion, $idsSeleccionados);
+
+            $qs = http_build_query(['route' => 'banco/conciliacion', 'id_cta_bancaria' => $idCuenta, 'mes' => date('m', strtotime($fechaConciliacion)), 'anio' => date('Y', strtotime($fechaConciliacion)), 'success' => 'Conciliación guardada exitosamente y cuadrada.']);
+            header('Location: ?' . $qs);
+            exit;
+        } catch (Exception $e) {
+            $qs = http_build_query(['route' => 'banco/conciliacion', 'id_cta_bancaria' => $idCuenta, 'mes' => date('m', strtotime($fechaConciliacion)), 'anio' => date('Y', strtotime($fechaConciliacion)), 'error' => $e->getMessage()]);
+            header('Location: ?' . $qs);
+            exit;
         }
     }
 }

@@ -1,0 +1,66 @@
+<div class="card card-outline card-primary">
+  <div class="card-header">
+    <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+    <div class="card-tools">
+      <a href="?route=utilidad/crear" class="btn btn-sm btn-primary">
+        <i class="fas fa-plus"></i> Generar Nueva Nómina
+      </a>
+    </div>
+  </div>
+  <div class="card-body">
+    <?php if (isset($_GET['msg'])): ?>
+      <div class="alert alert-success alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <h5><i class="icon fas fa-check"></i> ¡Éxito!</h5>
+        <?= htmlspecialchars($_GET['msg']) ?>
+      </div>
+    <?php endif; ?>
+
+    <?php if (isset($_GET['error'])): ?>
+      <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <h5><i class="icon fas fa-ban"></i> ¡Atención!</h5>
+        <?= htmlspecialchars($_GET['error']) ?>
+      </div>
+    <?php endif; ?>
+
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped w-100 table-sm">
+        <thead class="thead-dark">
+          <tr>
+            <th class="text-center">Año Fiscal</th>
+            <th class="text-center">Días Base (Cálculo)</th>
+            <th class="text-right">Monto Total Nómina (Bs)</th>
+            <th class="text-center">Fecha Generación</th>
+            <th class="text-center">Estatus</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php if (empty($utilidades)): ?>
+            <tr><td colspan="6" class="text-center">No hay registros de utilidades.</td></tr>
+          <?php else: ?>
+            <?php foreach ($utilidades as $u): ?>
+              <tr>
+                <td class="text-center font-weight-bold"><?= htmlspecialchars((string)$u['anio']) ?></td>
+                <td class="text-center"><?= htmlspecialchars((string)$u['dias_base']) ?> días</td>
+                <td class="text-right font-weight-bold text-success">
+                  Bs <?= number_format((float)$u['monto_total_nomina'], 2, ',', '.') ?>
+                </td>
+                <td class="text-center"><?= htmlspecialchars(date('d/m/Y H:i', strtotime($u['creado_en']))) ?></td>
+                <td class="text-center">
+                  <span class="badge badge-info"><?= htmlspecialchars($u['estatus']) ?></span>
+                </td>
+                <td class="text-center">
+                    <a href="?route=utilidad/imprimirListado&id=<?= $u['id_utilidad'] ?>" target="_blank" class="btn btn-xs btn-default" title="Imprimir Listado General">
+                        <i class="fas fa-print text-secondary"></i> Listado
+                    </a>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

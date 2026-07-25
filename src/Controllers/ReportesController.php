@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Repositories\ReportesOnapreRepository;
 
 class ReportesController extends BaseController
@@ -14,7 +16,7 @@ class ReportesController extends BaseController
     {
         $this->repo = $repo;
 
-        if (!isset($_SESSION['usuario'])) {
+        if (!isset($_SESSION['usuario_id'])) {
             header('Location: ?route=auth/login');
             exit;
         }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Database\Connection;
 use App\Models\ComprobantePresupuestario;
 use App\Models\MovimientoPresupuestario;
@@ -28,6 +30,7 @@ class AperturaCuentasController extends HomeController
 
     public function index(): void
     {
+        Gate::authorize('contabilidad.apertura_cuentas.ver');
         $estructuras = $this->estructurasRepo->all();
         $id_estruc_presupuestaria = isset($_GET['id_estruc_presupuestaria']) ? (int)$_GET['id_estruc_presupuestaria'] : null;
 
@@ -107,6 +110,7 @@ class AperturaCuentasController extends HomeController
             }
 
             $db->commit();
+            $this->audit('comprobante_presupuestario', 'CREAR', $id_comprobante, null, ['tipo' => 'AAP', 'cuentas_insertadas' => $cuentasInsertadas, 'montos' => $montos]);
             $_SESSION['success'] = "Comprobante $numeroComprobante generado con $cuentasInsertadas partida(s) aperturada(s).";
         } catch (Exception $e) {
             $db->rollBack();

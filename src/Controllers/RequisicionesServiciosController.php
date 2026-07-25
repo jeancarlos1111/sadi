@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Models\RequisicionServicios;
 use App\Repositories\EstrucPresupuestariaRepository;
 use App\Repositories\RequisicionServiciosRepository;
@@ -27,6 +29,7 @@ class RequisicionesServiciosController extends HomeController
     }
     public function index(): void
     {
+        Gate::authorize('compras.requisiciones_servicios.ver');
         $search = $_GET['search'] ?? '';
         $mes    = $_GET['mes'] ?? '';
 
@@ -50,6 +53,8 @@ class RequisicionesServiciosController extends HomeController
 
     public function form(): void
     {
+        $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'compras.requisiciones_servicios.editar' : 'compras.requisiciones_servicios.crear');
         $id          = $_GET['id'] ?? null;
         $requisicion = null;
 
@@ -109,6 +114,7 @@ class RequisicionesServiciosController extends HomeController
 
     public function eliminar(): void
     {
+        Gate::authorize('compras.requisiciones_servicios.eliminar');
         $id = $_POST['id'] ?? null;
         if ($id) {
             try {

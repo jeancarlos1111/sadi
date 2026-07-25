@@ -1,0 +1,115 @@
+<div class="card card-outline card-success">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+    </div>
+    
+    <div class="card-body">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> Seleccione el trabajador y la fecha de salida para calcular automáticamente los días y el bono según el Art. 190 y 192 de la LOTTT.
+        </div>
+
+        <form method="POST" action="?route=vacacion/guardar">
+            <div class="row">
+                <!-- Columna Izquierda: Entradas -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h3 class="card-title">1. Solicitud</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label>Trabajador:</label>
+                                <select name="cod_ficha" id="cod_ficha" required class="form-control" onchange="simularCalculo()">
+                                    <option value="">-- Seleccione Trabajador --</option>
+                                    <?php foreach ($trabajadores as $t): ?>
+                                        <option value="<?= htmlspecialchars((string)$t['cod_ficha']) ?>">
+                                            <?= htmlspecialchars($t['cedula'] . ' - ' . $t['nombre']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Fecha de Salida (Inicio Vacaciones):</label>
+                                <input type="date" name="fecha_salida" id="fecha_salida" required class="form-control" onchange="simularCalculo()">
+                            </div>
+                        </div>
+                        <div class="card-footer text-right">
+                            <a href="?route=vacacion/index" class="btn btn-default mr-2">Cancelar</a>
+                            <button type="submit" id="btn_guardar" class="btn btn-success" disabled>
+                                <i class="fas fa-save"></i> Registrar Pago de Vacaciones
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna Derecha: Simulación AJAX -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h3 class="card-title">2. Simulación LOTTT</h3>
+                        </div>
+                        <div class="card-body" id="simulacion_container" style="min-height: 250px; display: flex; align-items: center; justify-content: center;">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-calculator fa-3x mb-3"></i>
+                                <p>Seleccione un trabajador y una fecha de salida para ver el cálculo.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    var checkDependencies = setInterval(function() {
+        if (window.jQuery && window.jQuery.fn.select2) {
+            clearInterval(checkDependencies);
+            $('#cod_ficha').select2({
+                theme: 'bootstrap4',
+                width: '100%',
+                placeholder: '-- Seleccione Trabajador --',
+                allowClear: true
+            }).on('change', function() {
+                simularCalculo();
+            });
+        }
+    }, 100);
+});
+
+function simularCalculo() {
+    const codFicha = document.getElementById('cod_ficha').value;
+    const fechaSalida = document.getElementById('fecha_salida').value;
+    const container = document.getElementById('simulacion_container');
+    const btnGuardar = document.getElementById('btn_guardar');
+
+    if (!codFicha || !fechaSalida) {
+        container.innerHTML = '<div class="text-center text-muted"><i class="fas fa-calculator fa-3x mb-3"></i><p>Seleccione un trabajador y una fecha de salida para ver el cálculo.</p></div>';
+        btnGuardar.disabled = true;
+        return;
+    }
+
+    container.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x"></i><p class="mt-2">Calculando según LOTTT...</p></div>';
+    btnGuardar.disabled = true;
+
+    fetch('?route=vacacion/simular&ajax=1', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: `cod_ficha=${codFicha}&fecha_salida=${fechaSalida}`
+    })
+    .then(response => response.text())
+    .then(html => {
+        container.innerHTML = html;
+        container.style.display = 'block';
+        btnGuardar.disabled = false;
+    })
+    .catch(error => {
+        container.innerHTML = `<div class="alert alert-danger">Error al calcular: ${error}</div>`;
+    });
+}
+</script>

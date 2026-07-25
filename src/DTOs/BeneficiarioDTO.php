@@ -13,8 +13,8 @@ class BeneficiarioDTO
         public string $cedula,
         public string $nombres,
         public string $apellidos,
-        public string $direccion,
-        public string $telefono,
+        public ?string $direccion,
+        public ?string $telefono,
         public ?string $email = null,
         public ?int $idCodigoContable = null
     ) {

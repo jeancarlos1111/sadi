@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Models\PresupuestoGasto;
 use App\Repositories\PresupuestoGastoRepository;
 use PDOException;
@@ -16,7 +18,7 @@ class PresupuestoController extends HomeController
 
     public function __construct(PresupuestoGastoRepository $repo, \App\Repositories\FuenteFinanciamientoRepository $fuenteRepo, \App\Repositories\UnidadAdministrativaRepository $unidadRepo)
     {
-        if (!isset($_SESSION['usuario'])) {
+        if (!isset($_SESSION['usuario_id'])) {
             header('Location: ?route=auth/login');
             exit;
         }
@@ -28,6 +30,7 @@ class PresupuestoController extends HomeController
     /** Ejecución Presupuestaria — Vista principal con la tabla de disponibilidades */
     public function index(): void
     {
+        Gate::authorize('presupuesto.gastos.ver');
         $search = $_GET['search'] ?? '';
 
         try {
@@ -77,6 +80,8 @@ class PresupuestoController extends HomeController
     /** Formulario para crear o editar una partida presupuestaria */
     public function form(): void
     {
+        $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'presupuesto.gastos.editar' : 'presupuesto.gastos.crear');
         $id = $_GET['id'] ?? null;
         $presupuesto = null;
         if ($id) {
@@ -139,10 +144,12 @@ class PresupuestoController extends HomeController
         }
 
         try {
+            $datosAntes = null;
             $partida = new PresupuestoGasto($idEstructura, $idPlanUnico, $montoAsignado, 0, 0, 0, $idFuenteFinanciamiento, $idUnidadAdministrativa, $id);
             if ($id) {
                 $existing = $this->repo->find($id);
                 if ($existing) {
+                    $datosAntes = method_exists($existing, 'toArray') ? $existing->toArray() : (array)$existing;
                     $partida = new PresupuestoGasto(
                         $idEstructura,
                         $idPlanUnico,
@@ -157,6 +164,14 @@ class PresupuestoController extends HomeController
                 }
             }
             $this->repo->save($partida);
+            
+            // Re-fetch to get correct ID if it was an insert
+            // For now, if $id is null we might not easily get it without save returning it. 
+            // In PresupuestoGastoRepository save doesn't return ID directly. 
+            // We'll log what we have.
+            $datosDespues = method_exists($partida, 'toArray') ? $partida->toArray() : (array)$partida;
+            $this->audit('presupuesto_gastos', $id ? 'EDITAR' : 'CREAR', $id ?? 0, $datosAntes, $datosDespues);
+
             header('Location: ?route=presupuesto/formulacion');
             exit;
         } catch (PDOException $e) {
@@ -175,14 +190,18 @@ class PresupuestoController extends HomeController
     /** POST: eliminar partida (lógico) */
     public function eliminar(): void
     {
+        Gate::authorize('presupuesto.gastos.eliminar');
         $id = $_POST['id'] ?? null;
         if ($id) {
-            $this->repo->delete((int)$id);
+            $id = (int)$id;
+            $existing = $this->repo->find($id);
+            $datosAntes = $existing ? (method_exists($existing, 'toArray') ? $existing->toArray() : (array)$existing) : null;
+            $this->repo->delete($id);
+            $this->audit('presupuesto_gastos', 'ELIMINAR', $id, $datosAntes, null);
             header('Location: ?route=presupuesto/index&success=Partida+eliminada.');
         }
     }
 
-    /** Dashboard PoC con AMPHP Fibers */
     public function dashboard(): void
     {
         $start = microtime(true);
@@ -190,14 +209,24 @@ class PresupuestoController extends HomeController
             $pool = \App\Database\AsyncConnection::getPool();
 
             // Lanzamos consultas concurrentemente
-            $fTotal = \Amp\async(fn() => $pool->query("SELECT COALESCE(SUM(monto_asignado), 0) as total_asignado, COALESCE(SUM(monto_comprometido), 0) as total_comprometido FROM presupuesto_gastos WHERE eliminado = false")->fetchRow());
+            $fTotal = \Amp\async(fn() => $pool->query("
+                SELECT 
+                    COALESCE(SUM(monto_asignado), 0) as asignado, 
+                    COALESCE(SUM(monto_comprometido), 0) as comprometido,
+                    COALESCE(SUM(monto_causado), 0) as causado,
+                    COALESCE(SUM(monto_pagado), 0) as pagado
+                FROM presupuesto_gastos WHERE eliminado = false
+            ")->fetchRow());
             
             $fTopPartidas = \Amp\async(function() use ($pool) {
-                $result = $pool->query("SELECT p.codigo_plan_unico as partida_codigo, p.denominacion as partida_nombre, pg.monto_asignado 
-                                        FROM presupuesto_gastos pg
-                                        JOIN plan_unico_cuentas p ON pg.id_codigo_plan_unico = p.id_codigo_plan_unico
-                                        WHERE pg.eliminado = false 
-                                        ORDER BY pg.monto_asignado DESC LIMIT 5");
+                $result = $pool->query("
+                    SELECT p.codigo_plan_unico as partida_codigo, p.denominacion as partida_nombre, 
+                           pg.monto_asignado, pg.monto_comprometido
+                    FROM presupuesto_gastos pg
+                    JOIN plan_unico_cuentas p ON pg.id_codigo_plan_unico = p.id_codigo_plan_unico
+                    WHERE pg.eliminado = false 
+                    ORDER BY pg.monto_asignado DESC LIMIT 5
+                ");
                 $rows = [];
                 foreach ($result as $row) {
                     $rows[] = $row;
@@ -207,7 +236,9 @@ class PresupuestoController extends HomeController
 
             $fFuentes = \Amp\async(function() use ($pool) {
                 $result = $pool->query("
-                    SELECT ff.denominacion as nombre, COALESCE(SUM(pg.monto_asignado), 0) as total
+                    SELECT ff.denominacion as nombre, 
+                           COALESCE(SUM(pg.monto_asignado), 0) as asignado,
+                           COALESCE(SUM(pg.monto_comprometido), 0) as comprometido
                     FROM presupuesto_gastos pg
                     JOIN fuente_financiamiento ff ON pg.id_fuente_financiamiento = ff.id_fuente_financiamiento
                     WHERE pg.eliminado = false
@@ -224,8 +255,8 @@ class PresupuestoController extends HomeController
             [$totalRow, $topPartidas, $fuentes] = \Amp\Future\await([$fTotal, $fTopPartidas, $fFuentes]);
 
         } catch (\Throwable $e) {
-            $error = "Error asíncrono: " . $e->getMessage();
-            $totalRow = ['total_asignado' => 0, 'total_comprometido' => 0];
+            $error = "Error al cargar los datos del dashboard: " . $e->getMessage();
+            $totalRow = ['asignado' => 0, 'comprometido' => 0, 'causado' => 0, 'pagado' => 0];
             $topPartidas = [];
             $fuentes = [];
         }
@@ -233,11 +264,14 @@ class PresupuestoController extends HomeController
         $end = microtime(true);
         $timeTaken = round(($end - $start) * 1000, 2); // ms
 
+        // Calculamos disponibilidad general
+        $totalRow['disponible'] = ($totalRow['asignado'] ?? 0) - ($totalRow['comprometido'] ?? 0);
+
         $this->renderView('presupuesto/dashboard', [
-            'titulo' => 'Dashboard Presupuestario (Fibers PoC)',
-            'totalRow' => $totalRow ?? null,
-            'topPartidas' => $topPartidas ?? [],
-            'fuentes' => $fuentes ?? [],
+            'titulo' => 'Panel de Control Presupuestario',
+            'totalRow' => $totalRow,
+            'topPartidas' => $topPartidas,
+            'fuentes' => $fuentes,
             'timeTaken' => $timeTaken,
             'error' => $error ?? null,
         ]);

@@ -8,6 +8,7 @@ use PDO;
 use Sadi\Command;
 use Sadi\Console\Input;
 use Sadi\Console\Output;
+use Sadi\Commands\DbSeedCommand;
 
 class DbMigrateCommand extends Command
 {
@@ -98,6 +99,14 @@ class DbMigrateCommand extends Command
         } else {
             $output->line();
             $output->success("{$pending} migración(es) completadas.");
+        }
+
+        if ($input->hasOption('seed')) {
+            $output->line();
+            $output->info("Ejecutando seeders...");
+            
+            $seedCommand = new DbSeedCommand();
+            return $seedCommand->handle($input, $output);
         }
 
         return 0;

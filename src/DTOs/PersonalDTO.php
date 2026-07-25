@@ -13,7 +13,14 @@ class PersonalDTO
         public string $cedula,
         public string $nombres,
         public string $apellidos,
-        public string $fechaNacimiento
+        public string $fechaNacimiento,
+        public ?string $rif = null,
+        public ?string $telefono = null,
+        public ?string $direccion = null,
+        public ?string $correo = null,
+        public ?string $estadoCivil = 'SOLTERO',
+        public ?int $cargasFamiliares = 0,
+        public ?string $nivelInstruccion = null
     ) {
     }
 
@@ -24,7 +31,14 @@ class PersonalDTO
             $model->cedula,
             $model->nombres,
             $model->apellidos,
-            $model->fechaNacimiento
+            $model->fechaNacimiento,
+            $model->rif,
+            $model->telefono,
+            $model->direccion,
+            $model->correo,
+            $model->estadoCivil,
+            $model->cargasFamiliares,
+            $model->nivelInstruccion
         );
     }
 }

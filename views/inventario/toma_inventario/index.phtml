@@ -1,0 +1,85 @@
+<?php
+/** @var string $titulo */
+/** @var array $tomas */
+/** @var string $search */
+/** @var string|null $error */
+/** @var string|null $success */
+?>
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+        <div class="card-tools">
+            <a href="?route=toma_inventario/form" class="btn btn-sm btn-success">
+                <i class="fas fa-plus"></i> Iniciar Nueva Toma
+            </a>
+        </div>
+    </div>
+    
+    <div class="card-body">
+        <?php if ($error): ?>
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h5><i class="icon fas fa-ban"></i> Error</h5>
+                <?= htmlspecialchars($error) ?>
+            </div>
+        <?php endif; ?>
+        <?php if ($success): ?>
+            <div class="alert alert-success alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h5><i class="icon fas fa-check"></i> Éxito</h5>
+                <?= htmlspecialchars($success) ?>
+            </div>
+        <?php endif; ?>
+
+        <form method="GET" class="form-inline mb-4">
+            <input type="hidden" name="route" value="toma_inventario/index">
+            <div class="input-group w-50">
+                <input type="text" name="search" class="form-control" placeholder="Buscar por responsable..." value="<?= htmlspecialchars($search) ?>">
+                <span class="input-group-append">
+                    <button type="submit" class="btn btn-info btn-flat"><i class="fas fa-search"></i> Buscar</button>
+                </span>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped dataTable w-100">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>N° Toma</th>
+                        <th>Fecha</th>
+                        <th>Responsable</th>
+                        <th>Estado</th>
+                        <th>Fecha Cierre</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($tomas)): ?>
+                        <tr><td colspan="6" class="text-center">No se encontraron tomas físicas de inventario.</td></tr>
+                    <?php else: ?>
+                        <?php foreach ($tomas as $item): ?>
+                            <tr>
+                                <td class="font-weight-bold">T-<?= str_pad((string)$item['id_toma'], 4, '0', STR_PAD_LEFT) ?></td>
+                                <td><?= date('d/m/Y', strtotime($item['fecha_toma'])) ?></td>
+                                <td><?= htmlspecialchars($item['responsable']) ?></td>
+                                <td>
+                                    <?php if ($item['estado'] === 'ABIERTA'): ?>
+                                        <span class="badge badge-warning">ABIERTA</span>
+                                    <?php else: ?>
+                                        <span class="badge badge-success">CERRADA</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td><?= $item['fecha_cierre'] ? date('d/m/Y H:i', strtotime($item['fecha_cierre'])) : '-' ?></td>
+                                <td class="text-center">
+                                    <a href="?route=toma_inventario/conteo&id=<?= $item['id_toma'] ?>" class="btn btn-sm btn-info" title="Ver / Ingresar Conteo">
+                                        <i class="fas fa-list-ol"></i> Conteo
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -14,12 +14,16 @@
             <input type="number" name="cedula" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
         </div>
         <div style="flex: 1;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">RIF:</label>
+            <input type="text" name="rif" placeholder="V-12345678-9" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+        <div style="flex: 1;">
             <label style="display: block; font-weight: bold; margin-bottom: 5px;">Fecha de Nacimiento:</label>
             <input type="date" name="fecha_nacimiento" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
         </div>
     </div>
 
-    <div style="display: flex; gap: 15px; margin-bottom: 25px;">
+    <div style="display: flex; gap: 15px; margin-bottom: 15px;">
         <div style="flex: 1;">
             <label style="display: block; font-weight: bold; margin-bottom: 5px;">Nombres:</label>
             <input type="text" name="nombres" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
@@ -27,6 +31,37 @@
         <div style="flex: 1;">
             <label style="display: block; font-weight: bold; margin-bottom: 5px;">Apellidos:</label>
             <input type="text" name="apellidos" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+        <div style="flex: 1;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Teléfono:</label>
+            <input type="text" name="telefono" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+        <div style="flex: 1;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Correo Electrónico:</label>
+            <input type="email" name="correo" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 15px; margin-bottom: 25px;">
+        <div style="flex: 2;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Dirección:</label>
+            <input type="text" name="direccion" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+        <div style="flex: 1;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Estado Civil:</label>
+            <select name="estado_civil" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                <option value="SOLTERO">SOLTERO(A)</option>
+                <option value="CASADO">CASADO(A)</option>
+                <option value="DIVORCIADO">DIVORCIADO(A)</option>
+                <option value="VIUDO">VIUDO(A)</option>
+            </select>
+        </div>
+        <div style="flex: 1;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Cargas Fam.:</label>
+            <input type="number" name="cargas_familiares" value="0" min="0" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
         </div>
     </div>
 
@@ -61,6 +96,41 @@
         <div style="flex: 1;">
             <label style="display: block; font-weight: bold; margin-bottom: 5px;">Sueldo Básico (Bs):</label>
             <input type="number" step="0.01" min="1" name="sueldo_basico" required placeholder="Ej: 5000.00" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+        <div style="flex: 1;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">% Retención AR-I (ISLR):</label>
+            <input type="number" step="0.01" min="0" max="100" name="porcentaje_islr" value="0.00" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+    </div>
+
+    <h3 style="border-bottom: 1px solid #eee; padding-bottom: 5px;">3. Datos Bancarios y Relación</h3>
+    
+    <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+        <div style="flex: 1;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Tipo de Relación:</label>
+            <select name="tipo_relacion_laboral" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                <option value="FIJO">Fijo</option>
+                <option value="CONTRATADO">Contratado</option>
+                <option value="OBRERO">Obrero</option>
+            </select>
+        </div>
+        <div style="flex: 1;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Banco:</label>
+            <input type="text" name="banco" placeholder="Ej: Banco de Venezuela" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+        <div style="flex: 2;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Número de Cuenta (20 dígitos):</label>
+            <input type="text" name="numero_cuenta" maxlength="20" placeholder="0102..." style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+        <div style="flex: 1;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Tipo de Cuenta:</label>
+            <select name="tipo_cuenta" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                <option value="CORRIENTE">Corriente</option>
+                <option value="AHORRO">Ahorro</option>
+            </select>
         </div>
     </div>
 

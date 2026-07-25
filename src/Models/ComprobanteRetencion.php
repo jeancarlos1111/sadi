@@ -15,6 +15,7 @@ readonly class ComprobanteRetencion
         public float $porcentaje,
         public float $montoRetenido,
         public string $fechaEmision,
+        public ?int $idTipoRetencion = null,
         ?int $id = null
     ) {
         $this->id = $id;
@@ -30,18 +31,20 @@ readonly class ComprobanteRetencion
             'porcentaje' => $this->porcentaje,
             'montoRetenido' => $this->montoRetenido,
             'fechaEmision' => $this->fechaEmision,
+            'idTipoRetencion' => $this->idTipoRetencion,
         ];
     }
 
     public static function fromArray(array $data): self
     {
         return new self(
-            $data['idFactura'] ?? null,
-            $data['tipoRetencion'] ?? null,
-            $data['numeroComprobante'] ?? null,
-            $data['porcentaje'] ?? null,
-            $data['montoRetenido'] ?? null,
-            $data['fechaEmision'] ?? null,
+            (int)($data['idFactura'] ?? 0),
+            $data['tipoRetencion'] ?? '',
+            $data['numeroComprobante'] ?? '',
+            (float)($data['porcentaje'] ?? 0),
+            (float)($data['montoRetenido'] ?? 0),
+            $data['fechaEmision'] ?? '',
+            $data['idTipoRetencion'] ?? null,
             $data['id'] ?? null,
         );
     }

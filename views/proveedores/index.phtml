@@ -9,19 +9,24 @@
   </div>
   <div class="card-body">
     <?php if (isset($error)): ?>
-      <div class="alert alert-danger alert-dismissible">
-        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-        <h5><i class="icon fas fa-ban"></i> Error</h5>
-        <?= htmlspecialchars($error) ?>
-      </div>
+      <?= render_component('alert', ['type' => 'danger', 'message' => $error]) ?>
     <?php endif; ?>
 
-    <table class="table table-bordered table-striped w-100">
+    <div class="mb-3">
+      <?= render_component('search_filter', [
+          'route' => 'proveedores/index',
+          'searchValue' => $search ?? ''
+      ]) ?>
+    </div>
+
+    <div class="ajax-table-container">
+      <table class="table table-bordered table-striped w-100">
       <thead>
         <tr>
           <th>RIF</th>
           <th>NIT</th>
           <th>Compañía</th>
+          <th>RNC</th>
           <th>Tipo Organización</th>
           <th>Dirección</th>
           <th>Teléfono</th>
@@ -36,22 +41,34 @@
             $tipoOrg = $data['nombre_tipo_organizacion'];
           ?>
           <tr>
+            <?php 
+              $isExpired = false;
+              if ($p->numeroRnc && $p->fechaVencimientoRnc) {
+                  $isExpired = strtotime($p->fechaVencimientoRnc) < strtotime(date('Y-m-d'));
+              }
+            ?>
             <td><?= htmlspecialchars($p->rif) ?></td>
             <td><?= htmlspecialchars($p->nit ?? '') ?></td>
             <td><?= htmlspecialchars($p->compania) ?></td>
+            <td>
+              <?php if ($p->numeroRnc): ?>
+                <?= htmlspecialchars($p->numeroRnc) ?>
+                <?php if ($isExpired): ?>
+                  <span class="badge badge-danger">Vencido</span>
+                <?php endif; ?>
+              <?php else: ?>
+                <span class="text-muted">N/A</span>
+              <?php endif; ?>
+            </td>
             <td><?= htmlspecialchars($tipoOrg ?? 'N/A') ?></td>
-            <td><?= htmlspecialchars($p->direccion) ?></td>
-            <td><?= htmlspecialchars($p->telefono) ?></td>
+            <td><?= htmlspecialchars($p->direccion ?? '') ?></td>
+            <td><?= htmlspecialchars($p->telefono ?? '') ?></td>
             <td class="text-center">
-              <a href="?route=proveedores/form&id=<?= urlencode((string)$p->id) ?>" class="btn btn-sm btn-info" title="Editar">
-                <i class="fas fa-edit"></i>
-              </a>
-              <form method="POST" action="?route=proveedores/eliminar" onsubmit="return confirm('¿Seguro de eliminar este proveedor?');" style="display:inline;">
-                <input type="hidden" name="id" value="<?= htmlspecialchars((string)$p->id) ?>">
-                <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
-                  <i class="fas fa-trash-alt"></i>
-                </button>
-              </form>
+              <?= render_component('table_actions', [
+                'editUrl' => '?route=proveedores/form&id=' . $p->id,
+                'deleteUrl' => '?route=proveedores/eliminar',
+                'deleteId' => $p->id
+            ]) ?>
             </td>
           </tr>
         <?php endforeach; ?>
@@ -59,7 +76,11 @@
   </tbody>
 </table>
     <?php if (isset($paginator)): ?>
-      <?php include dirname(__DIR__) . '/partials/pagination.phtml'; ?>
+      <?= render_component('pagination', [
+          'page' => $paginator['current_page'],
+          'totalPages' => $paginator['last_page']
+      ]) ?>
     <?php endif; ?>
+    </div>
   </div>
 </div>

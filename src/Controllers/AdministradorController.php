@@ -15,7 +15,7 @@ class AdministradorController extends BaseController
     {
         $this->repo = $repo;
 
-        if (!isset($_SESSION['usuario'])) {
+        if (!isset($_SESSION['usuario_id'])) {
             header('Location: ?route=auth/login');
             exit;
         }

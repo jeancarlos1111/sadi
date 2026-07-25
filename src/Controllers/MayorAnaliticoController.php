@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Repositories\EstrucPresupuestariaRepository;
 use App\Repositories\MovimientoPresupuestarioRepository;
 use App\Repositories\PlanUnicoCuentasRepository;
@@ -26,6 +28,7 @@ class MayorAnaliticoController extends HomeController
     /** Pantalla de parámetros del reporte */
     public function index(): void
     {
+        Gate::authorize('contabilidad.mayor_analitico.ver');
         $this->renderView('mayor_analitico/index', [
             'titulo'      => 'Mayor Analítico Presupuestario',
             'estructuras' => $this->estructurasRepo->all(),

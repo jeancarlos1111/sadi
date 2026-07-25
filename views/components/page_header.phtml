@@ -1,0 +1,23 @@
+<?php
+/**
+ * @var string $title   Título de la tarjeta
+ * @var string $icon    Icono del título, ej: 'fas fa-coins'
+ * @var string|null $newUrl  URL para el botón "Nuevo" (opcional)
+ * @var string|null $newText Texto del botón "Nuevo" (opcional)
+ */
+?>
+<div class="card-header">
+    <h3 class="card-title mt-1">
+        <?php if (!empty($icon)): ?>
+            <i class="<?= htmlspecialchars($icon) ?> mr-1"></i> 
+        <?php endif; ?>
+        <?= htmlspecialchars($title) ?>
+    </h3>
+    <?php if (!empty($newUrl) && !empty($newText)): ?>
+    <div class="card-tools">
+        <a href="<?= htmlspecialchars($newUrl) ?>" class="btn btn-success btn-sm">
+            <i class="fas fa-plus"></i> <?= htmlspecialchars($newText) ?>
+        </a>
+    </div>
+    <?php endif; ?>
+</div>

@@ -12,7 +12,12 @@ $isPresupuesto = strpos($viewPath, 'presupuesto') !== false ||
                  strpos($viewPath, 'ajustes') !== false || 
                  strpos($viewPath, 'mayor') !== false || 
                  strpos($viewPath, 'presupuesto_ingreso') !== false ||
-                 strpos($viewPath, 'unidades_administrativas') !== false;
+                 strpos($viewPath, 'unidades_administrativas') !== false ||
+                 strpos($viewPath, 'fuente_financiamiento') !== false ||
+                 strpos($viewPath, 'pac') !== false ||
+                 strpos($viewPath, 'p_a_c') !== false ||
+                 strpos($viewPath, 'estructuras') !== false ||
+                 strpos($viewPath, 'estruc_presupuestaria') !== false;
 
 $isCompras = strpos($viewPath, 'articulos') !== false ||
              strpos($viewPath, 'ordenes_compra') !== false ||
@@ -20,38 +25,60 @@ $isCompras = strpos($viewPath, 'articulos') !== false ||
              strpos($viewPath, 'requisiciones_bienes') !== false ||
              strpos($viewPath, 'requisiciones_servicios') !== false ||
              strpos($viewPath, 'servicios') !== false ||
+             strpos($viewPath, 'proceso_contratacion') !== false ||
              strpos($viewPath, 'tipos_articulos') !== false ||
              strpos($viewPath, 'tipos_servicios') !== false ||
              strpos($viewPath, 'unidades_medida') !== false;
 
 $isCxP = strpos($viewPath, 'cuentas_por_pagar') !== false || 
          strpos($viewPath, 'cxp') !== false || 
-         strpos($viewPath, 'documentos') !== false || 
+         strpos($viewPath, 'documentos_por_pagar') !== false ||
          strpos($viewPath, 'solicitudes_pago') !== false || 
          strpos($viewPath, 'retenciones') !== false || 
-         strpos($viewPath, 'deducciones') !== false ||
+         strpos($viewPath, 'tipo_retencion') !== false ||
+         strpos($viewPath, 'deducciones_cxp') !== false ||
          strpos($viewPath, 'tipo_documentos') !== false;
 
 $isBanco = strpos($viewPath, 'banco') !== false || 
            strpos($viewPath, 'cuentas_bancarias') !== false || 
            strpos($viewPath, 'tipos_operaciones_bancarias') !== false ||
            strpos($viewPath, 'caja') !== false ||
+           strpos($viewPath, 'conciliacion') !== false ||
+           strpos($viewPath, 'fondo_avance') !== false ||
            strpos($viewPath, 'cheques') !== false;
 
 $isContabilidad = strpos($viewPath, 'contabilidad') !== false || 
                   strpos($viewPath, 'mayor_analitico') !== false ||
                   (strpos($viewPath, 'vinculacion') !== false && strpos($route, 'contabilidad/vinculacion'));
 
-$isNomina = strpos($viewPath, 'nomina') !== false;
+$isNomina = strpos($viewPath, 'nomina') !== false || strpos($viewPath, 'vacacion') !== false || strpos($viewPath, 'utilidad') !== false;
 
 $isInventario = strpos($viewPath, 'inventario') !== false;
 
 $isProveedores = strpos($viewPath, 'proveedores') !== false || 
                  strpos($viewPath, 'beneficiarios') !== false;
                  
-$isAdmin = strpos($viewPath, 'administrador') !== false;
+$isAdmin = strpos($viewPath, 'administrador') !== false || strpos($viewPath, 'admin') !== false || strpos($viewPath, 'auditoria') !== false;
 
 $isReportes = strpos($viewPath, 'reportes') !== false || strpos($viewPath, 'documental') !== false;
+
+$isDefinicionesPresupuesto = strpos($viewPath, 'tipos_operacion') !== false || 
+                             strpos($viewPath, 'estruc_presupuestaria') !== false || 
+                             strpos($viewPath, 'estructuras') !== false || 
+                             strpos($viewPath, 'unidades_administrativas') !== false || 
+                             strpos($viewPath, 'plan_unico_cuentas') !== false || 
+                             strpos($viewPath, 'vinculacion') !== false || 
+                             strpos($viewPath, 'proyectos') !== false || 
+                             strpos($viewPath, 'acciones_centralizadas') !== false ||
+                             strpos($viewPath, 'fuente_financiamiento') !== false ||
+                             strpos($viewPath, 'pac') !== false ||
+                             strpos($viewPath, 'p_a_c') !== false;
+
+$isProcesosPresupuesto = strpos($viewPath, 'apertura_cuentas') !== false || 
+                         strpos($viewPath, 'comprobante_presupuesto') !== false || 
+                         strpos($viewPath, 'periodos') !== false || 
+                         strpos($viewPath, 'disponibilidad') !== false || 
+                         strpos($viewPath, 'ajustes') !== false;
 ?>
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
   <!-- Brand Logo -->
@@ -82,8 +109,8 @@ $isReportes = strpos($viewPath, 'reportes') !== false || strpos($viewPath, 'docu
         <li class="nav-item"><a href="?route=presupuesto_ingreso/index" class="nav-link <?= strpos($viewPath, 'presupuesto_ingreso') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-hand-holding-usd text-info"></i><p>Presupuesto Ingresos</p></a></li>
 
         <!-- DEFINICIONES -->
-        <li class="nav-item <?= strpos($viewPath, 'tipos_operacion') !== false || strpos($viewPath, 'estruc_presupuestaria') !== false || strpos($viewPath, 'unidades_administrativas') !== false || strpos($viewPath, 'plan_unico_cuentas') !== false || strpos($viewPath, 'vinculacion') !== false || strpos($viewPath, 'proyectos') !== false || strpos($viewPath, 'acciones_centralizadas') !== false ? 'menu-open' : '' ?>">
-          <a href="#" class="nav-link">
+        <li class="nav-item <?= $isDefinicionesPresupuesto ? 'menu-open' : '' ?>">
+          <a href="#" class="nav-link <?= $isDefinicionesPresupuesto ? 'active' : '' ?>">
             <i class="nav-icon fas fa-book"></i>
             <p>DEFINICIONES <i class="right fas fa-angle-left"></i></p>
           </a>
@@ -91,7 +118,7 @@ $isReportes = strpos($viewPath, 'reportes') !== false || strpos($viewPath, 'docu
             <li class="nav-item"><a href="?route=tipos_operacion_presupuesto/index" class="nav-link <?= strpos($viewPath, 'tipos_operacion') !== false ? 'active' : '' ?>"><i class="far fa-circle nav-icon"></i><p>Tipos de operación</p></a></li>
             <li class="nav-item"><a href="?route=fuente_financiamiento/index" class="nav-link <?= strpos($viewPath, 'fuente_financiamiento') !== false ? 'active' : '' ?>"><i class="far fa-circle nav-icon"></i><p>Fuentes Financiamiento</p></a></li>
             <li class="nav-item"><a href="?route=p_a_c/index" class="nav-link <?= strpos($viewPath, 'pac') !== false || strpos($viewPath, 'p_a_c') !== false ? 'active' : '' ?>"><i class="far fa-circle nav-icon"></i><p>Prog. Anual de Compras</p></a></li>
-            <li class="nav-item"><a href="?route=estruc_presupuestaria/index" class="nav-link <?= strpos($viewPath, 'estruc_presupuestaria') !== false ? 'active' : '' ?>"><i class="far fa-circle nav-icon"></i><p>Estructura presupuestaria</p></a></li>
+            <li class="nav-item"><a href="?route=estruc_presupuestaria/index" class="nav-link <?= strpos($viewPath, 'estruc_presupuestaria') !== false || strpos($viewPath, 'estructuras') !== false ? 'active' : '' ?>"><i class="far fa-circle nav-icon"></i><p>Estructura presupuestaria</p></a></li>
             <li class="nav-item"><a href="?route=unidades_administrativas/index" class="nav-link <?= strpos($viewPath, 'unidades_administrativas') !== false ? 'active' : '' ?>"><i class="far fa-circle nav-icon"></i><p>Unidades administrativas</p></a></li>
             <li class="nav-item"><a href="?route=plan_unico_cuentas/index" class="nav-link <?= strpos($viewPath, 'plan_unico_cuentas') !== false ? 'active' : '' ?>"><i class="far fa-circle nav-icon"></i><p>Plan único de cuentas</p></a></li>
             <li class="nav-item"><a href="?route=vinculacion_puc_contable/index" class="nav-link <?= strpos($viewPath, 'vinculacion') !== false ? 'active' : '' ?>"><i class="far fa-circle nav-icon"></i><p>Convertidor</p></a></li>
@@ -101,8 +128,8 @@ $isReportes = strpos($viewPath, 'reportes') !== false || strpos($viewPath, 'docu
         </li>
 
         <!-- PROCESOS -->
-        <li class="nav-item <?= strpos($viewPath, 'apertura_cuentas') !== false || strpos($viewPath, 'comprobante_presupuesto') !== false || strpos($viewPath, 'periodos') !== false || strpos($viewPath, 'disponibilidad') !== false || strpos($viewPath, 'ajustes') !== false ? 'menu-open' : '' ?>">
-          <a href="#" class="nav-link">
+        <li class="nav-item <?= $isProcesosPresupuesto ? 'menu-open' : '' ?>">
+          <a href="#" class="nav-link <?= $isProcesosPresupuesto ? 'active' : '' ?>">
             <i class="nav-icon fas fa-cogs"></i>
             <p>PROCESOS <i class="right fas fa-angle-left"></i></p>
           </a>
@@ -110,13 +137,13 @@ $isReportes = strpos($viewPath, 'reportes') !== false || strpos($viewPath, 'docu
             <li class="nav-item"><a href="?route=apertura_cuentas/index" class="nav-link <?= strpos($viewPath, 'apertura_cuentas') !== false ? 'active' : '' ?>"><i class="far fa-circle nav-icon"></i><p>Aperturar cuentas</p></a></li>
             <li class="nav-item"><a href="?route=comprobante_presupuesto/index" class="nav-link <?= $viewPath === 'comprobante_presupuesto/index' ? 'active' : '' ?>"><i class="far fa-circle nav-icon"></i><p>Comprobante</p></a></li>
             <li class="nav-item <?= strpos($viewPath, 'comprobante_presupuesto/form') !== false ? 'menu-open' : '' ?>">
-              <a href="#" class="nav-link">
+              <a href="#" class="nav-link <?= strpos($viewPath, 'comprobante_presupuesto/form') !== false ? 'active' : '' ?>">
                 <i class="far fa-circle nav-icon"></i><p>Modificaciones <i class="right fas fa-angle-left"></i></p>
               </a>
               <ul class="nav nav-treeview" style="padding-left: 15px;">
                   <li class="nav-item"><a href="?route=comprobante_presupuesto/form&tipo=CA" class="nav-link <?= (isset($_GET['tipo']) && $_GET['tipo'] === 'CA') ? 'active' : '' ?>"><i class="fas fa-plus nav-icon"></i><p>Crédito adicional</p></a></li>
                   <li class="nav-item"><a href="?route=comprobante_presupuesto/form&tipo=TR" class="nav-link <?= (isset($_GET['tipo']) && $_GET['tipo'] === 'TR') ? 'active' : '' ?>"><i class="fas fa-minus nav-icon"></i><p>Reducción</p></a></li>
-                  <li class="nav-item"><a href="?route=comprobante_presupuesto/form&tipo=TR" class="nav-link"><i class="fas fa-exchange-alt nav-icon"></i><p>Traspaso</p></a></li>
+                  <li class="nav-item"><a href="?route=comprobante_presupuesto/form&tipo=TP" class="nav-link <?= (isset($_GET['tipo']) && $_GET['tipo'] === 'TP') ? 'active' : '' ?>"><i class="fas fa-exchange-alt nav-icon"></i><p>Traspaso</p></a></li>
               </ul>
             </li>
             <li class="nav-item"><a href="?route=periodos_presupuesto/index" class="nav-link <?= strpos($viewPath, 'periodos') !== false ? 'active' : '' ?>"><i class="far fa-circle nav-icon"></i><p>Cierre de meses</p></a></li>
@@ -139,6 +166,11 @@ $isReportes = strpos($viewPath, 'reportes') !== false || strpos($viewPath, 'docu
         <li class="nav-item"><a href="?route=servicios/index" class="nav-link <?= strpos($viewPath, 'servicios') !== false && strpos($viewPath, 'requisiciones') === false && strpos($viewPath, 'ordenes') === false && strpos($viewPath, 'tipos') === false ? 'active' : '' ?>"><i class="nav-icon fas fa-tools"></i><p>Catálogo de Servicios</p></a></li>
         <li class="nav-item"><a href="?route=requisiciones_bienes/index" class="nav-link <?= strpos($viewPath, 'requisiciones_bienes') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-file-alt"></i><p>Requisiciones Bienes</p></a></li>
         <li class="nav-item"><a href="?route=requisiciones_servicios/index" class="nav-link <?= strpos($viewPath, 'requisiciones_servicios') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-file-contract"></i><p>Requisiciones Servicios</p></a></li>
+        
+        <?php if (\App\Auth\Gate::check('compras.proceso_contratacion.ver')): ?>
+        <li class="nav-item"><a href="?route=proceso_contratacion/index" class="nav-link <?= strpos($viewPath, 'proceso_contratacion') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-gavel"></i><p>Procesos (LCP)</p></a></li>
+        <?php endif; ?>
+
         <li class="nav-item"><a href="?route=ordenes_compra/index" class="nav-link <?= strpos($viewPath, 'ordenes_compra') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-shopping-cart"></i><p>Órdenes de Compra</p></a></li>
         <li class="nav-item"><a href="?route=ordenes_servicio/index" class="nav-link <?= strpos($viewPath, 'ordenes_servicio') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-hands-helping"></i><p>Órdenes de Servicio</p></a></li>
         
@@ -152,17 +184,22 @@ $isReportes = strpos($viewPath, 'reportes') !== false || strpos($viewPath, 'docu
         <li class="nav-header mt-2 text-warning font-weight-bold">CUENTAS POR PAGAR</li>
         <li class="nav-item"><a href="?route=documentos_por_pagar/index" class="nav-link <?= strpos($viewPath, 'documentos') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-file-invoice"></i><p>Documentos CXP</p></a></li>
         <li class="nav-item"><a href="?route=solicitudes_pago/index" class="nav-link <?= strpos($viewPath, 'solicitudes') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-money-check-alt"></i><p>Solicitudes de Pago</p></a></li>
-        <li class="nav-item"><a href="?route=retenciones/index" class="nav-link <?= strpos($viewPath, 'retenciones') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-percentage"></i><p>Retenciones</p></a></li>
+        <li class="nav-item"><a href="?route=retenciones/index" class="nav-link <?= strpos($viewPath, 'retenciones') !== false && strpos($viewPath, 'tipo_retencion') === false ? 'active' : '' ?>"><i class="nav-icon fas fa-percentage"></i><p>Retenciones</p></a></li>
         <li class="nav-item"><a href="?route=deducciones_cxp/index" class="nav-link <?= strpos($viewPath, 'deducciones') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-minus-circle"></i><p>Deducciones</p></a></li>
+
+        <li class="nav-header mt-2 text-warning font-weight-bold">CONFIGURACIÓN SENIAT</li>
+        <li class="nav-item"><a href="?route=tipo_retencion/index" class="nav-link <?= strpos($viewPath, 'tipo_retencion') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-cog"></i><p>Tipos de Retención</p></a></li>
         <li class="nav-item"><a href="?route=tipo_documentos/index" class="nav-link <?= strpos($viewPath, 'tipo_documentos') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-tags"></i><p>Tipos de Documento</p></a></li>
 
         <?php elseif ($isBanco): ?>
         <li class="nav-item"><a href="?route=home/index" class="nav-link"><i class="nav-icon fas fa-home text-info"></i><p>INICIO</p></a></li>
         <li class="nav-header mt-2 text-danger font-weight-bold">MÓDULO BANCO</li>
         <li class="nav-item"><a href="?route=banco/index" class="nav-link <?= (strpos($viewPath, 'movimientos') !== false || $viewPath === 'banco/index') && strpos($viewPath, 'bancos') === false ? 'active' : '' ?>"><i class="nav-icon fas fa-exchange-alt"></i><p>Movimientos</p></a></li>
+        <li class="nav-item"><a href="?route=banco/conciliacion" class="nav-link <?= strpos($viewPath, 'conciliacion') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-check-double"></i><p>Conciliación Bancaria</p></a></li>
         <li class="nav-item"><a href="?route=banco/emitirPago" class="nav-link <?= strpos($viewPath, 'emitir') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-money-bill-wave"></i><p>Emitir Pagos</p></a></li>
         <li class="nav-item"><a href="?route=cheques/index" class="nav-link <?= strpos($viewPath, 'cheques') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-money-check"></i><p>Cheques</p></a></li>
         <li class="nav-item"><a href="?route=caja/index" class="nav-link <?= strpos($viewPath, 'caja') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-cash-register"></i><p>Caja Chica</p></a></li>
+        <li class="nav-item"><a href="?route=fondo_avance/index" class="nav-link <?= strpos($viewPath, 'fondo_avance') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-wallet"></i><p>Fondos en Avance</p></a></li>
         <li class="nav-item"><a href="?route=bancos/index" class="nav-link <?= strpos($viewPath, 'bancos/index') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-university"></i><p>Bancos</p></a></li>
         <li class="nav-item"><a href="?route=cuentas_bancarias/index" class="nav-link <?= strpos($viewPath, 'cuentas_bancarias') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-wallet"></i><p>Cuentas Bancarias</p></a></li>
         <li class="nav-item"><a href="?route=tipos_operaciones_bancarias/index" class="nav-link <?= strpos($viewPath, 'tipos_operaciones_bancarias') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-cogs"></i><p>Tipos de Operación</p></a></li>
@@ -185,14 +222,21 @@ $isReportes = strpos($viewPath, 'reportes') !== false || strpos($viewPath, 'docu
         <li class="nav-item"><a href="?route=nomina/index" class="nav-link <?= $viewPath === 'nomina/index' ? 'active' : '' ?>"><i class="nav-icon fas fa-file-invoice-dollar"></i><p>Recibos y Cálculos</p></a></li>
         <li class="nav-item"><a href="?route=nomina/trabajadores" class="nav-link <?= strpos($viewPath, 'trabajadores') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-user-tie"></i><p>Trabajadores</p></a></li>
         <li class="nav-item"><a href="?route=nomina/cargos" class="nav-link <?= strpos($viewPath, 'cargos') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-id-badge"></i><p>Cargos</p></a></li>
+        <li class="nav-item"><a href="?route=nomina/tiposNomina" class="nav-link <?= strpos($viewPath, 'tipos_nomina') !== false || strpos($viewPath, 'crear_nomina') !== false || strpos($viewPath, 'editar_nomina') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-layer-group"></i><p>Tipos de Nómina</p></a></li>
         <li class="nav-item"><a href="?route=nomina_conceptos/index" class="nav-link <?= strpos($viewPath, 'conceptos') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-calculator"></i><p>Conceptos</p></a></li>
+        <li class="nav-item"><a href="?route=vacacion/index" class="nav-link <?= strpos($viewPath, 'vacacion') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-umbrella-beach"></i><p>Vacaciones (LOTTT)</p></a></li>
+        <li class="nav-item"><a href="?route=utilidad/index" class="nav-link <?= strpos($viewPath, 'utilidad') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-gifts"></i><p>Utilidades Fin de Año</p></a></li>
+        <li class="nav-item"><a href="?route=prestaciones/index" class="nav-link <?= strpos($viewPath, 'prestaciones') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-piggy-bank"></i><p>Prestaciones (LOTTT)</p></a></li>
 
         <?php elseif ($isInventario): ?>
         <li class="nav-item"><a href="?route=home/index" class="nav-link"><i class="nav-icon fas fa-home text-info"></i><p>INICIO</p></a></li>
         <li class="nav-header mt-2 text-info font-weight-bold">MÓDULO INVENTARIO</li>
-        <li class="nav-item"><a href="?route=inventario/index" class="nav-link <?= strpos($viewPath, 'inventario/index') !== false || strpos($viewPath, 'existencias') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-boxes"></i><p>Existencias</p></a></li>
-        <li class="nav-item"><a href="?route=inventario/entradas" class="nav-link <?= strpos($viewPath, 'entradas') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-truck-loading"></i><p>Entradas</p></a></li>
-        <li class="nav-item"><a href="?route=inventario/salidas" class="nav-link <?= strpos($viewPath, 'salidas') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-dolly"></i><p>Salidas</p></a></li>
+        <li class="nav-item"><a href="?route=inventario/index" class="nav-link <?= strpos($viewPath, 'inventario/index') !== false || strpos($viewPath, 'existencias') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-boxes"></i><p>Insumos</p></a></li>
+        <li class="nav-item"><a href="?route=inventario_bienes/index" class="nav-link <?= strpos($viewPath, 'inventario/bienes') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-chair"></i><p>Bienes Patrimoniales</p></a></li>
+        <li class="nav-item"><a href="?route=depreciacion/index" class="nav-link <?= strpos($viewPath, 'depreciacion') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-calculator"></i><p>Depreciación</p></a></li>
+        <li class="nav-item"><a href="?route=toma_inventario/index" class="nav-link <?= strpos($viewPath, 'toma_inventario') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-clipboard-check"></i><p>Toma Física</p></a></li>
+        <li class="nav-item"><a href="?route=inventario/entradas" class="nav-link <?= strpos($viewPath, 'entradas') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-truck-loading"></i><p>Recepción (Entradas)</p></a></li>
+        <li class="nav-item"><a href="?route=inventario/despachos" class="nav-link <?= strpos($viewPath, 'despachos') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-dolly"></i><p>Despacho (Salidas)</p></a></li>
 
         <?php elseif ($isProveedores): ?>
         <li class="nav-item"><a href="?route=home/index" class="nav-link"><i class="nav-icon fas fa-home text-info"></i><p>INICIO</p></a></li>
@@ -203,8 +247,10 @@ $isReportes = strpos($viewPath, 'reportes') !== false || strpos($viewPath, 'docu
         <?php elseif ($isAdmin): ?>
         <li class="nav-item"><a href="?route=home/index" class="nav-link"><i class="nav-icon fas fa-home text-info"></i><p>INICIO</p></a></li>
         <li class="nav-header mt-2 text-light font-weight-bold bg-dark px-2 rounded">ADMINISTRACIÓN</li>
-        <li class="nav-item"><a href="?route=administrador/usuarios" class="nav-link <?= strpos($viewPath, 'usuarios') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-users-cog"></i><p>Usuarios</p></a></li>
-        <li class="nav-item"><a href="?route=administrador/configuracion" class="nav-link <?= strpos($viewPath, 'configuracion') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-cogs"></i><p>Configuración Global</p></a></li>
+        <li class="nav-item"><a href="?route=admin/usuarios" class="nav-link <?= strpos($viewPath, 'usuarios') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-users-cog"></i><p>Usuarios</p></a></li>
+        <li class="nav-item"><a href="?route=admin/roles" class="nav-link <?= strpos($viewPath, 'roles') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-user-shield"></i><p>Roles</p></a></li>
+        <li class="nav-item"><a href="?route=admin/institucion" class="nav-link <?= strpos($viewPath, 'institucion') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-cogs"></i><p>Institución</p></a></li>
+        <li class="nav-item"><a href="?route=auditoria/index" class="nav-link <?= strpos($viewPath, 'auditoria') !== false ? 'active' : '' ?>"><i class="nav-icon fas fa-history"></i><p>Pista de Auditoría</p></a></li>
 
         <?php elseif ($isReportes): ?>
         <li class="nav-item"><a href="?route=home/index" class="nav-link"><i class="nav-icon fas fa-home text-info"></i><p>INICIO</p></a></li>

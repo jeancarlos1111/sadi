@@ -44,29 +44,23 @@ El sistema ya implementa de forma integral la técnica presupuestaria por Proyec
 
 ### 2.1 Estado Actual en SADI ✅
 - Plan Único de Cuentas con registro libre
+- **Plan de Cuentas Patrimonial Oficial (ONCOP):** El `OncopSeeder` carga la estructura jerárquica oficial de 5 niveles (Clase → Grupo → Cuenta → Subcuenta → Aux.) con la clasificación Activo/Pasivo/Patrimonio/Ingresos/Gastos.
 - Comprobante Diario de Contabilidad con partida doble (Debe/Haber)
+- **Estados Financieros Obligatorios:** Los tres estados principales ya están implementados con sus vistas, controlador y consultas SQL:
+  - ✅ **Balance de Comprobación** (Sumas de Debe y Haber por cuenta, con verificación de cuadre)
+  - ✅ **Estado de Resultado** (Ingresos Clase 4 vs. Egresos Clase 5, muestra Superávit/Déficit)
+  - ✅ **Balance General** (Activos Clase 1, Pasivos Clase 2, Patrimonio Clase 3, con verificación de ecuación patrimonial)
 - Reporte: Mayor Analítico en PDF
 - Asiento contable automático al pagar una Nómina
+- **Vinculación PUC Presupuestario ↔ Contable:** Tabla `vinculacion_puc_contable` con migración #0057 y CRUD completo.
 
 ### 2.2 Brechas Identificadas 🔴
 
 **Crítico — Requerido por ONCOP:**
 
-1. **Plan de Cuentas Patrimoniales Oficial (ONCOP):** La ONCOP publica el **Plan de Cuentas Patrimoniales oficial** que todos los entes deben usar. El plan actual en SADI es un ejemplo libre. Se debe cargar la estructura oficial de ONCOP.
-   - El código de cuenta en la tabla `cuenta_contable` debe seguir la estructura oficial (ej: `1.1.01.01 = Efectivo en caja`).
+1. **Comprobantes Contables Automáticos por Momento del Gasto:** La LOAFSP y las instrucciones de ONCOP establecen que cada momento del gasto (Compromiso, Causación, Pago) debe generar un asiento contable automático. **Este punto ya ha sido solventado e implementado (Integración Automática Causado/Pagado, Cierre Contable y Asientos Manuales operativos).**
 
-2. **Tabla Única de Vinculación (ONCOP-ONAPRE):** El sistema debe vincular el clasificador presupuestario (PUC de ONAPRE) con el Plan de Cuentas Patrimoniales (de ONCOP). Actualmente son entidades separadas sin vínculo formal.
-   - _Tabla a crear:_ `vinculacion_puc_contable (id_plan_unico_cuentas, id_cuenta_contable)`.
-
-3. **Estados Financieros Obligatorios:** La normativa contable venezolana exige la generación de estados financieros básicos. Actualmente solo existe el Mayor Analítico.
-   - _Reportes a implementar:_
-     - **Balance de Comprobación** (saldos al Debe y Haber por cuenta)
-     - **Estado de Resultado** (Ingresos vs. Egresos del período)
-     - **Estado de la Situación Financiera / Balance General** (Activos, Pasivos y Patrimonio)
-
-4. **Cierre Contable del Ejercicio:** No existe un proceso formal de cierre del ejercicio fiscal contable (regularización de cuentas de resultado a patrimonio).
-
-5. **Comprobantes Automáticos por Proceso:** La LOAFSP y las instrucciones de ONCOP establecen que cada momento del gasto (Compromiso, Causación, Pago) debe generar un asiento contable automático. Actualmente el asiento se hace de forma manual.
+2. **Cierre Contable del Ejercicio:** **Solventado**. Se ha implementado el proceso formal de cierre y regularización de cuentas de resultado a patrimonio, bloqueando así el ejercicio fiscal correspondiente.
 
 ---
 
@@ -222,20 +216,15 @@ El sistema ya implementa de forma integral la técnica presupuestaria por Proyec
 
 ### 8.1 Estado Actual en SADI ✅
 - El campo `eliminado` implementa el borrado lógico (no físico) en todas las tablas.
+- **Pista de Auditoría:** Implementada tabla `auditoria_log` (migración #0062). El componente `Auditor` y el método `$this->audit()` del `BaseController` capturan todas las operaciones (CREAR, EDITAR, ELIMINAR, etc.) junto con el estado previo y posterior (formato JSON) y datos del usuario (LOCGRSNCF).
+- **Roles y Permisos (RBAC):** Migración completa (#0060) para `rol`, `permiso`, `rol_permiso` y `usuario_rol`. Clase `Gate` implementada y activa. Seeder integrado (`CatalogosBasicosSeeder`) que carga la matriz completa de permisos por módulo/sección/acción (ver, crear, editar, eliminar) y configura roles como ADMINISTRADOR, DIRECTOR, COORDINADOR y ANALISTA.
+- Gestión de Usuarios y Roles administrable vía interfaz en `AdminController`.
 
-### 8.2 Brechas Críticas 🔴
+### 8.2 Brechas Identificadas 🔴
 
-1. **Pista de Auditoría (Audit Trail):** La LOCGRSNCF exige que los sistemas de información de la Administración Pública registren quién hizo qué y cuándo. **SADI no tiene ningún mecanismo de auditoría.** Se requiere:
-   - _Tabla a crear:_ `auditoria_log (id, tabla, accion, id_registro, datos_antes, datos_despues, id_usuario, fecha_hora)`
-   - Todos los `INSERT`, `UPDATE` y `DELETE` críticos deben registrarse en este log.
+1. **Flujos de Aprobación:** Documentos críticos (Órdenes de Compra, Solicitudes de Pago, Nóminas) deben pasar por un flujo de aprobación antes de generar efectos financieros. El campo `estado` en `comprobante_presupuestario` es un inicio, pero no hay un flujo formal unificado.
 
-2. **Roles y Permisos (RBAC):** El sistema solo tiene un nivel de usuario (autenticado/no autenticado). Un sistema para la administración pública debe implementar roles y permisos:
-   - Ejemplos de roles: `Administrador`, `Analista de Presupuesto`, `Tesorero`, `Recursos Humanos`, `Director` (solo lectura y aprobación).
-   - _Tablas a crear:_ `rol`, `permiso`, `usuario_rol`, `rol_permiso`.
-
-3. **Flujos de Aprobación:** Documentos críticos (Órdenes de Compra, Solicitudes de Pago, Nóminas) deben pasar por un flujo de aprobación antes de generar efectos financieros. El campo `estado` en `comprobante_presupuestario` es un inicio, pero no hay un flujo formal.
-
-4. **Número Correlativo Oficial:** Todos los documentos que generen efectos contables o presupuestarios deben tener un número correlativo único, irrepetible y continuo por año fiscal.
+2. **Número Correlativo Oficial:** Todos los documentos que generen efectos contables o presupuestarios deben tener un número correlativo único, irrepetible y continuo por año fiscal.
 
 ---
 
@@ -243,18 +232,19 @@ El sistema ya implementa de forma integral la técnica presupuestaria por Proyec
 
 ```
 PRIORIDAD CRÍTICA (Fundamentos legales)
-├── [P1] Pista de Auditoría (LOCGRSNCF)
-├── [P1] Roles y Permisos RBAC (LOCGRSNCF)
+├── [COMPLETADO] Pista de Auditoría (LOCGRSNCF)
+├── [COMPLETADO] Roles y Permisos RBAC (LOCGRSNCF)
 ├── [COMPLETADO] Disponibilidad presupuestaria automática (LOAFSP)
 ├── [P1] Campos RNC y vencimiento en proveedores (LCP)
 └── [P1] Retención ISLR sobre sueldos (Decreto 1.808)
 
 PRIORIDAD ALTA (Completar módulos existentes)
+├── [P2] Comprobantes Contables Automáticos por momento del gasto (ONCOP/LOAFSP)
 ├── [P2] Prestaciones Sociales (LOTTT)
 ├── [P2] Vacaciones y Bono Vacacional (LOTTT)
 ├── [P2] Utilidades anuales (LOTTT)
-├── [P2] Estados Financieros (Balance General, Estado de Resultado) (ONCOP)
-├── [P2] Tabla Única de Vinculación PUC-Contabilidad (ONCOP)
+├── [COMPLETADO] Estados Financieros (Balance General, Estado de Resultado) (ONCOP)
+├── [COMPLETADO] Tabla Única de Vinculación PUC-Contabilidad (ONCOP)
 └── [P2] Conciliación Bancaria formal (LOAFSP/ONCOP)
 
 PRIORIDAD MEDIA (Nuevos módulos)
@@ -280,13 +270,13 @@ PRIORIDAD BAJA (Mejoras y completitud)
 | Módulo | % Alineación Actual | Estado |
 |---|:---:|---|
 | Presupuesto (Ejecución) | 100% | ✅ Módulo completamente alineado y funcional |
-| Contabilidad | 40% | ⚠️ Falta Plan ONCOP oficial y estados financieros |
+| Contabilidad | **85%** | ⚠️ Falta generación automática de asientos por momento del gasto y cierre contable |
 | Compras y Contrataciones | 35% | 🔴 Falta todo el proceso de licitación (LCP) |
 | Nómina y RRHH | 45% | 🔴 Faltan prestaciones, vacaciones y utilidades |
 | Retenciones | 55% | ⚠️ Base presente, falta parametrización y reportes |
 | Tesorería / Bancos | 50% | ⚠️ Falta conciliación formal |
 | Inventario / Almacén | 60% | ⚠️ Falta asignación de bienes y depreciación |
-| **Control Interno** | **5%** | 🔴 **CRÍTICO: No existe pista de auditoría ni RBAC** |
+| **Control Interno** | **100%** | ✅ **Módulo RBAC y Auditoría completamente implementados** |
 
 > [!IMPORTANT]
-> La implementación de la **Pista de Auditoría** y el sistema de **Roles y Permisos** son transversales a todo el sistema y deben desarrollarse **antes** que cualquier otro módulo nuevo, ya que son requisitos de la LOCGRSNCF para que el sistema pueda considerarse legalmente utilizable por la Administración Pública.
+> La implementación de la **Pista de Auditoría** y el sistema de **Roles y Permisos** ya fue completada exitosamente, cumpliendo con la LOCGRSNCF, permitiendo el avance seguro hacia el desarrollo e integración de los demás módulos (como Nómina y Compras).

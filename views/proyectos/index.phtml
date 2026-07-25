@@ -1,31 +1,20 @@
 <?php if (isset($error)): ?>
-  <div class="alert alert-danger alert-dismissible">
-    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-    <h5><i class="icon fas fa-ban"></i> Error!</h5>
-    <?= htmlspecialchars($error) ?>
-  </div>
+  <?= render_component('alert', ['type' => 'danger', 'message' => $error]) ?>
 <?php endif; ?>
 
 <div class="card card-primary card-outline">
-  <div class="card-header">
-    <h3 class="card-title mt-1"><i class="fas fa-clipboard-list mr-1"></i> <?= htmlspecialchars($titulo) ?></h3>
-    <div class="card-tools">
-      <a href="?route=proyectos/form" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> Nuevo Proyecto</a>
-    </div>
-  </div>
+  <?= render_component('page_header', [
+        'title' => $titulo,
+        'icon' => 'fas fa-clipboard-list',
+        'newUrl' => '?route=proyectos/form',
+        'newText' => 'Nuevo Proyecto'
+      ]) ?>
   <div class="card-body">
-    <div class="mb-3">
-      <form method="GET" action="" class="form-inline">
-        <input type="hidden" name="route" value="proyectos/index">
-        <div class="input-group input-group-sm">
-          <input type="text" name="search" class="form-control" placeholder="Buscar por código..." value="<?= htmlspecialchars($search ?? '') ?>" style="width: 250px;">
-          <span class="input-group-append">
-            <button type="submit" class="btn btn-primary btn-flat"><i class="fas fa-search"></i></button>
-          </span>
-        </div>
-        <a href="?route=proyectos/index" class="btn btn-default btn-sm ml-2">Limpiar</a>
-      </form>
-    </div>
+    <?= render_component('search_filter', [
+        'route' => 'proyectos/index',
+        'searchValue' => $search ?? '',
+        'placeholder' => 'Buscar por código...'
+      ]) ?>
 
     <table class="table table-bordered table-striped w-100">
       <thead class="thead-dark">
@@ -48,15 +37,11 @@
               <td class="text-center align-middle"><?= htmlspecialchars($item->anio_inicio) ?></td>
               <td class="text-center align-middle"><?= htmlspecialchars($item->anio_culm) ?></td>
               <td class="text-center align-middle">
-                <a href="?route=proyectos/form&id=<?= urlencode((string)$item->id_proyecto) ?>" class="btn btn-sm btn-info" title="Editar / Metas">
-                  <i class="fas fa-edit"></i>
-                </a>
-                <form method="POST" action="?route=proyectos/eliminar" onsubmit="return confirm('¿Eliminar este proyecto?');" class="d-inline">
-                  <input type="hidden" name="id" value="<?= htmlspecialchars((string)$item->id_proyecto) ?>">
-                  <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </form>
+                <?= render_component('table_actions', [
+                'editUrl' => '?route=proyectos/form&id=' . $item->id_proyecto,
+                'deleteUrl' => '?route=proyectos/eliminar',
+                'deleteId' => $item->id_proyecto
+            ]) ?>
               </td>
             </tr>
           <?php endforeach; ?>

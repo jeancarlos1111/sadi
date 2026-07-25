@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Repositories\ComprobanteRetencionRepository;
 use PDOException;
 
@@ -14,7 +16,7 @@ class RetencionesController extends HomeController
     public function __construct(ComprobanteRetencionRepository $repo)
     {
         $this->repo = $repo;
-        if (!isset($_SESSION['usuario'])) {
+        if (!isset($_SESSION['usuario_id'])) {
             header('Location: ?route=auth/login');
             exit;
         }
@@ -22,6 +24,7 @@ class RetencionesController extends HomeController
 
     public function index(): void
     {
+        Gate::authorize('cxp.retenciones.ver');
         $search = $_GET['search'] ?? '';
 
         try {
@@ -44,9 +47,15 @@ class RetencionesController extends HomeController
 
     public function form(): void
     {
+        $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'cxp.retenciones.editar' : 'cxp.retenciones.crear');
+        
+        $tipoRepo = new \App\Repositories\TipoRetencionRepository();
+        $tipos = $tipoRepo->allActivos();
+
         $this->renderView('retenciones/comprobantes/form', [
             'titulo' => 'Emitir Comprobante de Retención',
-            'error' => 'La emisión de nuevos comprobantes (IVA, ISLR, 1x1000) a partir del pago de facturas se encuentra en desarrollo.',
+            'tipos' => $tipos,
         ]);
     }
 

@@ -10,7 +10,8 @@ readonly class CuentaBancaria
         public int $id,
         public int $idBanco,
         public string $numeroCuenta,
-        public string $nombreBanco
+        public string $nombreBanco,
+        public ?int $idCuentaContable = null
     ) {
     }
 
@@ -21,6 +22,7 @@ readonly class CuentaBancaria
             'idBanco' => $this->idBanco,
             'numeroCuenta' => $this->numeroCuenta,
             'nombreBanco' => $this->nombreBanco,
+            'idCuentaContable' => $this->idCuentaContable,
         ];
     }
 
@@ -31,6 +33,7 @@ readonly class CuentaBancaria
             $data['idBanco'] ?? null,
             $data['numeroCuenta'] ?? null,
             $data['nombreBanco'] ?? null,
+            $data['idCuentaContable'] ?? null
         );
     }
 }

@@ -48,3 +48,7 @@
         <?php endif; ?>
     </tbody>
 </table>
+
+<div style="margin-top: 20px;">
+    <?= render_component('pagination', ['page' => $page, 'totalPages' => $totalPages]) ?>
+</div>

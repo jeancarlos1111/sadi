@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Database\Connection;
 use App\Models\ComprobantePresupuestario;
 use App\Models\MovimientoPresupuestario;
@@ -52,6 +54,7 @@ class ComprobantePresupuestoController extends HomeController
     /** Listado de todos los comprobantes (excluyendo AAP) */
     public function index(): void
     {
+        Gate::authorize('presupuesto.comprobantes.ver');
         $search     = trim($_GET['search'] ?? '');
         $tipo_filtro = trim($_GET['tipo'] ?? '');
 
@@ -75,6 +78,8 @@ class ComprobantePresupuestoController extends HomeController
     /** Formulario de nuevo / editar comprobante */
     public function form(): void
     {
+        $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'presupuesto.comprobantes.editar' : 'presupuesto.comprobantes.crear');
         $id    = isset($_GET['id']) ? (int)$_GET['id'] : null;
         $tipo  = strtoupper($_GET['tipo'] ?? 'CG'); // default: Gasto
         $item  = $id ? $this->comprobanteRepo->findById($id) : null;
@@ -155,7 +160,10 @@ class ComprobantePresupuestoController extends HomeController
             $id_comprobante = $this->comprobanteRepo->save($comprobante);
 
             // Si estamos editando, eliminamos lógicamente las líneas viejas
+            $datosAntes = null;
             if ($id_comprobante_existente) {
+                $modeloAnterior = $this->comprobanteRepo->findById($id_comprobante_existente);
+                $datosAntes = $modeloAnterior ? $modeloAnterior->toArray() : null;
                 $this->movimientoRepo->deleteByComprobanteId($id_comprobante_existente);
             }
 
@@ -183,6 +191,10 @@ class ComprobantePresupuestoController extends HomeController
             }
 
             $db->commit();
+            
+            $modeloDespues = $this->comprobanteRepo->findById($id_comprobante);
+            $this->audit('comprobante_presupuestario', $id_comprobante_existente ? 'EDITAR' : 'CREAR', $id_comprobante, $datosAntes, $modeloDespues ? $modeloDespues->toArray() : null);
+
             $_SESSION['success'] = "Comprobante $numero guardado correctamente.";
         } catch (Exception $e) {
             $db->rollBack();
@@ -196,6 +208,7 @@ class ComprobantePresupuestoController extends HomeController
     /** Eliminación lógica del comprobante y sus movimientos */
     public function eliminar(): void
     {
+        Gate::authorize('presupuesto.comprobantes.eliminar');
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header("Location: ?route=comprobante_presupuesto/index");
             exit;
@@ -207,9 +220,13 @@ class ComprobantePresupuestoController extends HomeController
 
             try {
                 $db->beginTransaction();
+                $modeloAnterior = $this->comprobanteRepo->findById($id);
+                $datosAntes = $modeloAnterior ? $modeloAnterior->toArray() : null;
                 $this->movimientoRepo->deleteByComprobanteId($id);
                 $this->comprobanteRepo->delete($id);
                 $db->commit();
+                
+                $this->audit('comprobante_presupuestario', 'ELIMINAR', $id, $datosAntes, null);
                 $_SESSION['success'] = "Comprobante eliminado correctamente.";
             } catch (Exception $e) {
                 $db->rollBack();

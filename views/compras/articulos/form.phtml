@@ -1,19 +1,17 @@
 <div class="row">
-    <div class="col-md-8 offset-md-2">
+    <div class="col-md-10 offset-md-1">
         <div class="card card-outline card-primary">
             <div class="card-header">
                 <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
             </div>
             <div class="card-body">
                 <?php if (isset($error)): ?>
-                    <div class="alert alert-danger alert-dismissible">
-                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                        <h5><i class="icon fas fa-ban"></i> Error</h5>
-                        <?= htmlspecialchars($error) ?>
-                    </div>
+                    <?= render_component('alert', ['type' => 'danger', 'message' => $error]) ?>
                 <?php endif; ?>
 
                 <form method="POST" action="?route=articulos/guardar">
+                    <h5 class="mb-3 text-primary border-bottom pb-2">Información Principal del Bien/Servicio</h5>
+                    
                     <?php if ($articulo && $articulo->id): ?>
                         <input type="hidden" name="id" value="<?= htmlspecialchars((string)$articulo->id) ?>">
                     <?php endif; ?>
@@ -59,7 +57,14 @@
 
                     <div class="form-group">
                         <label>ID Código Plan Único (Cuenta)</label>
-                        <input type="number" name="id_codigo_plan_unico" class="form-control" value="<?= htmlspecialchars((string)($articulo->idCodigoPlanUnico ?? '')) ?>">
+                        <select name="id_codigo_plan_unico" class="form-control select2" style="width: 100%;">
+                            <option value="">-- NO ASOCIAR CUENTA ESPECÍFICA --</option>
+                            <?php foreach ($cuentasContables as $cuenta): ?>
+                                <option value="<?= htmlspecialchars((string)$cuenta->id) ?>" <?= ($articulo && $articulo->idCodigoPlanUnico === $cuenta->id) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($cuenta->codigoCuenta . ' - ' . $cuenta->denominacion) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
                         <small class="form-text text-muted">Aplica si el artículo se asocia directamente a una cuenta contable o presupuestaria específica.</small>
                     </div>
 
@@ -73,12 +78,24 @@
                         </div>
                     </div>
 
-                    <div class="mt-4">
-                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Artículo</button>
-                        <a href="?route=articulos/index" class="btn btn-default ml-2"><i class="fas fa-times"></i> Cancelar</a>
+                    <div class="mt-4 border-top pt-3 text-right">
+                        <a href="?route=articulos/index" class="btn btn-default"><i class="fas fa-times"></i> Cancelar</a>
+                        <button type="submit" class="btn btn-success ml-2"><i class="fas fa-save"></i> Guardar Artículo</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof $ !== 'undefined' && $.fn.select2) {
+            $('.select2').select2({
+                theme: 'bootstrap4',
+                placeholder: "-- NO ASOCIAR CUENTA ESPECÍFICA --",
+                allowClear: true
+            });
+        }
+    });
+</script>

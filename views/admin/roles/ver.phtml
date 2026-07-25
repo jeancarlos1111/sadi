@@ -1,0 +1,149 @@
+<?php
+/** @var \App\Models\Rol|null $rol */
+/** @var array<string, array<string, \App\Models\Permiso[]>> $todosLosPermisos  Agrupados por módulo > sección */
+/** @var int[] $permisosMarca   IDs de permisos ya asignados a este rol */
+/** @var string $titulo */
+$acciones = ['ver', 'crear', 'editar', 'eliminar'];
+$iconosModulo = [
+    'presupuesto'  => 'fas fa-coins text-warning',
+    'compras'      => 'fas fa-shopping-cart text-primary',
+    'nomina'       => 'fas fa-users text-success',
+    'tesoreria'    => 'fas fa-university text-info',
+    'contabilidad' => 'fas fa-book text-secondary',
+    'inventario'   => 'fas fa-boxes text-orange',
+    'cxp'          => 'fas fa-file-invoice-dollar text-danger',
+    'documental'   => 'fas fa-folder-open text-dark',
+    'reportes'     => 'fas fa-chart-bar text-teal',
+    'admin'        => 'fas fa-cogs text-dark',
+];
+?>
+<div class="card card-outline card-dark">
+  <div class="card-header d-flex align-items-center">
+    <h3 class="card-title">
+      <i class="fas fa-eye mr-2"></i>
+      <?= htmlspecialchars($titulo) ?>
+    </h3>
+    <div class="card-tools ml-auto">
+      <a href="?route=admin/roles" class="btn btn-sm btn-secondary">
+        <i class="fas fa-arrow-left"></i> Volver
+      </a>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div>
+
+      <!-- Datos del Rol -->
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="nombre">Nombre del Rol <span class="text-danger">*</span></label>
+            <input type="text" id="nombre" name="nombre"
+                   class="form-control text-uppercase"
+                   value="<?= htmlspecialchars($rol?->nombre ?? '') ?>"
+                   readonly>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="descripcion">Descripción</label>
+            <input type="text" id="descripcion" name="descripcion"
+                   class="form-control"
+                   value="<?= htmlspecialchars($rol?->descripcion ?? '') ?>"
+                   readonly>
+          </div>
+        </div>
+      </div>
+
+      <!-- Matriz de Permisos -->
+      <div class="card card-secondary card-outline mt-2">
+        <div class="card-header d-flex align-items-center">
+          <h3 class="card-title"><i class="fas fa-key mr-1"></i> Matriz de Permisos</h3>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-bordered table-sm mb-0" id="permisosTable">
+              <thead class="thead-dark">
+                <tr>
+                  <th>Módulo / Sección</th>
+                  <?php foreach ($acciones as $a): ?>
+                  <th class="text-center" width="110">
+                    <span class="text-light">
+                      <?= ucfirst(htmlspecialchars($a)) ?>
+                    </span>
+                  </th>
+                  <?php endforeach; ?>
+                </tr>
+              </thead>
+              <tbody>
+                <?php foreach ($todosLosPermisos as $modulo => $secciones):
+                  $icono = $iconosModulo[$modulo] ?? 'fas fa-circle'; ?>
+
+                <!-- Cabecera de Módulo -->
+                <tr class="table-dark modulo-header" data-modulo="<?= htmlspecialchars($modulo) ?>">
+                  <td colspan="5">
+                    <strong>
+                      <i class="<?= htmlspecialchars($icono) ?> mr-2"></i>
+                      <?= strtoupper(htmlspecialchars($modulo)) ?>
+                    </strong>
+                  </td>
+                </tr>
+
+                <?php foreach ($secciones as $seccion => $permisos):
+                  // Necesitamos todos los permisos de esta sección indexados por acción
+                  $permisosPorAccion = [];
+                  foreach ($permisos as $p) {
+                      $permisosPorAccion[$p->accion] = $p;
+                  }
+                ?>
+                <tr data-modulo-row="<?= htmlspecialchars($modulo) ?>">
+                  <td class="pl-4 text-muted">
+                    <i class="fas fa-angle-right mr-1"></i>
+                    <?= htmlspecialchars(str_replace('_', ' ', ucfirst($seccion))) ?>
+                  </td>
+                  <?php foreach ($acciones as $a):
+                    $p = $permisosPorAccion[$a] ?? null;
+                    $checked = $p && in_array($p->id, $permisosMarca, true);
+                  ?>
+                  <td class="text-center">
+                    <?php if ($p): ?>
+                    <div class="custom-control custom-checkbox d-inline-block">
+                      <input type="checkbox"
+                             class="custom-control-input permiso-check permiso-<?= htmlspecialchars($a) ?> permiso-modulo-<?= htmlspecialchars($modulo) ?>"
+                             id="p_<?= htmlspecialchars((string)$p->id) ?>"
+                             name="permisos[]"
+                             value="<?= htmlspecialchars((string)$p->id) ?>"
+                             <?= $checked ? 'checked' : '' ?> disabled>
+                      <label class="custom-control-label" for="p_<?= htmlspecialchars((string)$p->id) ?>"></label>
+                    </div>
+                    <?php else: ?>
+                    <span class="text-muted">—</span>
+                    <?php endif; ?>
+                  </td>
+                  <?php endforeach; ?>
+                </tr>
+                <?php endforeach; ?>
+                <?php endforeach; ?>
+              </tbody>
+            </table>
+          </div><!-- /table-responsive -->
+        </div>
+      </div><!-- /card permisos -->
+
+      <div class="mt-3">
+        <a href="?route=admin/roles" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver</a>
+        <small class="text-muted ml-3" id="contadorPermisos"></small>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function actualizarContador() {
+  const total = document.querySelectorAll('.permiso-check').length;
+  const sel   = document.querySelectorAll('.permiso-check:checked').length;
+  document.getElementById('contadorPermisos').textContent = sel + ' / ' + total + ' permisos seleccionados';
+}
+actualizarContador();
+</script>

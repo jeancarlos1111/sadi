@@ -25,6 +25,7 @@ class ComprobanteRetencionRepository extends Repository
             SELECT 
                 CR.id_comprobante_retencion, CR.id_factura, CR.tipo_retencion,
                 CR.numero_comprobante, CR.porcentaje, CR.monto_retenido, CR.fecha_emision,
+                CR.id_tipo_retencion,
                 F.numero_factura, F.fecha_factura, F.monto_total,
                 P.compania_proveedor AS proveedor_nombre, P.rif_proveedor AS proveedor_rif
             FROM comprobante_retencion AS CR
@@ -59,6 +60,7 @@ class ComprobanteRetencionRepository extends Repository
                 (float)($row['porcentaje'] ?? 0),
                 (float)($row['monto_retenido'] ?? 0),
                 $row['fecha_emision'] ?? '',
+                $row['id_tipo_retencion'] ? (int)$row['id_tipo_retencion'] : null,
                 (int)$row['id_comprobante_retencion']
             );
             $results[] = [
@@ -86,6 +88,7 @@ class ComprobanteRetencionRepository extends Repository
             (float)$row['porcentaje'],
             (float)$row['monto_retenido'],
             $row['fecha_emision'],
+            $row['id_tipo_retencion'] ? (int)$row['id_tipo_retencion'] : null,
             (int)$row['id_comprobante_retencion']
         );
     }

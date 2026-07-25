@@ -11,18 +11,10 @@
   </div>
   <div class="card-body">
     <?php if (isset($success)): ?>
-      <div class="alert alert-success alert-dismissible">
-        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-        <h5><i class="icon fas fa-check"></i> Éxito</h5>
-        <?= htmlspecialchars($success) ?>
-      </div>
+      <?= render_component('alert', ['type' => 'success', 'message' => $success]) ?>
     <?php endif; ?>
     <?php if (isset($error)): ?>
-      <div class="alert alert-danger alert-dismissible">
-        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-        <h5><i class="icon fas fa-ban"></i> Error</h5>
-        <?= htmlspecialchars($error) ?>
-      </div>
+      <?= render_component('alert', ['type' => 'danger', 'message' => $error]) ?>
     <?php endif; ?>
 
     <div class="mb-3">
@@ -71,16 +63,12 @@
           <td><?= htmlspecialchars($c->referencia_c ?? '—') ?></td>
           <td><?= htmlspecialchars($c->beneficiario_cedula ?? '—') ?></td>
           <td class="text-center text-nowrap">
-            <a href="?route=comprobante_presupuesto/form&id=<?= urlencode((string)$c->id_comprobante) ?>" class="btn btn-sm btn-info" title="Editar">
-              <i class="fas fa-edit"></i>
-            </a>
-            <form method="POST" action="?route=comprobante_presupuesto/eliminar"
-               onsubmit="return confirm('¿Eliminar el comprobante <?= htmlspecialchars($c->numero_c) ?>?');" class="d-inline">
-              <input type="hidden" name="id" value="<?= htmlspecialchars((string)$c->id_comprobante) ?>">
-              <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
-                <i class="fas fa-trash-alt"></i>
-              </button>
-            </form>
+            <?= render_component('table_actions', [
+                'editUrl' => '?route=comprobante_presupuesto/form&id=' . urlencode((string)$c->id_comprobante),
+                'deleteUrl' => '?route=comprobante_presupuesto/eliminar',
+                'deleteId' => $c->id_comprobante,
+                'deleteConfirm' => '¿Eliminar el comprobante ' . htmlspecialchars($c->numero_c) . '?'
+            ]) ?>
           </td>
         </tr>
       <?php endforeach; ?>

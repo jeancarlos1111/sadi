@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Repositories\BancoRepository;
 use App\Repositories\BeneficiarioRepository;
 use App\Repositories\CuentaBancariaRepository;

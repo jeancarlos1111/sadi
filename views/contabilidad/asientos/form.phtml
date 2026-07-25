@@ -1,12 +1,266 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
-
-<?php if (isset($error)): ?>
-    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
-        <?= htmlspecialchars($error) ?>
+<?php
+/**
+ * @var string $titulo
+ * @var array $cuentas
+ */
+?>
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+        <div class="card-tools">
+            <a href="?route=contabilidad/asientos" class="btn btn-sm btn-secondary font-weight-bold">
+                <i class="fas fa-arrow-left"></i> Volver a Comprobantes
+            </a>
+        </div>
     </div>
-<?php else: ?>
-    <p>La vista transaccional para crear o modificar comprobantes de diario y cargar movimientos contables está en desarrollo.</p>
-<?php endif; ?>
-<div>
-    <a href="?route=contabilidad/asientos" style="padding: 10px 20px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 4px;">Volver a Comprobantes</a>
+    
+    <div class="card-body">
+        <?php if (isset($_SESSION['error'])): ?>
+            <?= render_component('alert', ['type' => 'danger', 'message' => $_SESSION['error']]) ?>
+            <?php unset($_SESSION['error']); ?>
+        <?php endif; ?>
+
+        <form action="?route=contabilidad/guardar" method="POST" id="formAsiento">
+            
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="fecha_comprobante">Fecha del Comprobante <span class="text-danger">*</span></label>
+                        <input type="date" name="fecha_comprobante" id="fecha_comprobante" class="form-control" required value="<?= date('Y-m-d') ?>">
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="form-group">
+                        <label for="concepto">Concepto General <span class="text-danger">*</span></label>
+                        <input type="text" name="concepto" id="concepto" class="form-control" required placeholder="Ej: Registro por ajuste manual...">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card card-outline card-secondary mb-4">
+                <div class="card-header">
+                    <h3 class="card-title">Movimientos Contables</h3>
+                    <div class="card-tools">
+                        <button type="button" id="btnAgregarFila" class="btn btn-sm btn-success font-weight-bold">
+                            <i class="fas fa-plus"></i> Agregar Fila
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped table-sm m-0" id="tablaMovimientos">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th style="width: 50%;">Cuenta Contable</th>
+                                    <th style="width: 15%; text-align: center;">Operación</th>
+                                    <th style="width: 25%; text-align: right;">Monto (Bs.)</th>
+                                    <th style="width: 10%; text-align: center;">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyMovimientos">
+                                <!-- Fila inicial -->
+                                <tr class="movimiento-fila">
+                                    <td>
+                                        <select name="cuenta[]" class="form-control form-control-sm select2-cuenta" required>
+                                            <option value="">Seleccione una cuenta</option>
+                                            <?php foreach ($cuentas as $cta): ?>
+                                                <option value="<?= htmlspecialchars((string)$cta->id) ?>">
+                                                    <?= htmlspecialchars($cta->codigoCuenta . ' - ' . $cta->denominacion) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </td>
+                                    <td class="text-center">
+                                        <select name="tipo[]" class="form-control form-control-sm tipo-op" required>
+                                            <option value="D">DEBE</option>
+                                            <option value="H">HABER</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="number" step="0.01" min="0.01" name="monto[]" class="form-control form-control-sm text-right input-monto" required>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <button type="button" class="btn btn-xs btn-outline-danger btn-eliminar-fila" disabled title="Eliminar Fila">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <!-- Segunda fila inicial -->
+                                <tr class="movimiento-fila">
+                                    <td>
+                                        <select name="cuenta[]" class="form-control form-control-sm select2-cuenta" required>
+                                            <option value="">Seleccione una cuenta</option>
+                                            <?php foreach ($cuentas as $cta): ?>
+                                                <option value="<?= htmlspecialchars((string)$cta->id) ?>">
+                                                    <?= htmlspecialchars($cta->codigoCuenta . ' - ' . $cta->denominacion) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </td>
+                                    <td class="text-center">
+                                        <select name="tipo[]" class="form-control form-control-sm tipo-op" required>
+                                            <option value="D">DEBE</option>
+                                            <option value="H" selected>HABER</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="number" step="0.01" min="0.01" name="monto[]" class="form-control form-control-sm text-right input-monto" required>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <button type="button" class="btn btn-xs btn-outline-danger btn-eliminar-fila" disabled title="Eliminar Fila">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot class="bg-light">
+                                <tr>
+                                    <td colspan="2" class="text-right font-weight-bold align-middle">TOTALES:</td>
+                                    <td class="text-right font-weight-bold font-monospace" style="font-size: 1.1rem;">
+                                        <div class="d-flex justify-content-between">
+                                            <span class="text-primary">D: <span id="totalDebe">0.00</span></span>
+                                            <span class="text-danger">H: <span id="totalHaber">0.00</span></span>
+                                        </div>
+                                    </td>
+                                    <td class="text-center align-middle font-weight-bold text-danger" id="mensajeDescuadre">
+                                        <i class="fas fa-exclamation-triangle" title="Descuadrado"></i>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12 text-right">
+                    <button type="submit" id="btnGuardar" class="btn btn-primary font-weight-bold" disabled>
+                        <i class="fas fa-save"></i> Guardar Comprobante Definitivo
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
+
+<!-- Template para nueva fila (Oculto) -->
+<template id="filaTemplate">
+    <tr class="movimiento-fila">
+        <td>
+            <select name="cuenta[]" class="form-control form-control-sm select2-cuenta-nueva" required>
+                <option value="">Seleccione una cuenta</option>
+                <?php foreach ($cuentas as $cta): ?>
+                    <option value="<?= htmlspecialchars((string)$cta->id) ?>">
+                        <?= htmlspecialchars($cta->codigoCuenta . ' - ' . $cta->denominacion) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </td>
+        <td class="text-center">
+            <select name="tipo[]" class="form-control form-control-sm tipo-op" required>
+                <option value="D">DEBE</option>
+                <option value="H">HABER</option>
+            </select>
+        </td>
+        <td>
+            <input type="number" step="0.01" min="0.01" name="monto[]" class="form-control form-control-sm text-right input-monto" required>
+        </td>
+        <td class="text-center align-middle">
+            <button type="button" class="btn btn-xs btn-outline-danger btn-eliminar-fila" title="Eliminar Fila">
+                <i class="fas fa-trash"></i>
+            </button>
+        </td>
+    </tr>
+</template>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar Select2 si está disponible globalmente en el layout
+    if (typeof jQuery !== 'undefined' && typeof jQuery.fn.select2 !== 'undefined') {
+        $('.select2-cuenta').select2({ theme: 'bootstrap4', width: '100%' });
+    }
+    
+    const tbody = document.getElementById('tbodyMovimientos');
+    const btnAgregar = document.getElementById('btnAgregarFila');
+    const template = document.getElementById('filaTemplate');
+    const totalDebeEl = document.getElementById('totalDebe');
+    const totalHaberEl = document.getElementById('totalHaber');
+    const mensajeDescuadre = document.getElementById('mensajeDescuadre');
+    const btnGuardar = document.getElementById('btnGuardar');
+
+    function calcularTotales() {
+        let totalDebe = 0;
+        let totalHaber = 0;
+
+        const filas = document.querySelectorAll('.movimiento-fila');
+        filas.forEach(fila => {
+            const tipo = fila.querySelector('.tipo-op').value;
+            const montoVal = parseFloat(fila.querySelector('.input-monto').value) || 0;
+            
+            if (tipo === 'D') {
+                totalDebe += montoVal;
+            } else {
+                totalHaber += montoVal;
+            }
+        });
+
+        totalDebe = Math.round(totalDebe * 100) / 100;
+        totalHaber = Math.round(totalHaber * 100) / 100;
+
+        totalDebeEl.textContent = totalDebe.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        totalHaberEl.textContent = totalHaber.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+        const botonesEliminar = document.querySelectorAll('.btn-eliminar-fila');
+        if (filas.length <= 2) {
+            botonesEliminar.forEach(btn => btn.disabled = true);
+        } else {
+            botonesEliminar.forEach(btn => btn.disabled = false);
+        }
+
+        if (totalDebe > 0 && totalDebe === totalHaber) {
+            mensajeDescuadre.style.visibility = 'hidden';
+            btnGuardar.disabled = false;
+        } else {
+            mensajeDescuadre.style.visibility = 'visible';
+            btnGuardar.disabled = true;
+        }
+    }
+
+    btnAgregar.addEventListener('click', function() {
+        const clone = template.content.cloneNode(true);
+        tbody.appendChild(clone);
+        
+        if (typeof jQuery !== 'undefined' && typeof jQuery.fn.select2 !== 'undefined') {
+            $(tbody).find('.select2-cuenta-nueva').removeClass('select2-cuenta-nueva').select2({ theme: 'bootstrap4', width: '100%' });
+        }
+        
+        calcularTotales();
+    });
+
+    tbody.addEventListener('input', function(e) {
+        if (e.target.classList.contains('input-monto') || e.target.classList.contains('tipo-op')) {
+            calcularTotales();
+        }
+    });
+
+    if (typeof jQuery !== 'undefined') {
+        $(tbody).on('change', '.tipo-op', function() {
+            calcularTotales();
+        });
+    }
+
+    tbody.addEventListener('click', function(e) {
+        let btn = e.target.closest('.btn-eliminar-fila');
+        if (btn && !btn.disabled) {
+            // Si el select2 está presente, hay que destruirlo antes de eliminar el nodo (buenas prácticas)
+            if (typeof jQuery !== 'undefined' && typeof jQuery.fn.select2 !== 'undefined') {
+                $(btn).closest('tr').find('select').select2('destroy');
+            }
+            btn.closest('tr').remove();
+            calcularTotales();
+        }
+    });
+
+    calcularTotales();
+});
+</script>

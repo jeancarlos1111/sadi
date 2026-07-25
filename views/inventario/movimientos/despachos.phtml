@@ -1,12 +1,87 @@
-<h2><?= htmlspecialchars($titulo) ?></h2>
-
-<?php if (isset($error)): ?>
-    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
-        <?= htmlspecialchars($error) ?>
+<?php
+/** @var string $titulo */
+/** @var array $despachos */
+/** @var string $search */
+/** @var string|null $error */
+/** @var string|null $success */
+?>
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-dolly"></i> <?= htmlspecialchars($titulo) ?></h3>
+        <div class="card-tools">
+            <a href="?route=inventario/nuevoDespacho" class="btn btn-sm btn-success">
+                <i class="fas fa-plus"></i> Nuevo Despacho
+            </a>
+            <a href="?route=inventario/index" class="btn btn-sm btn-default">
+                <i class="fas fa-arrow-left"></i> Volver al Inventario
+            </a>
+        </div>
     </div>
-<?php else: ?>
-    <p>La vista transaccional para despachar insumos desde el Almacén a los departamentos solicitantes está en desarrollo.</p>
-<?php endif; ?>
-<div>
-    <a href="?route=inventario/index" style="padding: 10px 20px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 4px;">Volver al Inventario</a>
+    
+    <div class="card-body">
+        <?php if ($error): ?>
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <?= htmlspecialchars($error) ?>
+            </div>
+        <?php endif; ?>
+        <?php if ($success): ?>
+            <div class="alert alert-success alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <?= htmlspecialchars($success) ?>
+            </div>
+        <?php endif; ?>
+
+        <form method="GET" action="" class="form-inline mb-3">
+            <input type="hidden" name="route" value="inventario/despachos">
+            <div class="input-group w-50">
+                <input type="text" name="search" class="form-control" placeholder="Buscar por Nro., Unidad o Solicitante..." value="<?= htmlspecialchars($search) ?>">
+                <span class="input-group-append">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
+                    <a href="?route=inventario/despachos" class="btn btn-default">Limpiar</a>
+                </span>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped dataTable w-100 text-center">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Nro. Despacho</th>
+                        <th>Fecha</th>
+                        <th>Unidad Solicitante</th>
+                        <th>Retirado Por</th>
+                        <th>Despachador (Almacén)</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($despachos)): ?>
+                        <tr>
+                            <td colspan="7" class="text-center">No hay registros de salidas / despachos.</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($despachos as $d): ?>
+                            <tr>
+                                <td class="font-weight-bold text-primary"><?= htmlspecialchars($d['numero_despacho']) ?></td>
+                                <td><?= date('d/m/Y', strtotime($d['fecha_despacho'])) ?></td>
+                                <td><?= htmlspecialchars($d['unidad_administrativa']) ?></td>
+                                <td><?= htmlspecialchars($d['solicitante']) ?></td>
+                                <td><?= htmlspecialchars($d['usuario_despacha']) ?></td>
+                                <td>
+                                    <span class="badge badge-success"><?= htmlspecialchars($d['estado']) ?></span>
+                                </td>
+                                <td>
+                                    <a href="?route=inventario/imprimirDespacho&id=<?= $d['id_despacho_almacen'] ?>" class="btn btn-sm btn-danger" target="_blank" title="Imprimir PDF">
+                                        <i class="fas fa-file-pdf"></i> Imprimir
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>

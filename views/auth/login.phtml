@@ -8,9 +8,7 @@
       <p class="login-box-msg">Inicie sesión para comenzar</p>
 
       <?php if (isset($error)): ?>
-          <div class="alert alert-danger text-center">
-            <i class="fas fa-exclamation-triangle"></i> <?= htmlspecialchars($error) ?>
-          </div>
+          <?= render_component('alert', ['type' => 'danger', 'message' => $error]) ?>
       <?php endif; ?>
 
       <form action="?route=auth/login" method="post">

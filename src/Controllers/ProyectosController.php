@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Models\IndicadorProyecto;
 use App\Models\Proyecto;
 use App\Repositories\ProyectoRepository;
@@ -27,6 +29,7 @@ class ProyectosController extends HomeController
 
     public function index(): void
     {
+        Gate::authorize('presupuesto.proyectos.ver');
         $search = $_GET['search'] ?? '';
 
         try {
@@ -48,6 +51,8 @@ class ProyectosController extends HomeController
 
     public function form(): void
     {
+        $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'presupuesto.proyectos.editar' : 'presupuesto.proyectos.crear');
         $id = $_GET['id'] ?? null;
         $item = null;
 
@@ -83,6 +88,12 @@ class ProyectosController extends HomeController
 
         try {
             $id   = !empty($_POST['id']) ? (int)$_POST['id'] : null;
+            $datosAntes = null;
+            if ($id) {
+                $modeloAnterior = $this->repo->findById($id);
+                $datosAntes = $modeloAnterior ? $modeloAnterior->toArray() : null;
+            }
+
             $item = new Proyecto(
                 trim($_POST['codigo_proyecto'] ?? ''),
                 trim($_POST['denominacion']    ?? ''),
@@ -129,6 +140,9 @@ class ProyectosController extends HomeController
                 }
             }
 
+            $modeloDespues = $this->repo->findById($proyectoId);
+            $this->audit('proyecto', $id ? 'EDITAR' : 'CREAR', $proyectoId, $datosAntes, $modeloDespues ? $modeloDespues->toArray() : null);
+
             header('Location: ?route=proyectos/index');
             exit;
         } catch (PDOException | \Exception $e) {
@@ -138,10 +152,15 @@ class ProyectosController extends HomeController
 
     public function eliminar(): void
     {
+        Gate::authorize('presupuesto.proyectos.eliminar');
         $id = $_POST['id'] ?? null;
         if ($id) {
             try {
-                $this->repo->delete((int)$id);
+                $id = (int)$id;
+                $modeloAnterior = $this->repo->findById($id);
+                $datosAntes = $modeloAnterior ? $modeloAnterior->toArray() : null;
+                $this->repo->delete($id);
+                $this->audit('proyecto', 'ELIMINAR', $id, $datosAntes, null);
             } catch (PDOException | \Exception $e) {
                 die("Error al eliminar: " . $e->getMessage());
             }

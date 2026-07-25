@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Models\DeduccionCxP;
 use App\Repositories\DeduccionCxPRepository;
 use PDOException;
@@ -19,6 +21,7 @@ class DeduccionesCxPController extends HomeController
 
     public function index(): void
     {
+        Gate::authorize('cxp.deducciones.ver');
         $search = $_GET['search'] ?? '';
         $items = [];
 
@@ -43,6 +46,8 @@ class DeduccionesCxPController extends HomeController
 
     public function form(): void
     {
+        $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'cxp.deducciones.editar' : 'cxp.deducciones.crear');
         $id   = $_GET['id'] ?? null;
         $item = null;
         if ($id) {
@@ -87,6 +92,7 @@ class DeduccionesCxPController extends HomeController
 
     public function eliminar(): void
     {
+        Gate::authorize('cxp.deducciones.eliminar');
         $id = $_POST['id'] ?? null;
         if ($id) {
             try {

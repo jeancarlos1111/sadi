@@ -12,8 +12,8 @@ readonly class Beneficiario
         public string  $cedula,
         public string  $nombres,
         public string  $apellidos,
-        public string  $direccion,
-        public string  $telefono,
+        public ?string  $direccion = null,
+        public ?string  $telefono = null,
         public ?string $email = null,
         public ?int    $idCodigoContable = null,
         ?int           $id = null

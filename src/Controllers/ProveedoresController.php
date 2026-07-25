@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Models\Proveedor;
 use App\Repositories\ProveedorRepository;
 use App\Repositories\TipoOrganizacionRepository;
@@ -22,6 +24,7 @@ class ProveedoresController extends HomeController
 
     public function index(): void
     {
+        Gate::authorize('compras.proveedores.ver');
         $search = $_GET['search'] ?? '';
         $page = (int)($_GET['page'] ?? 1);
         $perPage = 15; // Podría leerse de configuración
@@ -46,6 +49,8 @@ class ProveedoresController extends HomeController
 
     public function form(): void
     {
+        $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'compras.proveedores.editar' : 'compras.proveedores.crear');
         $id = $_GET['id'] ?? null;
         $proveedor = null;
         $error = null;
@@ -86,6 +91,8 @@ class ProveedoresController extends HomeController
                 trim($_POST['telefono'] ?? ''),
                 trim($_POST['nit'] ?? '') !== '' ? trim($_POST['nit']) : null,
                 !empty($_POST['id_codigo_contable']) ? (int)$_POST['id_codigo_contable'] : null,
+                trim($_POST['numero_rnc'] ?? '') !== '' ? trim($_POST['numero_rnc']) : null,
+                trim($_POST['fecha_vencimiento_rnc'] ?? '') !== '' ? trim($_POST['fecha_vencimiento_rnc']) : null,
                 $id
             );
 
@@ -100,6 +107,7 @@ class ProveedoresController extends HomeController
 
     public function eliminar(): void
     {
+        Gate::authorize('compras.proveedores.eliminar');
         $id = $_POST['id'] ?? null;
         if ($id) {
             try {

@@ -1,0 +1,102 @@
+<div class="card card-outline card-success">
+  <div class="card-header">
+    <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+  </div>
+  <div class="card-body">
+    <form method="POST" action="?route=proceso_contratacion/guardar">
+      <input type="hidden" name="id_proceso" value="<?= htmlspecialchars((string)($proceso?->id ?? 0)) ?>">
+      
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label>N° Expediente <span class="text-danger">*</span></label>
+          <input type="text" name="numero_expediente" class="form-control" required value="<?= htmlspecialchars($proceso?->numeroExpediente ?? '') ?>">
+        </div>
+        <div class="col-md-6 mb-3">
+          <label>Modalidad de Contratación <span class="text-danger">*</span></label>
+          <select name="modalidad" id="modalidadSelect" class="form-control" required>
+            <option value="CONSULTA_DE_PRECIOS" <?= ($proceso?->modalidad === 'CONSULTA_DE_PRECIOS') ? 'selected' : '' ?>>Consulta de Precios</option>
+            <option value="CONCURSO_CERRADO" <?= ($proceso?->modalidad === 'CONCURSO_CERRADO') ? 'selected' : '' ?>>Concurso Cerrado</option>
+            <option value="CONCURSO_ABIERTO" <?= ($proceso?->modalidad === 'CONCURSO_ABIERTO') ? 'selected' : '' ?>>Concurso Abierto</option>
+            <option value="CONTRATACION_DIRECTA" <?= ($proceso?->modalidad === 'CONTRATACION_DIRECTA') ? 'selected' : '' ?>>Contratación Directa</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label>Descripción del Objeto de la Contratación <span class="text-danger">*</span></label>
+        <textarea name="descripcion" class="form-control" rows="3" required><?= htmlspecialchars($proceso?->descripcion ?? '') ?></textarea>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label>Monto Estimado (Referencial) Bs <span class="text-danger">*</span></label>
+          <input type="number" step="0.01" min="0" name="monto_estimado" class="form-control" required value="<?= htmlspecialchars((string)($proceso?->montoEstimado ?? '')) ?>">
+        </div>
+        <div class="col-md-4 mb-3">
+          <label>Fecha de Apertura <span class="text-danger">*</span></label>
+          <input type="date" name="fecha_apertura" class="form-control" required value="<?= htmlspecialchars($proceso?->fechaApertura ?? date('Y-m-d')) ?>">
+        </div>
+        <div class="col-md-4 mb-3">
+          <label>Fecha de Cierre (Tope Recepción)</label>
+          <input type="date" name="fecha_cierre" class="form-control" value="<?= htmlspecialchars($proceso?->fechaCierre ?? '') ?>">
+        </div>
+      </div>
+
+      <div class="card bg-light mb-3" id="justificacionDirectaContainer" style="<?= ($proceso?->modalidad === 'CONTRATACION_DIRECTA') ? '' : 'display:none;' ?>">
+        <div class="card-body">
+          <label>Justificación Legal (Obligatorio para Contratación Directa) <span class="text-danger">*</span></label>
+          <p class="text-muted small">Especifique el numeral del Art. 101 de la Ley de Contrataciones Públicas aplicable.</p>
+          <textarea name="justificacion_legal" id="justificacionInput" class="form-control" rows="2"><?= htmlspecialchars($proceso?->justificacionLegal ?? '') ?></textarea>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <div class="custom-control custom-checkbox mt-4">
+            <input type="checkbox" class="custom-control-input" id="crsCheck" name="crs_aplicable" value="1" <?= ($proceso?->crsAplicable) ? 'checked' : '' ?>>
+            <label class="custom-control-label" for="crsCheck">Aplica Compromiso de Responsabilidad Social (CRS)</label>
+          </div>
+        </div>
+        <div class="col-md-8 mb-3" id="numeroCrsContainer" style="<?= ($proceso?->crsAplicable) ? '' : 'display:none;' ?>">
+          <label>Número de Expediente CRS</label>
+          <input type="text" name="numero_crs" id="numeroCrsInput" class="form-control" value="<?= htmlspecialchars($proceso?->numeroCrs ?? '') ?>">
+        </div>
+      </div>
+
+      <div class="text-right mt-3">
+        <a href="?route=proceso_contratacion/index" class="btn btn-secondary mr-2">Cancelar</a>
+        <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Guardar Expediente</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modalidadSelect = document.getElementById('modalidadSelect');
+    const justificacionContainer = document.getElementById('justificacionDirectaContainer');
+    const justificacionInput = document.getElementById('justificacionInput');
+
+    modalidadSelect.addEventListener('change', function() {
+        if (this.value === 'CONTRATACION_DIRECTA') {
+            justificacionContainer.style.display = 'block';
+            justificacionInput.required = true;
+        } else {
+            justificacionContainer.style.display = 'none';
+            justificacionInput.required = false;
+        }
+    });
+
+    const crsCheck = document.getElementById('crsCheck');
+    const numeroCrsContainer = document.getElementById('numeroCrsContainer');
+    
+    crsCheck.addEventListener('change', function() {
+        if (this.checked) {
+            numeroCrsContainer.style.display = 'block';
+        } else {
+            numeroCrsContainer.style.display = 'none';
+            document.getElementById('numeroCrsInput').value = '';
+        }
+    });
+});
+</script>

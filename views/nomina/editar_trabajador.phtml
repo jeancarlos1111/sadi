@@ -7,7 +7,47 @@
 
 <form method="POST" action="?route=nomina/actualizarTrabajador" style="max-width: 600px; border: 1px solid #ced4da; padding: 20px; border-radius: 8px; background: white;">
     
-    <input type="hidden" name="cod_ficha" value="<?= htmlspecialchars($trabajador['cod_ficha']) ?>">
+    <input type="hidden" name="cod_ficha" value="<?= htmlspecialchars((string)$trabajador['cod_ficha']) ?>">
+    <input type="hidden" name="cod_personal" value="<?= htmlspecialchars((string)$trabajador['personal_cod_personal']) ?>">
+
+    <h3 style="border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 0;">1. Datos Personales</h3>
+    
+    <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+        <div style="flex: 1;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">RIF:</label>
+            <input type="text" name="rif" value="<?= htmlspecialchars($trabajador['rif'] ?? '') ?>" placeholder="V-12345678-9" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+        <div style="flex: 1;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Teléfono:</label>
+            <input type="text" name="telefono" value="<?= htmlspecialchars($trabajador['telefono'] ?? '') ?>" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+        <div style="flex: 1;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Correo:</label>
+            <input type="email" name="correo" value="<?= htmlspecialchars($trabajador['correo'] ?? '') ?>" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 15px; margin-bottom: 25px;">
+        <div style="flex: 2;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Dirección:</label>
+            <input type="text" name="direccion" value="<?= htmlspecialchars($trabajador['direccion'] ?? '') ?>" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+        <div style="flex: 1;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Estado Civil:</label>
+            <select name="estado_civil" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                <option value="SOLTERO" <?= ($trabajador['estado_civil'] ?? '') === 'SOLTERO' ? 'selected' : '' ?>>SOLTERO(A)</option>
+                <option value="CASADO" <?= ($trabajador['estado_civil'] ?? '') === 'CASADO' ? 'selected' : '' ?>>CASADO(A)</option>
+                <option value="DIVORCIADO" <?= ($trabajador['estado_civil'] ?? '') === 'DIVORCIADO' ? 'selected' : '' ?>>DIVORCIADO(A)</option>
+                <option value="VIUDO" <?= ($trabajador['estado_civil'] ?? '') === 'VIUDO' ? 'selected' : '' ?>>VIUDO(A)</option>
+            </select>
+        </div>
+        <div style="flex: 1;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Cargas Fam.:</label>
+            <input type="number" name="cargas_familiares" value="<?= htmlspecialchars((string)($trabajador['cargas_familiares'] ?? '0')) ?>" min="0" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+    </div>
+
+    <h3 style="border-bottom: 1px solid #eee; padding-bottom: 5px;">2. Ficha Salarial y Cargo</h3>
 
     <div style="margin-bottom: 15px;">
         <label style="display: block; font-weight: bold; margin-bottom: 5px;">Cargo Actual:</label>
@@ -31,9 +71,46 @@
         </select>
     </div>
 
-    <div style="margin-bottom: 20px;">
-        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Sueldo Básico Modificado (Bs):</label>
-        <input type="number" step="0.01" min="1" name="sueldo_basico" required value="<?= htmlspecialchars($trabajador['sueldo_basico']) ?>" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; color: green;">
+    <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+        <div style="flex: 1;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Sueldo Básico Modificado (Bs):</label>
+            <input type="number" step="0.01" min="1" name="sueldo_basico" required value="<?= htmlspecialchars((string)$trabajador['sueldo_basico']) ?>" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; color: green;">
+        </div>
+        <div style="flex: 1;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">% Retención AR-I (ISLR):</label>
+            <input type="number" step="0.01" min="0" max="100" name="porcentaje_islr" required value="<?= htmlspecialchars((string)($trabajador['porcentaje_islr'] ?? '0.00')) ?>" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; color: #d9534f;">
+        </div>
+    </div>
+
+    <h3 style="border-bottom: 1px solid #eee; padding-bottom: 5px;">3. Datos Bancarios y Relación</h3>
+    
+    <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+        <div style="flex: 1;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Tipo de Relación:</label>
+            <select name="tipo_relacion_laboral" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                <option value="FIJO" <?= ($trabajador['tipo_relacion_laboral'] ?? '') === 'FIJO' ? 'selected' : '' ?>>Fijo</option>
+                <option value="CONTRATADO" <?= ($trabajador['tipo_relacion_laboral'] ?? '') === 'CONTRATADO' ? 'selected' : '' ?>>Contratado</option>
+                <option value="OBRERO" <?= ($trabajador['tipo_relacion_laboral'] ?? '') === 'OBRERO' ? 'selected' : '' ?>>Obrero</option>
+            </select>
+        </div>
+        <div style="flex: 1;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Banco:</label>
+            <input type="text" name="banco" value="<?= htmlspecialchars($trabajador['banco'] ?? '') ?>" placeholder="Ej: Banco de Venezuela" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+        <div style="flex: 2;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Número de Cuenta (20 dígitos):</label>
+            <input type="text" name="numero_cuenta" maxlength="20" value="<?= htmlspecialchars($trabajador['numero_cuenta'] ?? '') ?>" placeholder="0102..." style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+        <div style="flex: 1;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Tipo de Cuenta:</label>
+            <select name="tipo_cuenta" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                <option value="CORRIENTE" <?= ($trabajador['tipo_cuenta'] ?? '') === 'CORRIENTE' ? 'selected' : '' ?>>Corriente</option>
+                <option value="AHORRO" <?= ($trabajador['tipo_cuenta'] ?? '') === 'AHORRO' ? 'selected' : '' ?>>Ahorro</option>
+            </select>
+        </div>
     </div>
 
     <div style="text-align: right; margin-top: 30px; border-top: 1px solid #eee; padding-top: 15px;">

@@ -1,0 +1,273 @@
+<?php declare(strict_types=1); ?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= htmlspecialchars($e->getMessage() ?? 'Error 500') ?></title>
+    <style>
+        :root {
+            --bg-color: #f3f4f6;
+            --text-color: #1f2937;
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
+            --accent-color: #ef4444;
+            --trace-bg: #f9fafb;
+            --trace-active: #fee2e2;
+            --trace-active-border: #ef4444;
+            --code-bg: #1e1e1e;
+            --code-text: #d4d4d4;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #111827;
+                --text-color: #f9fafb;
+                --card-bg: #1f2937;
+                --border-color: #374151;
+                --accent-color: #f87171;
+                --trace-bg: #111827;
+                --trace-active: #374151;
+                --trace-active-border: #f87171;
+                --code-bg: #0d1117;
+                --code-text: #c9d1d9;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 2rem;
+            flex-shrink: 0;
+        }
+
+        .exception-class {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+
+        .exception-message {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--accent-color);
+            word-break: break-word;
+        }
+
+        .layout {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 350px;
+            background-color: var(--trace-bg);
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .frame {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .frame:hover {
+            background-color: rgba(107, 114, 128, 0.1);
+        }
+
+        .frame.active {
+            background-color: var(--trace-active);
+            border-left: 4px solid var(--trace-active-border);
+        }
+
+        .frame-file {
+            font-size: 0.875rem;
+            font-weight: 600;
+            word-break: break-all;
+            margin-bottom: 0.25rem;
+        }
+
+        .frame-method {
+            font-size: 0.75rem;
+            color: #6b7280;
+            font-family: ui-monospace, monospace;
+            word-break: break-all;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            background-color: var(--bg-color);
+        }
+
+        .code-block {
+            background-color: var(--code-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .code-header {
+            background-color: rgba(0,0,0,0.2);
+            padding: 0.75rem 1rem;
+            color: #9ca3af;
+            font-size: 0.875rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .code-line {
+            display: flex;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .code-line.highlight {
+            background-color: rgba(239, 68, 68, 0.15);
+            border-left: 3px solid var(--accent-color);
+        }
+
+        .line-number {
+            width: 40px;
+            padding-right: 10px;
+            text-align: right;
+            color: #6b7280;
+            user-select: none;
+            background: rgba(0,0,0,0.1);
+        }
+
+        .line-content {
+            padding-left: 1rem;
+            white-space: pre-wrap;
+            color: var(--code-text);
+        }
+        
+        /* PHP Syntax Highlighting Colors */
+        .php-keyword { color: #569cd6; }
+        .php-string { color: #ce9178; }
+        .php-variable { color: #9cdcfe; }
+        .php-function { color: #dcdcaa; }
+        .php-comment { color: #6a9955; font-style: italic; }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="exception-class"><?= htmlspecialchars(get_class($e)) ?></div>
+    <div class="exception-message"><?= htmlspecialchars($e->getMessage()) ?></div>
+</header>
+
+<div class="layout">
+    <div class="sidebar">
+        <?php
+        $trace = $e->getTrace();
+        // Insert main exception file as the first frame
+        array_unshift($trace, [
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'function' => 'Main Exception',
+            'class' => get_class($e)
+        ]);
+        
+        foreach ($trace as $index => $frame):
+            $file = $frame['file'] ?? '[internal function]';
+            $line = $frame['line'] ?? '';
+            $shortFile = str_replace(dirname(__DIR__, 2), '', $file);
+            
+            $method = '';
+            if (isset($frame['class'])) {
+                $method .= $frame['class'] . ($frame['type'] ?? '::');
+            }
+            $method .= $frame['function'] ?? '';
+        ?>
+        <div class="frame <?= $index === 0 ? 'active' : '' ?>" onclick="showFrame(<?= $index ?>)">
+            <div class="frame-file"><?= htmlspecialchars($shortFile) ?><?= $line ? ':' . $line : '' ?></div>
+            <div class="frame-method"><?= htmlspecialchars($method) ?></div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+
+    <div class="main-content">
+        <?php
+        foreach ($trace as $index => $frame):
+            if (!isset($frame['file']) || !file_exists($frame['file'])) continue;
+            
+            $file = $frame['file'];
+            $targetLine = $frame['line'] ?? 0;
+            
+            // Read some lines around the error
+            $lines = [];
+            if ($targetLine > 0 && is_readable($file)) {
+                $fileContent = file($file);
+                $start = max(0, $targetLine - 10);
+                $end = min(count($fileContent), $targetLine + 10);
+                
+                for ($i = $start; $i < $end; $i++) {
+                    $lines[$i + 1] = $fileContent[$i];
+                }
+            }
+        ?>
+        <div id="frame-content-<?= $index ?>" class="code-block" style="<?= $index !== 0 ? 'display: none;' : '' ?>">
+            <div class="code-header">
+                <span><?= htmlspecialchars($file) ?></span>
+                <span>Line <?= $targetLine ?></span>
+            </div>
+            <div class="code-body">
+                <?php foreach ($lines as $lineNum => $lineContent): ?>
+                <div class="code-line <?= $lineNum === $targetLine ? 'highlight' : '' ?>">
+                    <div class="line-number"><?= $lineNum ?></div>
+                    <div class="line-content"><?= htmlspecialchars($lineContent) ?></div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+</div>
+
+<script>
+    function showFrame(index) {
+        // Update sidebar active state
+        document.querySelectorAll('.frame').forEach(el => el.classList.remove('active'));
+        const frames = document.querySelectorAll('.frame');
+        if (frames[index]) {
+            frames[index].classList.add('active');
+        }
+
+        // Show/hide main content blocks
+        document.querySelectorAll('.code-block').forEach(el => el.style.display = 'none');
+        const content = document.getElementById('frame-content-' + index);
+        if (content) {
+            content.style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>

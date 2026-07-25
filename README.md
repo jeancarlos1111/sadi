@@ -8,155 +8,25 @@
 
 **SADI** es un sistema de gestión administrativa y financiera para organismos del sector público. Cubre los procesos de nómina de personal, contabilidad, presupuesto, compras y almacén, bancos, y cuentas por pagar, todo integrado bajo una única interfaz web.
 
-El sistema es una reescritura desde cero de SIGAFS, conservando la fidelidad funcional del sistema original pero adoptando estándares modernos de PHP (PSR-1, PSR-4, PSR-12), arquitectura MVC estricta con separación de capas, y una base de datos que apunta a **PostgreSQL** en producción con soporte de desarrollo rápido sobre **SQLite**.
+El sistema es una reescritura desde cero de SIGAFS, conservando la fidelidad funcional del sistema original pero adoptando estándares modernos de PHP (PSR-1, PSR-4, PSR-12), arquitectura MVC estricta con separación de capas, y una base de datos soportada en **PostgreSQL**.
 
 ---
 
-## ⚙️ Requisitos del Sistema
+## ⚙️ Requisitos Previos
 
-### Servidor
-
-| Requisito        | Versión mínima        |
-|------------------|-----------------------|
-| PHP              | **8.4** o superior    |
-| Servidor web     | Apache 2.4 / Nginx    |
-| Base de datos    | PostgreSQL 12+         |
-| Extensiones PHP  | `pdo`, `pdo_pgsql`, `pdo_sqlite`, `mbstring` |
-
-### Desarrollo local
-
-| Herramienta        | Descripción                                 |
-|--------------------|---------------------------------------------|
-| PHP 8.4+ (CLI)     | Para ejecutar el CLI y herramientas         |
-| Podman / Docker    | Orquestación de servicios locales (BD, Web) |
-| Composer           | Gestión de dependencias PHP                 |
-| php-cs-fixer       | Corrección de estilo PSR-12 (dev)           |
+| Herramienta        | Versión mínima        | Descripción                                 |
+|--------------------|-----------------------|---------------------------------------------|
+| PHP / CLI          | **8.4** o superior    | Para ejecutar el CLI y servidor web         |
+| Base de datos      | PostgreSQL 12+         | Motor de base de datos relacional           |
+| Extensiones PHP    | `pdo`, `pdo_pgsql`, `mbstring` | Extensiones requeridas para el funcionamiento|
+| Podman / Docker    | Recomendado           | Para orquestación de servicios locales      |
+| Composer           | Última versión        | Gestión de dependencias PHP                 |
 
 ---
 
-## 🗂️ Estructura del Proyecto
+## 🚀 Instalación y Despliegue Local
 
-```
-sadi/
-├── public/
-│   └── index.php              # Punto de entrada único / Router automático
-├── src/
-│   ├── Controllers/           # Lógica de negocio y flujo de pantallas
-│   ├── Models/                # Entidades / DTOs del dominio
-│   ├── Repositories/          # Acceso a datos (extienden Repository base)
-│   ├── Services/              # Servicios reutilizables (PDF, fórmulas, etc.)
-│   ├── Libs/                  # Librerías de terceros (fpdf.php, etc.)
-│   ├── Core/                  # Núcleo del framework (autoloader, etc.)
-│   └── Database/              # Clase base Repository + gestión de conexión PDO
-├── views/
-│   ├── layouts/
-│   │   └── main.phtml         # Layout principal de la aplicación
-│   └── [modulo]/              # Vistas de cada módulo (archivos .phtml)
-├── database/
-│   ├── schema.sql             # Schema completo (compatible SQLite / PostgreSQL)
-│   ├── sadi.sqlite            # Base de datos de desarrollo
-│   └── seed.php               # Script de datos iniciales
-├── .agents/
-│   └── workflows/
-│       └── reglas_proyecto.md # Convenciones y reglas del proyecto (para IA/equipo)
-├── composer.json
-└── .php-cs-fixer.dist.php     # Configuración de estilo de código
-```
-
-### Router automático
-
-El router convierte `?route=nombre_modulo/accion` en una llamada directa al controlador:
-
-- `?route=apertura_cuentas/index` → `AperturaCuentasController::index()`
-- `?route=comprobante_presupuesto/guardar` → `ComprobantePresupuestoController::guardar()`
-
-**No existe un archivo de rutas explícito** — el mapeo es 100% por convención de nombres.
-
----
-
-## 📦 Módulos Disponibles
-
-### 👥 Personal y Nómina
-
-| Módulo | Descripción |
-|--------|-------------|
-| **Nómina** | Generación de nóminas con motor de fórmulas dinámicas |
-| **Conceptos de Nómina** | Configuración de asignaciones y deducciones |
-| **Retenciones** | Gestión de retenciones ISLR y similares |
-| **Beneficiarios** | Registro de beneficiarios de pagos |
-
-### 🏦 Operaciones Bancarias
-
-| Módulo | Descripción |
-|--------|-------------|
-| **Bancos** | Registro de operaciones bancarias |
-| **Cuentas Bancarias** | Gestión de cuentas de la institución |
-| **Cheques** | Emisión y control de cheques |
-| **Caja** | Control de ingresos y egresos de caja chica |
-| **Conversiones** | Convertidor de divisas |
-
-### 📒 Contabilidad
-
-| Módulo | Descripción |
-|--------|-------------|
-| **Plan Único de Cuentas (PUC)** | Gestión del catálogo contable |
-| **Apertura de Cuentas** | Proceso de apertura de cuentas presupuestarias |
-| **Mayor Analítico** | Reporte de movimientos contables por cuenta (PDF) |
-| **Documental** | Registro de documentos contables (comprobantes) |
-
-### 💰 Presupuesto
-
-| Módulo | Descripción |
-|--------|-------------|
-| **Presupuesto de Gasto** | Administración del presupuesto de gasto institucional |
-| **Presupuesto de Ingreso** | Administración del presupuesto de ingreso |
-| **Comprobante de Presupuesto** | Registro de comprobantes de gasto / créditos adicionales / traspasos |
-| **Disponibilidad Presupuestaria** | Consulta de saldo disponible por cuenta |
-| **Ajustes / Reformulación** | Registro de ajustes a la reformulación presupuestaria |
-| **Períodos de Presupuesto** | Gestión del cierre y apertura de períodos |
-| **Tipos de Operación de Presupuesto** | Catálogo de tipos de movimiento presupuestario |
-| **Proyectos** | Catálogo de proyectos presupuestarios |
-| **Acciones Centralizadas** | Catálogo de acciones centralizadas |
-| **Estructura Presupuestaria** | Gestión de la estructura de clasificación presupuestaria |
-
-### 🛒 Compras y Almacén
-
-| Módulo | Descripción |
-|--------|-------------|
-| **Órdenes de Compra** | Generación y seguimiento de órdenes de compra |
-| **Órdenes de Servicio** | Gestión de órdenes de servicio |
-| **Requisiciones de Bienes** | Solicitudes de bienes internos |
-| **Requisiciones de Servicios** | Solicitudes de servicios internos |
-| **Inventario** | Control de inventario y existencias |
-| **Artículos** | Catálogo de bienes y materiales |
-| **Proveedores** | Registro y gestión de proveedores |
-| **Tipos de Artículos** | Clasificación de artículos |
-| **Unidades de Medida** | Catálogo de unidades de medida |
-
-### 💳 Cuentas por Pagar
-
-| Módulo | Descripción |
-|--------|-------------|
-| **Cuentas por Pagar** | Gestión de compromisos de pago pendientes |
-| **Documentos por Pagar** | Registro de documentos origen del compromiso |
-| **Solicitudes de Pago** | Generación de órdenes de pago |
-| **Deducciones CxP** | Aplicación de deducciones a documentos por pagar |
-| **Reportes CxP** | Reportes de cuentas por pagar (PDF) |
-
-### 🔧 Administración / Configuración
-
-| Módulo | Descripción |
-|--------|-------------|
-| **Administrador** | Panel de administración del sistema |
-| **Unidades Administrativas** | Catálogo de unidades organizativas |
-| **Servicios / Tipos de Servicios** | Catálogo de servicios |
-| **Tipo de Documentos** | Clasificación de tipos de documentos |
-| **Tipos de Operaciones Bancarias** | Catálogo de operaciones del módulo bancario |
-| **Reportes Generales** | Reportes transversales del sistema |
-
----
-
-## 🚀 Cómo Desarrollar en el Proyecto
+El proyecto cuenta con una configuración completa en contenedores para levantar el ecosistema completo (`PostgreSQL`, `PHP-FPM`, `Nginx`) de forma fácil.
 
 ### 1. Clonar e instalar dependencias
 
@@ -166,115 +36,168 @@ cd sadi
 composer install
 ```
 
-### 2. Preparar la base de datos de desarrollo
+### 2. Iniciar los contenedores (Recomendado)
 
-El proyecto utiliza PostgreSQL. Asegúrate de tener el motor corriendo (puedes usar Podman/Docker con `compose.yaml`) y luego usa el CLI integrado para inicializar la estructura y los catálogos maestros:
+Asegúrate de tener instalado `podman-compose` o `docker-compose` y ejecuta en la raíz del proyecto:
+
+```bash
+podman compose up --build -d
+```
+Esto levantará el servidor web en el puerto `8000` y la base de datos en el puerto `5433`.
+
+### 3. Preparar la base de datos
+
+Usa el CLI integrado de SADI para inicializar la estructura y los catálogos maestros:
 
 ```bash
 php cli/sadi db:migrate
 php cli/sadi db:seed
 ```
 
-### 3. Iniciar el servidor de desarrollo
+### 4. Accesos Rápidos
+- **Aplicación Web:** Abre en tu navegador [http://localhost:8000](http://localhost:8000)
+- **Base de Datos directa:** Usa un cliente SQL apuntando a `127.0.0.1` en el puerto `5433` (User: `sadi`, BD: `sadi_db`, Pass: `sadi`).
 
-Te recomendamos levantar el proyecto usando Podman o Docker. Así tendrás Nginx, PHP-FPM y PostgreSQL configurados con un solo comando:
+---
 
-```bash
-podman compose up --build -d
+## 🔐 Acceso al Sistema y Permisos (RBAC)
+
+El sistema cuenta con Control de Acceso Basado en Roles (RBAC). Al ejecutar los comandos de migración y los *seeders* (`db:seed`), se configuran automáticamente:
+
+- **180 permisos** granulares agrupados por módulo.
+- **23 roles** predefinidos (Director, Coordinador, Analista por módulo, etc.).
+
+### Credenciales Principales
+- **Usuario de Acceso Total (Root):** `ADMINISTRADOR`
+- **Contraseña:** `Admin2026!`
+
+### Seguridad de Contraseñas (Bcrypt + Pepper)
+Todas las contraseñas están protegidas utilizando **Bcrypt** puro. Para agregar una capa de seguridad criptográfica adicional contra ataques de fuerza bruta o diccionarios en caso de filtración de la base de datos, el sistema implementa un *pepper* (sal estática) que se añade automáticamente antes del hashing.
+
+Para configurar esta llave, define la variable `PASSWORD_SALT` en tu archivo `.env`:
+```env
+PASSWORD_SALT=tu_llave_secreta_aqui
 ```
 
-Acceder en el navegador: [http://localhost:8000](http://localhost:8000)
+> ⚠️ **¡ADVERTENCIA CRÍTICA PARA PRODUCCIÓN!**
+> Si cambias el valor de la variable `PASSWORD_SALT` en el futuro, **TODAS** las contraseñas antiguas que se hayan guardado usando el salt anterior dejarán de funcionar de manera irreversible. Asegúrate de establecer un valor fuerte desde el principio y **mantenerlo fijo y respaldado** una vez que el sistema esté en producción.
 
-### 4. Convenciones de código
+### Datos Falsos de Prueba (Faker)
+Si deseas poblar toda la base de datos con información ficticia (Proveedores, Proyectos, Presupuestos, Usuarios, etc.) para realizar pruebas en desarrollo, puedes ejecutar el **MockDatabaseSeeder**. 
 
-El proyecto sigue **PSR-1 / PSR-4 / PSR-12** de forma estricta:
-
-| Regla | Detalle |
-|-------|---------|
-| `declare(strict_types=1)` | Obligatorio en **todos** los archivos PHP |
-| Tipado explícito | Parámetros y tipos de retorno siempre declarados |
-| Namespace | `App\Controllers`, `App\Models`, `App\Repositories`, `App\Services` |
-| Clases | PascalCase |
-| Métodos | camelCase |
-| Tablas / columnas BD | snake_case |
-| Rutas URL | `?route=nombre_modulo/accion` (snake_case) |
-
-Verificar estilo de código:
-
+Para limpiar la base de datos y levantarla desde cero con todos los datos falsos y los catálogos requeridos, ejecuta el siguiente comando:
 ```bash
-vendor/bin/php-cs-fixer fix --dry-run --diff
+php cli/sadi db:migrate --fresh --seed --class=MockDatabaseSeeder
+```
+*(Nota: Este comando generará usuarios aleatorios con roles aleatorios. La contraseña base para todos los usuarios generados por Faker es `Test2026!`)*
+
+---
+
+## 📦 Módulos Disponibles
+
+### 👥 Personal y Nómina
+- **Nómina:** Generación de nóminas con motor de fórmulas dinámicas
+- **Conceptos de Nómina:** Configuración de asignaciones y deducciones
+- **Retenciones:** Gestión de retenciones ISLR y similares
+- **Beneficiarios:** Registro de beneficiarios de pagos
+
+### 🏦 Operaciones Bancarias
+- **Bancos:** Registro de operaciones bancarias
+- **Cuentas Bancarias:** Gestión de cuentas de la institución
+- **Cheques & Caja:** Emisión de cheques y control de caja chica
+- **Conversiones:** Convertidor de divisas
+
+### 📒 Contabilidad
+- **Plan Único de Cuentas (PUC):** Gestión del catálogo contable
+- **Mayor Analítico:** Reporte de movimientos contables por cuenta (PDF)
+- **Documental & Apertura:** Registro de documentos y apertura de cuentas
+
+### 💰 Presupuesto
+- **Presupuesto (Gasto/Ingreso):** Administración del presupuesto institucional
+- **Comprobantes:** Registro de comprobantes de gasto / créditos / traspasos
+- **Disponibilidad:** Consulta de saldo disponible por cuenta
+- **Catálogos:** Proyectos, Acciones Centralizadas, Estructura Presupuestaria
+
+### 🛒 Compras y Almacén
+- **Órdenes & Requisiciones:** Seguimiento de compras y servicios internos
+- **Inventario:** Control de inventario y existencias
+- **Catálogos:** Artículos, Proveedores, Unidades de Medida
+
+### 💳 Cuentas por Pagar
+- **Cuentas por Pagar:** Gestión de compromisos de pago pendientes
+- **Solicitudes de Pago:** Generación de órdenes de pago y deducciones
+
+### 🔧 Administración
+- **Administrador:** Panel central para gestionar usuarios y matriz de roles/permisos.
+
+---
+
+## 🛠️ Guía de Desarrollo
+
+### Estructura del Proyecto
+
+```
+sadi/
+├── public/
+│   └── index.php              # Punto de entrada único / Router automático
+├── src/
+│   ├── Controllers/           # Lógica de negocio y flujo de pantallas
+│   ├── Models/                # Entidades / DTOs del dominio (Inmutables)
+│   ├── Repositories/          # Acceso a datos nativo con PDO
+│   ├── Services/              # Servicios reutilizables (Auth, PDF, etc.)
+│   └── Core/                  # Núcleo del framework y contenedor
+├── views/
+│   └── [modulo]/              # Vistas de cada módulo (.phtml)
+├── database/
+│   └── migrations/            # Migraciones SQL del sistema
+├── cli/
+│   └── sadi                   # Herramienta de línea de comandos CLI
+└── docs/                      # Guías y tutoriales de arquitectura
+```
+
+### Router Automático
+
+El router convierte la variable GET `route` en una llamada directa al controlador de forma automática. **No existe un archivo de rutas explícito**:
+- `?route=apertura_cuentas/index` → `AperturaCuentasController::index()`
+
+### Convenciones de Código (PSR)
+
+El proyecto sigue estrictamente **PSR-1, PSR-4 y PSR-12**:
+- `declare(strict_types=1)` es obligatorio en todos los archivos.
+- Tipado explícito para argumentos y retornos.
+- Variables en `camelCase`, Base de datos en `snake_case`.
+
+**Formateo de código:**
+```bash
 vendor/bin/php-cs-fixer fix
 ```
 
-Verificar sintaxis PHP:
+### Añadir un Nuevo Módulo
 
-```bash
-php -l src/Controllers/MiController.php
-```
-
-### 5. Añadir un nuevo módulo
-
-Para garantizar la estandarización de DTOs y Arquitectura Limpia, **utiliza el CLI de SADI** para generar módulos. No crees los archivos manualmente.
+Para garantizar la estandarización, **utiliza siempre el CLI de SADI** para generar módulos completos (CRUD, Modelo, Repositorio, Controlador, Migración):
 
 ```bash
 php cli/sadi make:section MiEntidad
 ```
+> 📖 **[Ver Manual Técnico del CLI](docs/MANUAL_TECNICO_CLI.md)**
 
-Esto generará automáticamente:
+### Arquitectura y Guías de Lectura Obligatoria
 
-1. `src/Models/MiEntidad.php` (Readonly DTO)
-2. `src/Repositories/MiEntidadRepository.php`
-3. `src/Controllers/MiEntidadController.php`
-4. `database/migrations/mi_entidads.sql`
-5. Vistas CRUD en `views/mi_entidad/`
+El proyecto utiliza un **patrón Repositorio** estricto con DTOs inmutables y consultas SQL puras preparadas, evitando ORMs. Es imprescindible leer estas guías:
 
-**[Ver Manual Técnico del CLI](docs/MANUAL_TECNICO_CLI.md)** para más detalles y comandos avanzados.
-
-El módulo estará disponible automáticamente en:
-`http://localhost:8000/?route=mi_entidad/index`
-
-### 6. Arquitectura y Guías de Desarrollo
-
-El proyecto utiliza un patrón Repositorio estricto con DTOs inmutables, evitando ORMs activos. Para entender cómo interactuar con la base de datos, revisa estas guías obligatorias:
-
-- 📖 **[Tutorial: Creación de un Módulo CRUD desde Cero](docs/TUTORIAL_CREAR_MODULO.md)**: Guía paso a paso desde el scaffolding hasta los tests de Pest.
-- 📖 **[Manejo de Relaciones entre Modelos](docs/MANEJO_DE_RELACIONES.md)**: Cómo hacer JOINs y evitar el problema N+1 sin usar Lazy Loading.
-- 📖 **[Operaciones CRUD y Queries SQL](docs/CRUD_Y_QUERIES.md)**: Uso obligatorio de PDO Prepared Statements y convenciones de Inserción, Soft Deletes y Búsquedas.
-
-### 7. Generar reportes PDF
-
-Se usa **FPDF** a través de `App\Services\PdfService`. Recordar limpiar output buffers antes de enviar:
-
-```php
-while (ob_get_level() > 0) {
-    ob_end_clean();
-}
-$pdf->Output('I', 'reporte.pdf');
-exit;
-```
+1. 📖 **[Tutorial: Creación de un Módulo CRUD desde Cero](docs/TUTORIAL_CREAR_MODULO.md)**
+2. 📖 **[Manejo de Relaciones entre Modelos (N+1)](docs/MANEJO_DE_RELACIONES.md)**
+3. 📖 **[Operaciones CRUD y Queries SQL Seguras](docs/CRUD_Y_QUERIES.md)**
 
 ---
 
-## 🗄️ Base de Datos
+## 🗄️ Entornos y Base de Datos
 
-| Entorno      | Motor       | Archivo / Conexión            |
-|--------------|-------------|-------------------------------|
-| Desarrollo   | PostgreSQL  | `.env` y Podman/Docker        |
-| Producción   | PostgreSQL  | Variable de entorno / config  |
-| Pruebas      | PostgreSQL  | `.env.testing` (`sadi_test`)  |
-
-El esquema maestro se encuentra en `database/schema.sql` y las migraciones generadas por el CLI van a `database/migrations/`.
-
----
-
-## 📜 Estándares y Herramientas
-
-| Herramienta | Propósito |
-|-------------|-----------|
-| [Composer](https://getcomposer.org/) | Gestión de dependencias y autoloading PSR-4 |
-| [PHP CS Fixer](https://github.com/PHP-CS-Fixer/PHP-CS-Fixer) | Formateo automático PSR-12 |
-| [FPDF](http://www.fpdf.org/) | Generación de reportes en PDF |
-| PostgreSQL | Motor de Base de Datos para Pruebas, Desarrollo y Producción |
+| Entorno      | Configuración                 | Notas                          |
+|--------------|-------------------------------|--------------------------------|
+| Desarrollo   | `.env` y Podman/Docker        | Levanta en automático con up -d|
+| Producción   | Variables de entorno OS       | Usar Nginx y PHP-FPM nativos   |
+| Pruebas      | `.env.testing` (`sadi_test`)  | Usada para testing automatizado|
 
 ---
 
@@ -283,28 +206,6 @@ El esquema maestro se encuentra en `database/schema.sql` y las migraciones gener
 | Fase | Módulos | Estado |
 |------|---------|--------|
 | Fase 1–4 | Personal, Nómina, Contabilidad, Almacén, Bancos | ✅ Completado |
-| Fase 5.1 | Catálogos de Presupuesto (Proyectos, Acciones Centralizadas, PUC) | ✅ Completado |
-| Fase 5.2 | Procesos Presupuestarios (Apertura, CG/CA/TR, Períodos, Disponibilidad, Reformulación) | ✅ Completado |
-| Fase 5.3 | Reportes — Mayor Analítico PDF | ✅ Completado |
-
----
-
-## 🐳 Despliegue Local (Docker / Podman)
-
-El proyecto cuenta con una configuración completa en contenedores para levantar el ecosistema (`PostgreSQL`, `PHP-FPM`, `Nginx`) con un solo comando de forma nativa.
-
-### Cómo ejecutarlo
-1. Asegúrate de tener instalado `podman-compose` o `docker-compose`.
-2. Ejecuta en la raíz del proyecto:
-   ```bash
-   podman compose up --build -d
-   ```
-
-### Accesos Rápidos
-- **Aplicación Web:** Abre en tu navegador [http://localhost:8000](http://localhost:8000)
-- **Base de Datos directa:** Usa un cliente SQL apuntando a `127.0.0.1` en el puerto `5433` (User: `sadi`, BD: `sadi_db`, Pass: `sadi`).
-
-### Credenciales de Prueba
-El sistema incluye datos iniciales generados en el esquema para que inicies sesión rápidamente:
-- **Usuario:** `ADMINISTRADOR`
-- **Contraseña:** `123456`
+| Fase 5.1 | Catálogos de Presupuesto (Proyectos, Acc. Cent., PUC) | ✅ Completado |
+| Fase 5.2 | Procesos Presupuestarios (Comprobantes, Períodos, Reformulación) | ✅ Completado |
+| Fase 5.3 | Seguridad y Autenticación RBAC | ✅ Completado |

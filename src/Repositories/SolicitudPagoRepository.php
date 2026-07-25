@@ -6,6 +6,7 @@ namespace App\Repositories;
 
 use App\Database\Repository;
 use App\Models\SolicitudPago;
+use App\Services\IntegracionContableService;
 use Exception;
 use PDO;
 
@@ -134,24 +135,23 @@ class SolicitudPagoRepository extends Repository
 
             // 1. Registrar movimiento bancario vinculado
             $stmtMov = $db->prepare("
-                INSERT INTO movimiento_bancario 
-                (id_cta_bancaria, id_tipo_operacion_bancaria, monto, fecha, referencia, id_solicitud_pago)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO movimiento_bancario
+                (id_cta_bancaria, id_tipo_operacion_bancaria, monto, fecha, referencia)
+                VALUES (?, ?, ?, ?, ?)
             ");
             $stmtMov->execute([
                 $pagoData['id_cta_bancaria'],
                 $pagoData['id_tipo_operacion_bancaria'],
                 $req->montoPagar,
                 $pagoData['fecha_pago'] ?? date('Y-m-d'),
-                $pagoData['referencia'],
-                $idReq,
+                $pagoData['referencia_pago'] ?? ''
             ]);
 
             // 2. Marcar Solicitud como Contabilizada (Pagada)
             $db->prepare("UPDATE solicitud_pago SET contabilizada = true WHERE id_solicitud_pago = ?")->execute([$idReq]);
 
             // 3. Afectar Presupuesto (PAGADO) e Iniciar Contabilización
-            $asientoDetalles = [];
+            $partidasPago = [];
             if ($req->idDocumento) {
                 $stmtDoc = $db->prepare("SELECT id_orden_de_compra, id_orden_de_servicio FROM documento WHERE id_documento = ?");
                 $stmtDoc->execute([$req->idDocumento]);
@@ -162,7 +162,6 @@ class SolicitudPagoRepository extends Repository
                     $esOs = (bool)$docRow['id_orden_de_servicio'];
 
                     if ($idOrden) {
-                        $montoPagadoPorPartida = [];
                         if (!$esOs) {
                             $stmtC = $db->prepare("
                                 SELECT a.id_codigo_plan_unico, SUM(aodc.costo_aodc * aodc.cantidad_aodc) as subtotal_base, aodc.aplica_iva 
@@ -184,8 +183,6 @@ class SolicitudPagoRepository extends Repository
                         $args = $esOs ? [$idOrden, $idOrden] : [$idOrden];
                         $stmtC->execute($args);
 
-                        $convRepo = new VinculacionPucContableRepository();
-
                         foreach ($stmtC->fetchAll(PDO::FETCH_ASSOC) as $row) {
                             $idPartida = $row['id_codigo_plan_unico'];
                             $base = (float)$row['subtotal_base'];
@@ -196,32 +193,26 @@ class SolicitudPagoRepository extends Repository
                             $db->prepare("UPDATE presupuesto_gastos SET monto_pagado = monto_pagado + ? WHERE id_codigo_plan_unico = ?")
                                ->execute([$montoFase, $idPartida]);
 
-                            // Prepara Asiento
-                            $idCuentaDebe = $convRepo->getCuentaContableId($idPartida, 'PAGADO');
-                            $idCuentaHaber = $convRepo->getCuentaContableId($idPartida, 'PAGADO_BANCO');
-
-                            $asientoDetalles[] = ['id_cuenta_contable' => $idCuentaDebe ?: 3, 'tipo' => 'D', 'monto' => $montoFase];
-                            $asientoDetalles[] = ['id_cuenta_contable' => $idCuentaHaber ?: 2, 'tipo' => 'H', 'monto' => $montoFase];
+                            $partidasPago[] = [
+                                'id_codigo_plan_unico' => $idPartida,
+                                'monto' => $montoFase
+                            ];
                         }
                     }
                 }
             }
 
             // 4. Integrar con Contabilidad
-            if (empty($asientoDetalles)) {
-                $asientoDetalles = [
-                   ['id_cuenta_contable' => 3, 'tipo' => 'D', 'monto' => $req->montoPagar],
-                   ['id_cuenta_contable' => 2, 'tipo' => 'H', 'monto' => $req->montoPagar],
-                ];
+            if (!empty($partidasPago)) {
+                $integracionService = new IntegracionContableService();
+                $integracionService->registrarPago(
+                    $idReq,
+                    $pagoData['fecha_pago'] ?? date('Y-m-d'),
+                    "Pago Solicitud #{$idReq} - Ref: " . ($pagoData['referencia_pago'] ?? ''),
+                    $partidasPago,
+                    (int)$pagoData['id_cta_bancaria']
+                );
             }
-
-            $repoContable = new AsientoContableRepository();
-            $repoContable->registrarDesdeTransaccion(
-                $pagoData['fecha_pago'] ?? date('Y-m-d'),
-                "Pago Solicitud #{$idReq} - Ref: {$pagoData['referencia']}",
-                $asientoDetalles,
-                $idReq
-            );
 
             $db->commit();
 

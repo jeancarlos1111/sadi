@@ -6,6 +6,7 @@ namespace App\Repositories;
 
 use App\Database\Repository;
 use App\Models\DocumentoPorPagar;
+use App\Services\IntegracionContableService;
 use Exception;
 use PDO;
 
@@ -199,6 +200,7 @@ class DocumentoRepository extends Repository
             $idOc = !empty($data['id_orden_de_compra']) ? (int)$data['id_orden_de_compra'] : null;
             $idOs = !empty($data['id_orden_de_servicio']) ? (int)$data['id_orden_de_servicio'] : null;
             $idProveedor = (int)$data['id_proveedor'];
+            $partidasCausado = [];
 
             if (!$idOc && !$idOs) {
                 throw new Exception("Debe proveer un ID de Orden de Compra o de Servicio.");
@@ -352,8 +354,54 @@ class DocumentoRepository extends Repository
                     }
                     if ($idPartida) {
                         $stmtPptoCausado->execute([$montoRenglon, $idPartida]);
+                        $partidasCausado[] = [
+                            'id_codigo_plan_unico' => $idPartida,
+                            'monto' => $montoRenglon
+                        ];
                     }
                 }
+            } elseif ($idOc) {
+                $stmtDetOc = $db->prepare("
+                    SELECT a.id_codigo_plan_unico, (aodc.cantidad_aodc * aodc.costo_aodc) as monto_renglon, aodc.aplica_iva
+                    FROM articulo_orden_de_compra aodc
+                    JOIN articulo a ON aodc.id_articulo = a.id_articulo
+                    WHERE aodc.id_orden_de_compra = ?
+                ");
+                $stmtDetOc->execute([$idOc]);
+
+                $stmtGetIvaOc = $db->prepare("SELECT porcentaje_iva_odc FROM orden_de_compra WHERE id_orden_de_compra = ?");
+                $stmtGetIvaOc->execute([$idOc]);
+                $pctIvaOc = (float)$stmtGetIvaOc->fetchColumn();
+
+                $stmtPptoCausado = $db->prepare("UPDATE presupuesto_gastos SET monto_causado = monto_causado + ? WHERE id_codigo_plan_unico = ?");
+                
+                $rows = $stmtDetOc->fetchAll(PDO::FETCH_ASSOC);
+                error_log("DEBUG: Found " . count($rows) . " details for OC $idOc");
+                foreach ($rows as $item) {
+                    $idPartida = $item['id_codigo_plan_unico'];
+                    $montoRenglon = (float)$item['monto_renglon'];
+                    if ($item['aplica_iva']) {
+                        $montoRenglon += ($montoRenglon * ($pctIvaOc / 100));
+                    }
+                    if ($idPartida) {
+                        $stmtPptoCausado->execute([$montoRenglon, $idPartida]);
+                        $partidasCausado[] = [
+                            'id_codigo_plan_unico' => $idPartida,
+                            'monto' => $montoRenglon
+                        ];
+                    }
+                }
+            }
+
+            // INTEGRACIÓN CONTABLE AUTOMÁTICA DEL CAUSADO
+            if (!empty($partidasCausado)) {
+                $integracionService = new IntegracionContableService();
+                $integracionService->registrarCausadoFactura(
+                    (int)$idDocumentoFactura,
+                    $data['fecha_emision_d'],
+                    "Causado Factura N° " . $data['nro_documento_d'],
+                    $partidasCausado
+                );
             }
 
             $db->commit();

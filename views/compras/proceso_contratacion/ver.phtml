@@ -1,0 +1,188 @@
+<div class="card card-outline card-info">
+  <div class="card-header">
+    <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+    <div class="card-tools">
+        <?php if ($proceso->estatus === 'ABIERTO'): ?>
+            <a href="?route=proceso_contratacion/form&id=<?= $proceso->id ?>" class="btn btn-sm btn-warning">
+                <i class="fas fa-edit"></i> Editar
+            </a>
+        <?php endif; ?>
+        <a href="?route=proceso_contratacion/index" class="btn btn-sm btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+  </div>
+  <div class="card-body">
+    
+    <?php if (isset($_GET['success'])): ?>
+      <div class="alert alert-success alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <h5><i class="icon fas fa-check"></i> Éxito</h5>
+        <?= htmlspecialchars($_GET['success']) ?>
+      </div>
+    <?php endif; ?>
+    <?php if (isset($_GET['error'])): ?>
+      <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <h5><i class="icon fas fa-ban"></i> Error</h5>
+        <?= htmlspecialchars($_GET['error']) ?>
+      </div>
+    <?php endif; ?>
+
+    <div class="row">
+        <div class="col-md-6">
+            <table class="table table-sm table-bordered">
+                <tr><th class="bg-light w-25">N° Expediente</th><td><?= htmlspecialchars($proceso->numeroExpediente) ?></td></tr>
+                <tr><th class="bg-light">Modalidad</th><td><?= htmlspecialchars(str_replace('_', ' ', $proceso->modalidad)) ?></td></tr>
+                <tr><th class="bg-light">Estatus</th><td>
+                    <span class="badge badge-<?= $proceso->estatus === 'ABIERTO' ? 'info' : ($proceso->estatus === 'EVALUACION' ? 'warning' : 'success') ?>">
+                        <?= htmlspecialchars($proceso->estatus) ?>
+                    </span>
+                </td></tr>
+                <tr><th class="bg-light">Monto Ref.</th><td>Bs <?= number_format($proceso->montoEstimado, 2, ',', '.') ?></td></tr>
+            </table>
+        </div>
+        <div class="col-md-6">
+            <table class="table table-sm table-bordered">
+                <tr><th class="bg-light w-25">F. Apertura</th><td><?= htmlspecialchars($proceso->fechaApertura) ?></td></tr>
+                <tr><th class="bg-light">F. Cierre</th><td><?= htmlspecialchars($proceso->fechaCierre ?? 'N/A') ?></td></tr>
+                <tr><th class="bg-light">Aplica CRS</th><td><?= $proceso->crsAplicable ? 'SÍ (' . htmlspecialchars($proceso->numeroCrs ?? '') . ')' : 'NO' ?></td></tr>
+                <tr><th class="bg-light">Orden Compra</th><td><?= $proceso->idOrdenCompra ? 'Vinculada N° ' . $proceso->idOrdenCompra : 'Pendiente' ?></td></tr>
+            </table>
+        </div>
+    </div>
+    
+    <div class="card bg-light mt-2 mb-4">
+        <div class="card-body py-2">
+            <strong>Descripción:</strong> <?= htmlspecialchars($proceso->descripcion) ?>
+        </div>
+    </div>
+
+    <!-- SECCIÓN DE OFERTAS -->
+    <h4><i class="fas fa-file-invoice-dollar text-secondary"></i> Ofertas Recibidas</h4>
+    <hr>
+    
+    <?php if ($proceso->estatus === 'ABIERTO' || $proceso->estatus === 'EVALUACION'): ?>
+        <button type="button" class="btn btn-sm btn-primary mb-3" data-toggle="modal" data-target="#modalOferta">
+            <i class="fas fa-plus"></i> Registrar Oferta de Proveedor
+        </button>
+    <?php endif; ?>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-sm">
+            <thead class="bg-secondary text-white">
+                <tr>
+                    <th>Proveedor</th>
+                    <th>RNC</th>
+                    <th>Vencimiento RNC</th>
+                    <th>F. Presentación</th>
+                    <th class="text-right">Monto Ofertado</th>
+                    <th class="text-center">Cumple Téc.</th>
+                    <th class="text-center">Acción / Adjudicar</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (empty($ofertas)): ?>
+                    <tr><td colspan="7" class="text-center">No se han registrado ofertas.</td></tr>
+                <?php else: ?>
+                    <?php foreach ($ofertas as $o): ?>
+                        <?php 
+                        $ent = $o['entity']; 
+                        $rncVencido = empty($o['fecha_vencimiento_rnc']) || strtotime($o['fecha_vencimiento_rnc']) < time();
+                        ?>
+                        <tr class="<?= $ent->esGanador ? 'table-success' : '' ?>">
+                            <td>
+                                <?= htmlspecialchars($o['razon_social']) ?>
+                                <?php if ($ent->esGanador): ?>
+                                    <span class="badge badge-success ml-1"><i class="fas fa-trophy"></i> GANADOR</span>
+                                <?php endif; ?>
+                            </td>
+                            <td><?= htmlspecialchars($o['rnc']) ?></td>
+                            <td>
+                                <?php if ($rncVencido): ?>
+                                    <span class="text-danger font-weight-bold" title="RNC Vencido"><i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($o['fecha_vencimiento_rnc']) ?></span>
+                                <?php else: ?>
+                                    <span class="text-success"><?= htmlspecialchars($o['fecha_vencimiento_rnc']) ?></span>
+                                <?php endif; ?>
+                            </td>
+                            <td><?= htmlspecialchars($ent->fechaPresentacion) ?></td>
+                            <td class="text-right font-weight-bold">Bs <?= number_format($ent->montoOfertado, 2, ',', '.') ?></td>
+                            <td class="text-center">
+                                <?= $ent->cumpleTecnicamente ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>' ?>
+                            </td>
+                            <td class="text-center">
+                                <?php if (!$ent->esGanador && $proceso->estatus !== 'ADJUDICADO' && $ent->cumpleTecnicamente): ?>
+                                    <form method="POST" action="?route=proceso_contratacion/adjudicar" class="d-inline" onsubmit="return confirm('¿Confirma adjudicar a este proveedor? Esta acción es irreversible y cerrará el proceso.');">
+                                        <input type="hidden" name="id_proceso" value="<?= $proceso->id ?>">
+                                        <input type="hidden" name="id_oferta" value="<?= $ent->id ?>">
+                                        <button type="submit" class="btn btn-sm btn-success" <?= $rncVencido ? 'disabled title="Proveedor con RNC Vencido"' : '' ?>>
+                                            <i class="fas fa-gavel"></i> Adjudicar
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal para Registrar Oferta -->
+<?php if ($proceso->estatus === 'ABIERTO' || $proceso->estatus === 'EVALUACION'): ?>
+<div class="modal fade" id="modalOferta" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <form method="POST" action="?route=proceso_contratacion/agregarOferta">
+      <input type="hidden" name="id_proceso" value="<?= $proceso->id ?>">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title"><i class="fas fa-plus"></i> Registrar Oferta de Proveedor</h5>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Proveedor <span class="text-danger">*</span></label>
+                <select name="id_proveedor" class="form-control select2" required style="width: 100%;">
+                    <option value="">Seleccione un proveedor...</option>
+                    <?php foreach ($proveedores as $prov): ?>
+                        <option value="<?= htmlspecialchars((string)$prov->id) ?>">
+                            <?= htmlspecialchars($prov->rif . ' - ' . $prov->razonSocial) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label>Monto Ofertado (Bs) <span class="text-danger">*</span></label>
+                    <input type="number" step="0.01" min="1" name="monto_ofertado" class="form-control" required>
+                </div>
+                <div class="col-md-6 form-group">
+                    <label>Fecha de Presentación <span class="text-danger">*</span></label>
+                    <input type="date" name="fecha_presentacion" class="form-control" value="<?= date('Y-m-d') ?>" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" id="cumpleTecnicamente" name="cumple_tecnicamente" value="1" checked>
+                    <label class="custom-control-label" for="cumpleTecnicamente">Cumple Técnicamente con el pliego de condiciones</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Observaciones</label>
+                <textarea name="observaciones" class="form-control" rows="2"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Oferta</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<?php endif; ?>

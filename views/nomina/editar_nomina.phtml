@@ -1,0 +1,39 @@
+<?php
+/**
+ * @var string $titulo
+ * @var \App\Models\Nomina $nomina
+ */
+?>
+<div class="card card-outline card-warning">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="?route=nomina/actualizarNomina">
+            <input type="hidden" name="cod_nomina" value="<?= htmlspecialchars((string)$nomina->id) ?>">
+
+            <div class="form-group">
+                <label for="denom">Denominación de la Nómina: <span class="text-danger">*</span></label>
+                <input type="text" name="denom" id="denom" required class="form-control"
+                    value="<?= htmlspecialchars($nomina->nombre) ?>">
+            </div>
+            <div class="form-group">
+                <label for="tipo_periodo">Tipo de Período: <span class="text-danger">*</span></label>
+                <select name="tipo_periodo" id="tipo_periodo" required class="form-control">
+                    <option value="Mensual" <?= $nomina->tipoPeriodo === 'Mensual' ? 'selected' : '' ?>>Mensual</option>
+                    <option value="Quincenal" <?= $nomina->tipoPeriodo === 'Quincenal' ? 'selected' : '' ?>>Quincenal</option>
+                    <option value="Semanal" <?= $nomina->tipoPeriodo === 'Semanal' ? 'selected' : '' ?>>Semanal</option>
+                    <option value="Especial" <?= $nomina->tipoPeriodo === 'Especial' ? 'selected' : '' ?>>Especial (Utilidades / Fin de Año)</option>
+                </select>
+            </div>
+            <div class="text-right mt-3">
+                <a href="?route=nomina/tiposNomina" class="btn btn-default mr-2">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-warning">
+                    <i class="fas fa-save"></i> Actualizar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

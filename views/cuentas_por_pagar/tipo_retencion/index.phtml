@@ -1,0 +1,91 @@
+<div class="card card-outline card-primary">
+  <div class="card-header">
+    <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+    <div class="card-tools">
+      <a href="?route=tipo_retencion/form" class="btn btn-sm btn-success">
+        <i class="fas fa-plus"></i> Nuevo Tipo
+      </a>
+    </div>
+  </div>
+  <div class="card-body">
+    
+    <div class="callout callout-info mb-4">
+      <h5><i class="fas fa-info-circle"></i> Configuración de Retenciones</h5>
+      <p>Esta tabla permite configurar los porcentajes y sustraendos aplicables según la normativa vigente del SENIAT para ISLR e IVA. Al emitir un comprobante, los cálculos tomarán automáticamente los valores definidos aquí.</p>
+    </div>
+
+    <?php if (isset($_GET['success'])): ?>
+      <div class="alert alert-success alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <h5><i class="icon fas fa-check"></i> Éxito</h5>
+        <?= htmlspecialchars($_GET['success']) ?>
+      </div>
+    <?php endif; ?>
+
+    <form method="GET" action="index.php" class="mb-3">
+        <input type="hidden" name="route" value="tipo_retencion/index">
+        <div class="input-group" style="max-width: 400px;">
+            <input type="text" name="search" class="form-control" placeholder="Buscar por código o denominación..." value="<?= htmlspecialchars($search) ?>">
+            <div class="input-group-append">
+                <button type="submit" class="btn btn-outline-secondary"><i class="fas fa-search"></i> Buscar</button>
+            </div>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped w-100 table-sm">
+        <thead class="bg-primary text-white">
+          <tr>
+            <th>Código</th>
+            <th>Denominación</th>
+            <th class="text-right">Porcentaje (%)</th>
+            <th class="text-right">Sustraendo (Bs)</th>
+            <th>Aplica A</th>
+            <th class="text-center">Estado</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php if (empty($tipos)): ?>
+            <tr><td colspan="7" class="text-center">No hay tipos de retención registrados.</td></tr>
+          <?php else: ?>
+            <?php foreach ($tipos as $t): ?>
+              <tr class="<?= !$t->activo ? 'text-muted bg-light' : '' ?>">
+                <td class="font-weight-bold"><?= htmlspecialchars($t->codigo) ?></td>
+                <td><?= htmlspecialchars($t->denominacion) ?></td>
+                <td class="text-right font-weight-bold text-success"><?= number_format($t->porcentaje, 2, ',', '.') ?>%</td>
+                <td class="text-right"><?= number_format($t->sustraendo, 2, ',', '.') ?></td>
+                <td>
+                    <span class="badge badge-info"><?= htmlspecialchars($t->aplicaA) ?></span>
+                </td>
+                <td class="text-center">
+                    <?php if ($t->activo): ?>
+                        <span class="badge badge-success">Activo</span>
+                    <?php else: ?>
+                        <span class="badge badge-danger">Inactivo</span>
+                    <?php endif; ?>
+                </td>
+                <td class="text-center">
+                    <div class="btn-group">
+                        <a href="?route=tipo_retencion/form&id=<?= $t->id ?>" class="btn btn-sm btn-warning" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <form method="POST" action="?route=tipo_retencion/toggle" class="d-inline" onsubmit="return confirm('¿Cambiar estado de esta configuración?');">
+                            <input type="hidden" name="id" value="<?= $t->id ?>">
+                            <?php if ($t->activo): ?>
+                                <button type="submit" class="btn btn-sm btn-danger" title="Desactivar"><i class="fas fa-power-off"></i></button>
+                            <?php else: ?>
+                                <button type="submit" class="btn btn-sm btn-success" title="Activar"><i class="fas fa-power-off"></i></button>
+                            <?php endif; ?>
+                        </form>
+                    </div>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>

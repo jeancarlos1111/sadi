@@ -15,14 +15,29 @@ class CargoRepository extends Repository
         return 'cargo';
     }
 
-    public function all(): array
+    public function countAll(): int
     {
         $db = $this->getPdo();
-        $stmt = $db->query("SELECT * FROM cargo WHERE eliminado = false ORDER BY nombre ASC");
+        $stmt = $db->query("SELECT COUNT(*) FROM cargo WHERE eliminado = false");
+        return (int)$stmt->fetchColumn();
+    }
+
+    public function all(?int $limit = null, ?int $offset = null): array
+    {
+        $db = $this->getPdo();
+        $sql = "SELECT * FROM cargo WHERE eliminado = false ORDER BY nombre ASC";
+        if ($limit !== null) {
+            $sql .= " LIMIT " . (int)$limit;
+        }
+        if ($offset !== null) {
+            $sql .= " OFFSET " . (int)$offset;
+        }
+
+        $stmt = $db->query($sql);
 
         $results = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-            $results[] = new Cargo((int)$row['cod_cargo'], $row['nombre']);
+            $results[] = clone (new Cargo((int)$row['cod_cargo'], $row['nombre']));
         }
 
         return $results;

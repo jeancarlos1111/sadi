@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Models\TipoOperacionPresupuesto;
 use App\Repositories\TipoOperacionPresupuestoRepository;
 use PDOException;
@@ -19,6 +21,7 @@ class TiposOperacionPresupuestoController extends HomeController
 
     public function index(): void
     {
+        Gate::authorize('presupuesto.operaciones.ver');
         $search = $_GET['search'] ?? '';
 
         try {
@@ -40,6 +43,8 @@ class TiposOperacionPresupuestoController extends HomeController
 
     public function form(): void
     {
+        $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'presupuesto.operaciones.editar' : 'presupuesto.operaciones.crear');
         $id = $_GET['id'] ?? null;
         $item = null;
 
@@ -66,12 +71,22 @@ class TiposOperacionPresupuestoController extends HomeController
 
         try {
             $id   = !empty($_POST['id']) ? (int)$_POST['id'] : null;
+            $datosAntes = null;
+            if ($id) {
+                $modeloAnterior = $this->repo->findById($id);
+                $datosAntes = $modeloAnterior ? $modeloAnterior->toArray() : null;
+            }
+
             $item = new TipoOperacionPresupuesto(
                 trim($_POST['denominacion'] ?? ''),
                 trim($_POST['descripcion']  ?? '') ?: null,
                 $id
             );
-            $this->repo->save($item);
+            $nuevoId = $this->repo->save($item);
+
+            $modeloDespues = $this->repo->findById($nuevoId);
+            $this->audit('tipo_operacion_presupuesto', $id ? 'EDITAR' : 'CREAR', $nuevoId, $datosAntes, $modeloDespues ? $modeloDespues->toArray() : null);
+
             header('Location: ?route=tipos_operacion_presupuesto/index');
             exit;
         } catch (PDOException | \Exception $e) {
@@ -81,10 +96,15 @@ class TiposOperacionPresupuestoController extends HomeController
 
     public function eliminar(): void
     {
+        Gate::authorize('presupuesto.operaciones.eliminar');
         $id = $_POST['id'] ?? null;
         if ($id) {
             try {
-                $this->repo->delete((int)$id);
+                $id = (int)$id;
+                $modeloAnterior = $this->repo->findById($id);
+                $datosAntes = $modeloAnterior ? $modeloAnterior->toArray() : null;
+                $this->repo->delete($id);
+                $this->audit('tipo_operacion_presupuesto', 'ELIMINAR', $id, $datosAntes, null);
             } catch (PDOException | \Exception $e) {
                 die("Error: " . $e->getMessage());
             }

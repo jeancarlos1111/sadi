@@ -43,17 +43,11 @@
         <td class="text-center text-muted"><?= htmlspecialchars((string)$ep->id) ?></td>
         <td class="align-middle"><?= htmlspecialchars($ep->descripcion) ?></td>
         <td class="text-center align-middle">
-          <a href="?route=estruc_presupuestaria/form&id=<?= htmlspecialchars((string)$ep->id) ?>" class="btn btn-sm btn-info" title="Editar">
-            <i class="fas fa-edit"></i>
-          </a>
-          <form method="POST" action="?route=estruc_presupuestaria/eliminar"
-             onsubmit="return confirm('¿Eliminar esta estructura? Las partidas asociadas quedarán sin estructura.');"
-             class="d-inline">
-            <input type="hidden" name="id" value="<?= htmlspecialchars((string)$ep->id) ?>">
-            <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
-              <i class="fas fa-trash"></i>
-            </button>
-          </form>
+          <?= render_component('table_actions', [
+                'editUrl' => '?route=estruc_presupuestaria/form&id=' . $ep->id,
+                'deleteUrl' => '?route=estruc_presupuestaria/eliminar',
+                'deleteId' => $ep->id
+            ]) ?>
         </td>
       </tr>
       <?php endforeach; ?>

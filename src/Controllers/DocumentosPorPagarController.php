@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Repositories\DocumentoRepository;
 use Exception;
 use PDOException;
@@ -18,6 +20,7 @@ class DocumentosPorPagarController extends HomeController
     }
     public function index(): void
     {
+        Gate::authorize('cxp.documentos.ver');
         $search = $_GET['search'] ?? '';
         $mes = $_GET['mes'] ?? '';
 
@@ -42,6 +45,8 @@ class DocumentosPorPagarController extends HomeController
 
     public function form(): void
     {
+        $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'cxp.documentos.editar' : 'cxp.documentos.crear');
         try {
             $ordenesCompra = $this->repo->getOrdenesPendientesFacturar();
             $ordenesServicio = $this->repo->getOrdenesServicioPendientesFacturar();
@@ -110,6 +115,7 @@ class DocumentosPorPagarController extends HomeController
 
     public function eliminar(): void
     {
+        Gate::authorize('cxp.documentos.eliminar');
         $id = $_POST['id'] ?? null;
         if ($id) {
             try {

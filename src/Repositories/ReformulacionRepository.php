@@ -67,7 +67,7 @@ class ReformulacionRepository extends Repository
             ON CONFLICT(id_estruc_presupuestaria, id_codigo_plan_unico) DO UPDATE SET
                 monto_reformulado = excluded.monto_reformulado,
                 observacion       = excluded.observacion,
-                fecha_registro    = date('now'),
+                fecha_registro    = CURRENT_DATE,
                 eliminado = false
         ");
         $stmt->execute([

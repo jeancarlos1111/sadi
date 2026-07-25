@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Repositories\ArticuloRepository;
 use App\Repositories\OrdenCompraRepository;
 use App\Repositories\ProveedorRepository;
@@ -26,6 +28,7 @@ class OrdenesCompraController extends BaseController
     }
     public function index(): void
     {
+        Gate::authorize('compras.ordenes_compra.ver');
         $search = $_GET['search'] ?? '';
         $mes = $_GET['mes'] ?? '';
 
@@ -50,6 +53,8 @@ class OrdenesCompraController extends BaseController
 
     public function form(): void
     {
+        $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'compras.ordenes_compra.editar' : 'compras.ordenes_compra.crear');
         $proveedores = $this->proveedorRepo->all();
         $articulos = $this->articuloRepo->all();
 
@@ -143,6 +148,7 @@ class OrdenesCompraController extends BaseController
 
     public function eliminar(): void
     {
+        Gate::authorize('compras.ordenes_compra.eliminar');
         $id = $_POST['id'] ?? null;
         if ($id) {
             try {

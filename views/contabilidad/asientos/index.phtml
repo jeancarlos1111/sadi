@@ -12,11 +12,7 @@
     </div>
     <div class="card-body">
         <?php if (isset($error)): ?>
-            <div class="alert alert-danger alert-dismissible">
-                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                <h5><i class="icon fas fa-ban"></i> Error</h5>
-                <?= htmlspecialchars($error) ?>
-            </div>
+            <?= render_component('alert', ['type' => 'danger', 'message' => $error]) ?>
         <?php endif; ?>
 
         <form method="GET" action="" class="form-inline mb-4">
@@ -61,6 +57,12 @@
                                     <a href="?route=documental/comprobanteDiario&id=<?= urlencode((string)$asiento->id) ?>" target="_blank" class="btn btn-sm btn-outline-success font-weight-bold" title="Ver PDF">
                                         <i class="fas fa-file-pdf"></i> PDF
                                     </a>
+                                    <form method="POST" action="?route=contabilidad/anular" class="d-inline" onsubmit="return confirm('¿Está seguro de anular este comprobante de diario? (Solo aplicará reversión lógica si la norma lo permite)');">
+                                        <input type="hidden" name="id" value="<?= htmlspecialchars((string)$asiento->id) ?>">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger font-weight-bold" title="Anular Asiento">
+                                            <i class="fas fa-ban"></i> Anular
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

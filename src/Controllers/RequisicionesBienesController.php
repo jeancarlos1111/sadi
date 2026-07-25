@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Models\RequisicionBienes;
 use App\Repositories\ArticuloRepository;
 use App\Repositories\RequisicionBienesRepository;
@@ -22,6 +24,7 @@ class RequisicionesBienesController extends HomeController
 
     public function index(): void
     {
+        Gate::authorize('compras.requisiciones_bienes.ver');
         $search = $_GET['search'] ?? '';
         $mes = $_GET['mes'] ?? '';
 
@@ -46,6 +49,8 @@ class RequisicionesBienesController extends HomeController
 
     public function form(): void
     {
+        $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'compras.requisiciones_bienes.editar' : 'compras.requisiciones_bienes.crear');
         $id = $_GET['id'] ?? null;
         $requisicion = null;
         $error = null;
@@ -110,6 +115,7 @@ class RequisicionesBienesController extends HomeController
 
     public function eliminar(): void
     {
+        Gate::authorize('compras.requisiciones_bienes.eliminar');
         $id = $_POST['id'] ?? null;
         if ($id) {
             try {

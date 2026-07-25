@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Models\TipoServicio;
 use App\Repositories\TipoServicioRepository;
 use PDOException;
@@ -19,6 +21,7 @@ class TiposServiciosController extends HomeController
 
     public function index(): void
     {
+        Gate::authorize('inventario.tipos_servicios.ver');
         $search = $_GET['search'] ?? '';
 
         try {
@@ -40,6 +43,8 @@ class TiposServiciosController extends HomeController
 
     public function form(): void
     {
+        $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'inventario.tipos_servicios.editar' : 'inventario.tipos_servicios.crear');
         $id = $_GET['id'] ?? null;
         $item = null;
 
@@ -81,6 +86,7 @@ class TiposServiciosController extends HomeController
 
     public function eliminar(): void
     {
+        Gate::authorize('inventario.tipos_servicios.eliminar');
         $id = $_POST['id'] ?? null;
         if ($id) {
             try {

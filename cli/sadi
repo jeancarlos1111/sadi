@@ -16,6 +16,8 @@ use Sadi\Commands\DbMigrateCommand;
 use Sadi\Commands\DbSeedCommand;
 use Sadi\Commands\RouteListCommand;
 use Sadi\Commands\TestCommand;
+use Sadi\Commands\MakeFactoryCommand;
+use Sadi\Commands\MakeSeederCommand;
 
 $app = new Application();
 
@@ -25,6 +27,8 @@ $app
     ->register(new MakeModelCommand())
     ->register(new MakeRepositoryCommand())
     ->register(new MakeTestCommand())
+    ->register(new MakeFactoryCommand())
+    ->register(new MakeSeederCommand())
     ->register(new DbMigrateCommand())
     ->register(new DbSeedCommand())
     ->register(new RouteListCommand())

@@ -1,0 +1,120 @@
+<?php
+/** @var string $titulo */
+/** @var array $unidades */
+/** @var array $insumos */
+/** @var string|null $error */
+?>
+<div class="card card-outline card-success">
+    <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-plus"></i> <?= htmlspecialchars($titulo) ?></h3>
+    </div>
+    
+    <div class="card-body">
+        <?php if ($error): ?>
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <?= htmlspecialchars($error) ?>
+            </div>
+        <?php endif; ?>
+
+        <form method="POST" action="?route=inventario/guardarDespacho" onsubmit="return confirm('¿Está seguro de procesar este despacho? Esto descontará los insumos del inventario de forma inmediata.');">
+            
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label>Unidad Administrativa Solicitante <span class="text-danger">*</span></label>
+                    <select name="id_unidad_administrativa" class="form-control" required>
+                        <option value="">-- Seleccionar Unidad --</option>
+                        <?php foreach ($unidades as $ua): ?>
+                            <option value="<?= htmlspecialchars((string)$ua->id) ?>">
+                                <?= htmlspecialchars($ua->codigo . ' - ' . $ua->denominacion) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                
+                <div class="col-md-6 form-group">
+                    <label>Persona que Retira (Solicitante) <span class="text-danger">*</span></label>
+                    <input type="text" name="solicitante" class="form-control" placeholder="Nombre y Apellido, Cédula" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Observaciones o Motivo del Despacho</label>
+                <textarea name="observaciones" class="form-control" rows="2" placeholder="Ej: Material de oficina para uso regular..."></textarea>
+            </div>
+
+            <hr>
+            <h5 class="text-success mb-3"><i class="fas fa-boxes"></i> Seleccionar Insumos a Despachar</h5>
+            
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped dataTable w-100 text-center" id="tabla-insumos">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th style="width: 50%;">Insumo / Artículo</th>
+                            <th style="width: 15%;">Unidad</th>
+                            <th style="width: 15%;">Stock Disponible</th>
+                            <th style="width: 20%;">Cant. a Despachar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($insumos)): ?>
+                            <tr>
+                                <td colspan="4" class="text-center text-danger font-weight-bold">
+                                    No hay insumos con stock disponible en el almacén en este momento.
+                                </td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($insumos as $insumo): ?>
+                                <tr>
+                                    <td class="text-left">
+                                        <?= htmlspecialchars($insumo['denominacion_a']) ?>
+                                        <input type="hidden" name="id_articulo[]" value="<?= $insumo['id_articulo'] ?>" disabled>
+                                    </td>
+                                    <td><?= htmlspecialchars($insumo['denominacion_udm']) ?></td>
+                                    <td class="font-weight-bold text-success" id="stock-<?= $insumo['id_articulo'] ?>">
+                                        <?= number_format((float)$insumo['stock'], 2, ',', '.') ?>
+                                    </td>
+                                    <td>
+                                        <input type="number" class="form-control form-control-sm mx-auto cant-input" name="cantidad_despachar[]" 
+                                               min="0" max="<?= htmlspecialchars((string)$insumo['stock']) ?>" step="0.01" 
+                                               data-id="<?= $insumo['id_articulo'] ?>" disabled style="width: 100px;" placeholder="0">
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="form-group mt-4 text-right">
+                <a href="?route=inventario/despachos" class="btn btn-default mr-2">Cancelar</a>
+                <button type="submit" class="btn btn-success" <?= empty($insumos) ? 'disabled' : '' ?>>
+                    <i class="fas fa-check"></i> Procesar Despacho
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Enable/disable hidden input based on whether quantity > 0
+    const inputs = document.querySelectorAll('.cant-input');
+    inputs.forEach(input => {
+        // Enable them initially so user can type
+        input.disabled = false;
+        
+        input.addEventListener('input', function() {
+            const row = this.closest('tr');
+            const hiddenId = row.querySelector('input[type="hidden"]');
+            const cant = parseFloat(this.value);
+            
+            if (cant > 0) {
+                hiddenId.disabled = false;
+            } else {
+                hiddenId.disabled = true;
+            }
+        });
+    });
+});
+</script>

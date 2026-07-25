@@ -26,11 +26,7 @@
     <?php endif; ?>
 
     <?php if (isset($error)): ?>
-      <div class="alert alert-danger alert-dismissible">
-        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-        <h5><i class="icon fas fa-ban"></i> Error</h5>
-        <?= htmlspecialchars($error) ?>
-      </div>
+      <?= render_component('alert', ['type' => 'danger', 'message' => $error]) ?>
     <?php endif; ?>
 
     <div class="table-responsive">
@@ -53,21 +49,28 @@
             <?php foreach ($trabajadores as $t): ?>
               <tr>
                 <td class="font-weight-bold"><?= htmlspecialchars($t['cedula']) ?></td>
-                <td><?= htmlspecialchars($t['nombres'] . ' ' . $t['apellidos']) ?></td>
+                <td>
+                  <?= htmlspecialchars($t['nombres'] . ' ' . $t['apellidos']) ?>
+                  <?php if (empty($t['banco'])): ?>
+                    <span class="badge badge-warning ml-1" title="Falta cuenta bancaria"><i class="fas fa-exclamation-triangle"></i> Sin Banco</span>
+                  <?php endif; ?>
+                </td>
                 <td><?= htmlspecialchars($t['cargo']) ?></td>
                 <td><span class="badge badge-secondary" style="font-size: 0.9em;"><?= htmlspecialchars($t['nomina']) ?></span></td>
                 <td><?= htmlspecialchars($t['ingreso']) ?></td>
                 <td class="text-right font-weight-bold text-success">Bs <?= number_format((float)$t['sueldo_basico'], 2, ',', '.') ?></td>
                 <td class="text-center">
-                  <a href="?route=nomina/editarTrabajador&cod_ficha=<?= htmlspecialchars((string)$t['cod_ficha']) ?>" class="btn btn-sm btn-warning font-weight-bold" title="Editar Cargo/Sueldo">
-                    <i class="fas fa-edit"></i> Editar Cargo/Sueldo
-                  </a>
+                  <?= render_component('table_actions', [
+                      'editUrl' => '?route=nomina/editarTrabajador&cod_ficha=' . htmlspecialchars((string)$t['cod_ficha'])
+                  ]) ?>
                 </td>
               </tr>
             <?php endforeach; ?>
           <?php endif; ?>
-        </tbody>
       </table>
+    </div>
+    <div class="card-footer clearfix mt-3">
+      <?= render_component('pagination', ['page' => $page, 'totalPages' => $totalPages]) ?>
     </div>
   </div>
 </div>

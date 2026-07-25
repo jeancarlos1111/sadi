@@ -7,11 +7,7 @@
   </div>
   <div class="card-body">
     <?php if (isset($error)): ?>
-      <div class="alert alert-danger alert-dismissible">
-        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-        <h5><i class="icon fas fa-ban"></i> Error</h5>
-        <?= htmlspecialchars($error) ?>
-      </div>
+      <?= render_component('alert', ['type' => 'danger', 'message' => $error]) ?>
     <?php endif; ?>
 
     <?php if (isset($_SESSION['success'])): ?>
@@ -60,15 +56,11 @@
                   <?php endif; ?>
                 </td>
                 <td class="text-center">
-                  <a href="?route=articulos/form&id=<?= urlencode((string)$a->id) ?>" class="btn btn-sm btn-info" title="Editar">
-                    <i class="fas fa-edit"></i>
-                  </a>
-                  <form method="POST" action="?route=articulos/eliminar" onsubmit="return confirm('¿Seguro de eliminar este artículo?');" style="display:inline;">
-                    <input type="hidden" name="id" value="<?= htmlspecialchars((string)$a->id) ?>">
-                    <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
-                      <i class="fas fa-trash"></i>
-                    </button>
-                  </form>
+                  <?= render_component('table_actions', [
+                'editUrl' => '?route=articulos/form&id=' . $a->id,
+                'deleteUrl' => '?route=articulos/eliminar',
+                'deleteId' => $a->id
+            ]) ?>
                 </td>
               </tr>
             <?php endforeach; ?>

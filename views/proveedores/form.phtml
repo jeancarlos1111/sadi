@@ -5,15 +5,21 @@
     <form method="POST" action="?route=proveedores/guardar">
         <div class="card-body">
             <?php if (isset($error)): ?>
-                <div class="alert alert-danger alert-dismissible">
-                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                    <h5><i class="icon fas fa-ban"></i> Error</h5>
-                    <?= htmlspecialchars($error) ?>
-                </div>
+                <?= render_component('alert', ['type' => 'danger', 'message' => $error]) ?>
             <?php endif; ?>
 
             <?php if ($proveedor && $proveedor->id): ?>
                 <input type="hidden" name="id" value="<?= htmlspecialchars((string)$proveedor->id) ?>">
+                <?php 
+                    if ($proveedor->numeroRnc && $proveedor->fechaVencimientoRnc) {
+                        if (strtotime($proveedor->fechaVencimientoRnc) < strtotime(date('Y-m-d'))) {
+                            echo render_component('alert', [
+                                'type' => 'warning', 
+                                'message' => '¡Atención! El Registro Nacional de Contratistas (RNC) de este proveedor se encuentra VENCIDO. La Ley de Contrataciones Públicas prohíbe adjudicar compras a proveedores insolventes.'
+                            ]);
+                        }
+                    }
+                ?>
             <?php endif; ?>
 
             <div class="form-group">
@@ -56,6 +62,16 @@
             <div class="form-group">
                 <label>ID Código Contable</label>
                 <input type="number" class="form-control" name="id_codigo_contable" value="<?= htmlspecialchars((string)($proveedor->idCodigoContable ?? '')) ?>">
+            </div>
+
+            <div class="form-group">
+                <label>Número RNC</label>
+                <input type="text" class="form-control" name="numero_rnc" value="<?= htmlspecialchars($proveedor->numeroRnc ?? '') ?>" maxlength="20">
+            </div>
+
+            <div class="form-group">
+                <label>Fecha Vencimiento RNC</label>
+                <input type="date" class="form-control" name="fecha_vencimiento_rnc" value="<?= htmlspecialchars($proveedor->fechaVencimientoRnc ?? '') ?>">
             </div>
         </div>
 

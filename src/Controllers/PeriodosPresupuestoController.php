@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Models\PeriodoPresupuestario;
 use App\Repositories\PeriodoPresupuestarioRepository;
 
@@ -20,6 +22,7 @@ class PeriodosPresupuestoController extends HomeController
     /** Muestra la grilla de 12 meses del año con su estado y permite cambiarlos */
     public function index(): void
     {
+        Gate::authorize('presupuesto.periodos.ver');
         $anio = (int)($_GET['anio'] ?? date('Y'));
 
         $periodos = $this->repo->getByAnio($anio);
@@ -58,6 +61,7 @@ class PeriodosPresupuestoController extends HomeController
 
         try {
             $this->repo->actualizarEstados($anio, $estados, $observacion ?: null);
+            $this->audit('periodo_presupuestario', 'EDITAR_MASIVO', $anio, null, ['estados' => $estados, 'observacion' => $observacion]);
             $_SESSION['success'] = "Períodos del año $anio actualizados correctamente.";
         } catch (\Exception $e) {
             $_SESSION['error'] = 'Error al guardar: ' . $e->getMessage();

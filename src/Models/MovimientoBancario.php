@@ -14,6 +14,8 @@ readonly class MovimientoBancario
         public float $monto,
         public string $fecha,
         public string $referencia,
+        public bool $conciliado = false,
+        public ?string $fechaConciliacion = null,
         ?int $id = null
     ) {
         $this->id = $id;
@@ -28,6 +30,8 @@ readonly class MovimientoBancario
             'monto' => $this->monto,
             'fecha' => $this->fecha,
             'referencia' => $this->referencia,
+            'conciliado' => $this->conciliado,
+            'fechaConciliacion' => $this->fechaConciliacion,
         ];
     }
 
@@ -39,6 +43,8 @@ readonly class MovimientoBancario
             $data['monto'] ?? null,
             $data['fecha'] ?? null,
             $data['referencia'] ?? null,
+            $data['conciliado'] ?? false,
+            $data['fechaConciliacion'] ?? null,
             $data['id'] ?? null,
         );
     }

@@ -12,10 +12,12 @@ readonly class Proveedor
         public string $rif,
         public string $compania,
         public int $idTipoOrganizacion,
-        public string $direccion,
-        public string $telefono,
+        public ?string $direccion = null,
+        public ?string $telefono = null,
         public ?string $nit = null,
         public ?int $idCodigoContable = null,
+        public ?string $numeroRnc = null,
+        public ?string $fechaVencimientoRnc = null,
         ?int $id = null
     ) {
         $this->id = $id;
@@ -32,6 +34,8 @@ readonly class Proveedor
             'telefono' => $this->telefono,
             'nit' => $this->nit,
             'idCodigoContable' => $this->idCodigoContable,
+            'numeroRnc' => $this->numeroRnc,
+            'fechaVencimientoRnc' => $this->fechaVencimientoRnc,
         ];
     }
 
@@ -45,6 +49,8 @@ readonly class Proveedor
             $data['telefono'] ?? null,
             $data['nit'] ?? null,
             $data['idCodigoContable'] ?? null,
+            $data['numeroRnc'] ?? null,
+            $data['fechaVencimientoRnc'] ?? null,
             $data['id'] ?? null,
         );
     }

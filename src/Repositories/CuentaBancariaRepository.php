@@ -22,7 +22,7 @@ class CuentaBancariaRepository extends Repository
     {
         $db = $this->getPdo();
         $sql = "
-            SELECT C.id_cta_bancaria, C.id_banco, C.numero_cta_bancaria, B.nombre_banco 
+            SELECT C.id_cta_bancaria, C.id_banco, C.numero_cta_bancaria, B.nombre_banco, C.id_cuenta_contable
             FROM cta_bancaria AS C
             JOIN banco AS B ON C.id_banco = B.id_banco
             WHERE C.eliminado = false AND B.eliminado = false
@@ -36,7 +36,8 @@ class CuentaBancariaRepository extends Repository
                 (int)$row['id_cta_bancaria'],
                 (int)$row['id_banco'],
                 $row['numero_cta_bancaria'],
-                $row['nombre_banco']
+                $row['nombre_banco'],
+                $row['id_cuenta_contable'] ? (int)$row['id_cuenta_contable'] : null
             );
         }
 
@@ -47,7 +48,7 @@ class CuentaBancariaRepository extends Repository
     {
         $db = $this->getPdo();
         $sql = "
-            SELECT C.id_cta_bancaria, C.id_banco, C.numero_cta_bancaria, B.nombre_banco 
+            SELECT C.id_cta_bancaria, C.id_banco, C.numero_cta_bancaria, B.nombre_banco, C.id_cuenta_contable
             FROM cta_bancaria AS C
             JOIN banco AS B ON C.id_banco = B.id_banco
             WHERE C.id_cta_bancaria = ? AND C.eliminado = false
@@ -64,7 +65,8 @@ class CuentaBancariaRepository extends Repository
             (int)$row['id_cta_bancaria'],
             (int)$row['id_banco'],
             $row['numero_cta_bancaria'],
-            $row['nombre_banco']
+            $row['nombre_banco'],
+            $row['id_cuenta_contable'] ? (int)$row['id_cuenta_contable'] : null
         );
     }
 
@@ -74,16 +76,17 @@ class CuentaBancariaRepository extends Repository
         $data = [
             'id_banco' => $cta->idBanco,
             'numero_cta_bancaria' => $cta->numeroCuenta,
+            'id_cuenta_contable' => $cta->idCuentaContable,
         ];
 
         if ($cta->id) {
-            $stmt = $db->prepare("UPDATE cta_bancaria SET id_banco = ?, numero_cta_bancaria = ? WHERE id_cta_bancaria = ?");
+            $stmt = $db->prepare("UPDATE cta_bancaria SET id_banco = ?, numero_cta_bancaria = ?, id_cuenta_contable = ? WHERE id_cta_bancaria = ?");
 
-            return $stmt->execute([$cta->idBanco, $cta->numeroCuenta, $cta->id]);
+            return $stmt->execute([$cta->idBanco, $cta->numeroCuenta, $cta->idCuentaContable, $cta->id]);
         }
 
-        $stmt = $db->prepare("INSERT INTO cta_bancaria (id_banco, numero_cta_bancaria) VALUES (?, ?)");
-        $res = $stmt->execute([$cta->idBanco, $cta->numeroCuenta]);
+        $stmt = $db->prepare("INSERT INTO cta_bancaria (id_banco, numero_cta_bancaria, id_cuenta_contable) VALUES (?, ?, ?)");
+        $res = $stmt->execute([$cta->idBanco, $cta->numeroCuenta, $cta->idCuentaContable]);
         if ($res) {
             $cta->id = (int)$db->lastInsertId();
 

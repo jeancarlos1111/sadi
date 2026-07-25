@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Database\Connection;
 use App\Services\PdfService;
 
@@ -11,7 +13,7 @@ class DocumentalController extends BaseController
 {
     public function __construct()
     {
-        if (!isset($_SESSION['usuario'])) {
+        if (!isset($_SESSION['usuario_id'])) {
             header('Location: ?route=auth/login');
             exit;
         }
@@ -52,14 +54,14 @@ class DocumentalController extends BaseController
         // Armar PDF
         $pdf = new PdfService();
         $pdf->AliasNbPages();
-        $pdf->setTitulo("ORDEN DE COMPRA / SERVICIO NRO: OC-". str_pad($id, 4, '0', STR_PAD_LEFT));
+        $pdf->setTitulo("ORDEN DE COMPRA / SERVICIO NRO: OC-". str_pad((string)$id, 4, '0', STR_PAD_LEFT));
         $pdf->AddPage();
 
         $pdf->SetFont('Arial', '', 11);
         $pdf->Cell(100, 6, mb_convert_encoding('Proveedor: ' . $orden['denominacion_p'], 'ISO-8859-1', 'UTF-8'));
         $pdf->Cell(90, 6, mb_convert_encoding('Fecha Emisión: ' . $orden['fecha_odc'], 'ISO-8859-1', 'UTF-8'), 0, 1, 'R');
         $pdf->Cell(100, 6, mb_convert_encoding('RIF: ' . $orden['rif_p'], 'ISO-8859-1', 'UTF-8'), 0, 1);
-        $pdf->Cell(100, 6, mb_convert_encoding('Concepto: ' . substr($orden['concepto_odc'], 0, 100), 'ISO-8859-1', 'UTF-8'), 0, 1);
+        $pdf->Cell(100, 6, mb_convert_encoding('Concepto: ' . substr($orden['concepto_odc'] ?? '', 0, 100), 'ISO-8859-1', 'UTF-8'), 0, 1);
 
         $pdf->Ln(10);
 
@@ -111,7 +113,7 @@ class DocumentalController extends BaseController
 
         $pdf = new PdfService();
         $pdf->AliasNbPages();
-        $pdf->setTitulo("SOLICITUD DE PAGO / COMPROBANTE NRO: SP-". str_pad($id, 4, '0', STR_PAD_LEFT));
+        $pdf->setTitulo("SOLICITUD DE PAGO / COMPROBANTE NRO: SP-". str_pad((string)$id, 4, '0', STR_PAD_LEFT));
         $pdf->AddPage();
 
         $pdf->SetFont('Arial', '', 11);
@@ -164,13 +166,13 @@ class DocumentalController extends BaseController
 
         $pdf = new PdfService();
         $pdf->AliasNbPages();
-        $pdf->setTitulo("REQUISICION DE BIENES Y SERVICIOS NRO: RB-". str_pad($id, 4, '0', STR_PAD_LEFT));
+        $pdf->setTitulo("REQUISICION DE BIENES Y SERVICIOS NRO: RB-". str_pad((string)$id, 4, '0', STR_PAD_LEFT));
         $pdf->AddPage();
 
         $pdf->SetFont('Arial', '', 11);
         $pdf->Cell(100, 6, mb_convert_encoding('Estructura Presupuestaria: ' . $req['denominacion_ep'], 'ISO-8859-1', 'UTF-8'));
         $pdf->Cell(90, 6, mb_convert_encoding('Fecha: ' . $req['fecha_rb'], 'ISO-8859-1', 'UTF-8'), 0, 1, 'R');
-        $pdf->Cell(100, 6, mb_convert_encoding('Concepto: ' . substr($req['concepto_rb'], 0, 100), 'ISO-8859-1', 'UTF-8'), 0, 1);
+        $pdf->Cell(100, 6, mb_convert_encoding('Concepto: ' . substr($req['concepto_rb'] ?? '', 0, 100), 'ISO-8859-1', 'UTF-8'), 0, 1);
 
         $pdf->Ln(10);
 
@@ -339,14 +341,14 @@ class DocumentalController extends BaseController
 
         $pdf = new PdfService();
         $pdf->AliasNbPages();
-        $pdf->setTitulo("ORDEN DE SERVICIO NRO: OS-". str_pad($id, 4, '0', STR_PAD_LEFT));
+        $pdf->setTitulo("ORDEN DE SERVICIO NRO: OS-". str_pad((string)$id, 4, '0', STR_PAD_LEFT));
         $pdf->AddPage();
 
         $pdf->SetFont('Arial', '', 11);
         $pdf->Cell(100, 6, mb_convert_encoding('Proveedor: ' . $orden['denominacion_p'], 'ISO-8859-1', 'UTF-8'));
         $pdf->Cell(90, 6, mb_convert_encoding('Fecha Emisión: ' . $orden['fecha_os'], 'ISO-8859-1', 'UTF-8'), 0, 1, 'R');
         $pdf->Cell(100, 6, mb_convert_encoding('RIF: ' . $orden['rif_p'], 'ISO-8859-1', 'UTF-8'), 0, 1);
-        $pdf->Cell(100, 6, mb_convert_encoding('Concepto: ' . substr($orden['concepto_os'], 0, 100), 'ISO-8859-1', 'UTF-8'), 0, 1);
+        $pdf->Cell(100, 6, mb_convert_encoding('Concepto: ' . substr($orden['concepto_os'] ?? '', 0, 100), 'ISO-8859-1', 'UTF-8'), 0, 1);
 
         $pdf->Ln(10);
 
@@ -416,13 +418,13 @@ class DocumentalController extends BaseController
 
         $pdf = new PdfService();
         $pdf->AliasNbPages();
-        $pdf->setTitulo("REQUISICION DE SERVICIOS NRO: RS-". str_pad($id, 4, '0', STR_PAD_LEFT));
+        $pdf->setTitulo("REQUISICION DE SERVICIOS NRO: RS-". str_pad((string)$id, 4, '0', STR_PAD_LEFT));
         $pdf->AddPage();
 
         $pdf->SetFont('Arial', '', 11);
         $pdf->Cell(100, 6, mb_convert_encoding('Estructura Presupuestaria: ' . $req['denominacion_ep'], 'ISO-8859-1', 'UTF-8'));
         $pdf->Cell(90, 6, mb_convert_encoding('Fecha: ' . $req['fecha_rs'], 'ISO-8859-1', 'UTF-8'), 0, 1, 'R');
-        $pdf->Cell(100, 6, mb_convert_encoding('Concepto: ' . substr($req['concepto_rs'], 0, 100), 'ISO-8859-1', 'UTF-8'), 0, 1);
+        $pdf->Cell(100, 6, mb_convert_encoding('Concepto: ' . substr($req['concepto_rs'] ?? '', 0, 100), 'ISO-8859-1', 'UTF-8'), 0, 1);
 
         $pdf->Ln(10);
 

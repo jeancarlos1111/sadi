@@ -1,0 +1,41 @@
+<?php
+/**
+ * Componente de Paginación
+ * 
+ * @var int $page Página actual
+ * @var int $totalPages Total de páginas
+ * @var string $route Ruta base (e.g. 'prestaciones/index')
+ */
+
+if ($totalPages <= 1) {
+    return;
+}
+
+// Variables por defecto si no son pasadas
+$page = $page ?? 1;
+$totalPages = $totalPages ?? 1;
+$route = $route ?? ($_GET['route'] ?? '');
+
+$queryParams = $_GET;
+unset($queryParams['page']);
+// Reconstruir la URL base sin el page
+$queryString = http_build_query($queryParams);
+$baseUrl = '?' . $queryString;
+?>
+<nav aria-label="Navegación de páginas">
+    <ul class="pagination justify-content-end mb-0">
+        <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+            <a class="page-link" href="<?= $baseUrl ?>&page=<?= $page - 1 ?>" tabindex="-1" aria-disabled="true">Anterior</a>
+        </li>
+        
+        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+            <li class="page-item <?= ($i === $page) ? 'active' : '' ?>">
+                <a class="page-link" href="<?= $baseUrl ?>&page=<?= $i ?>"><?= $i ?></a>
+            </li>
+        <?php endfor; ?>
+        
+        <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
+            <a class="page-link" href="<?= $baseUrl ?>&page=<?= $page + 1 ?>">Siguiente</a>
+        </li>
+    </ul>
+</nav>

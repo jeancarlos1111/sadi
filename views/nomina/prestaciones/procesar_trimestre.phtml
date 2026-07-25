@@ -1,0 +1,57 @@
+<?php
+/**
+ * @var string $titulo
+ */
+?>
+<div class="mb-4">
+    <h2><?= htmlspecialchars($titulo) ?></h2>
+    <p class="text-muted">Según el Art. 142 LOTTT (Garantía de Prestaciones Sociales). Se procesarán 15 días calculados al salario integral actual para todo el personal activo.</p>
+</div>
+
+<?php if (isset($_GET['error'])): ?>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <?= htmlspecialchars($_GET['error']) ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+<?php endif; ?>
+
+<div class="card shadow-sm border-0" style="max-width: 600px; margin: 0 auto;">
+    <div class="card-body p-4">
+        <form action="?route=prestaciones/procesarTrimestre" method="post" id="formTrimestre">
+            
+            <div class="mb-3">
+                <label for="periodo" class="form-label fw-bold">Período a Procesar <span class="text-danger">*</span></label>
+                <select name="periodo" id="periodo" class="form-select" required>
+                    <option value="">Seleccione el Trimestre...</option>
+                    <?php 
+                        $year = (int)date('Y');
+                        for ($i = $year; $i >= $year - 1; $i--) {
+                            echo "<option value=\"{$i}-Q1\">1er Trimestre {$i}</option>";
+                            echo "<option value=\"{$i}-Q2\">2do Trimestre {$i}</option>";
+                            echo "<option value=\"{$i}-Q3\">3er Trimestre {$i}</option>";
+                            echo "<option value=\"{$i}-Q4\">4to Trimestre {$i}</option>";
+                        }
+                    ?>
+                </select>
+                <div class="form-text">Ejemplo: 1er Trimestre corresponde a Enero - Marzo.</div>
+            </div>
+
+            <div class="mb-4">
+                <label for="fecha_proceso" class="form-label fw-bold">Fecha del Depósito / Proceso <span class="text-danger">*</span></label>
+                <input type="date" name="fecha_proceso" id="fecha_proceso" class="form-control" value="<?= date('Y-m-d') ?>" required>
+            </div>
+
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                <strong>Nota Contable:</strong> Se generará automáticamente un Asiento de Provisión de Prestaciones Sociales afectando el gasto y el pasivo acumulado.
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+                <a href="?route=prestaciones/index" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary" onclick="return confirm('¿Está seguro de procesar masivamente la garantía trimestral? Esta acción generará asientos contables.');">
+                    <i class="bi bi-play-circle me-1"></i> Iniciar Proceso Masivo
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

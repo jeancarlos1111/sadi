@@ -1,0 +1,22 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Database\Factories;
+
+use App\Database\Factory;
+use App\Models\{{ModelName}};
+use App\Repositories\{{RepositoryName}};
+
+class {{FactoryName}} extends Factory
+{
+    protected string $model = {{ModelName}}::class;
+    protected string $repository = {{RepositoryName}}::class;
+
+    public function definition(): array
+    {
+        return [
+            // 'columna' => $this->faker->word(),
+        ];
+    }
+}

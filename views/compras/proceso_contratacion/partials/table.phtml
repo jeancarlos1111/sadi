@@ -1,0 +1,51 @@
+<div class="table-responsive">
+  <table class="table table-bordered table-striped w-100 table-sm">
+    <thead class="bg-primary text-white">
+      <tr>
+        <th>N° Expediente</th>
+        <th>Descripción</th>
+        <th>Modalidad</th>
+        <th>Estatus</th>
+        <th class="text-right">Monto Estimado</th>
+        <th class="text-center">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <?php if (empty($procesos)): ?>
+        <tr><td colspan="6" class="text-center">No hay procesos de contratación registrados.</td></tr>
+      <?php else: ?>
+        <?php foreach ($procesos as $item): ?>
+          <?php $p = $item['entity']; ?>
+          <tr>
+            <td class="font-weight-bold"><?= htmlspecialchars($p->numeroExpediente) ?></td>
+            <td><?= htmlspecialchars($p->descripcion) ?></td>
+            <td><?= htmlspecialchars(str_replace('_', ' ', $p->modalidad)) ?></td>
+            <td>
+              <?php if ($p->estatus === 'ABIERTO'): ?>
+                <span class="badge badge-info">ABIERTO</span>
+              <?php elseif ($p->estatus === 'EVALUACION'): ?>
+                <span class="badge badge-warning">EN EVALUACIÓN</span>
+              <?php elseif ($p->estatus === 'ADJUDICADO'): ?>
+                <span class="badge badge-success">ADJUDICADO</span>
+              <?php else: ?>
+                <span class="badge badge-secondary"><?= htmlspecialchars($p->estatus) ?></span>
+              <?php endif; ?>
+            </td>
+            <td class="text-right">Bs <?= number_format($p->montoEstimado, 2, ',', '.') ?></td>
+            <td class="text-center">
+              <?= render_component('table_actions', [
+                  'viewUrl' => '?route=proceso_contratacion/ver&id=' . $p->id,
+                  'editUrl' => $p->estatus === 'ABIERTO' ? '?route=proceso_contratacion/form&id=' . $p->id : null,
+                  'deleteUrl' => $p->estatus === 'ABIERTO' ? '?route=proceso_contratacion/eliminar' : null,
+                  'deleteId' => $p->id
+              ]) ?>
+            </td>
+          </tr>
+        <?php endforeach; ?>
+      <?php endif; ?>
+    </tbody>
+  </table>
+</div>
+<div class="clearfix mt-2">
+  <?= render_component('pagination', ['page' => $page, 'totalPages' => $totalPages]) ?>
+</div>

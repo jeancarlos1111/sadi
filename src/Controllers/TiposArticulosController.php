@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Models\TipoArticulo;
 use App\Repositories\TipoArticuloRepository;
 use PDOException;
@@ -19,6 +21,7 @@ class TiposArticulosController extends HomeController
 
     public function index(): void
     {
+        Gate::authorize('inventario.tipos_articulos.ver');
         $search = $_GET['search'] ?? '';
 
         try {
@@ -40,6 +43,8 @@ class TiposArticulosController extends HomeController
 
     public function form(): void
     {
+        $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'inventario.tipos_articulos.editar' : 'inventario.tipos_articulos.crear');
         $id = $_GET['id'] ?? null;
         $item = null;
 
@@ -82,6 +87,7 @@ class TiposArticulosController extends HomeController
 
     public function eliminar(): void
     {
+        Gate::authorize('inventario.tipos_articulos.eliminar');
         $id = $_POST['id'] ?? null;
         if ($id) {
             try {

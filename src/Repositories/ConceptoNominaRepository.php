@@ -15,15 +15,29 @@ class ConceptoNominaRepository extends Repository
         return 'concepto_nomina';
     }
 
+    public function countAll(): int
+    {
+        $db = $this->getPdo();
+        $stmt = $db->query("SELECT COUNT(*) FROM concepto_nomina WHERE eliminado = false");
+        return (int)$stmt->fetchColumn();
+    }
+
     /**
      * @return ConceptoNomina[]
      */
-    public function all(): array
+    public function all(?int $limit = null, ?int $offset = null): array
     {
         $db = $this->getPdo();
-        $stmt = $db->query("SELECT * FROM concepto_nomina WHERE eliminado = false ORDER BY tipo_concepto ASC, id_concepto ASC");
+        $sql = "SELECT * FROM concepto_nomina WHERE eliminado = false ORDER BY tipo_concepto ASC, id_concepto ASC";
+        if ($limit !== null) {
+            $sql .= " LIMIT " . (int)$limit;
+        }
+        if ($offset !== null) {
+            $sql .= " OFFSET " . (int)$offset;
+        }
+        $stmt = $db->query($sql);
 
-        return array_map(fn ($row) => $this->mapRowToEntity($row), $stmt->fetchAll(PDO::FETCH_ASSOC));
+        return array_map(fn ($row) => clone $this->mapRowToEntity($row), $stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
     public function find(int $id): ?ConceptoNomina

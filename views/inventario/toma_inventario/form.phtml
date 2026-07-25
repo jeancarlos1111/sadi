@@ -1,0 +1,56 @@
+<?php
+/** @var string $titulo */
+/** @var string|null $error */
+?>
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card card-outline card-primary">
+            <div class="card-header">
+                <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+            </div>
+            
+            <form method="POST" action="?route=toma_inventario/guardar">
+                <div class="card-body">
+                    <?php if ($error): ?>
+                        <div class="alert alert-danger alert-dismissible">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                            <?= htmlspecialchars($error) ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Al iniciar una Toma Física, el sistema "congelará" (copiará) las existencias actuales de todos los insumos y bienes operativos para su posterior conteo físico.
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Fecha de la Toma: <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" name="fecha_toma" value="<?= date('Y-m-d') ?>" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Responsable del Conteo (Auditor): <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="responsable" placeholder="Nombre completo" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Observaciones / Justificación:</label>
+                        <textarea class="form-control" name="observaciones" rows="3" placeholder="Ej: Toma de inventario anual de cierre de ejercicio..."></textarea>
+                    </div>
+
+                </div>
+                
+                <div class="card-footer text-right">
+                    <button type="submit" class="btn btn-primary" onclick="return confirm('¿Está seguro de iniciar la toma física? Se copiarán las existencias actuales del sistema.');">
+                        <i class="fas fa-play"></i> Iniciar Toma de Inventario
+                    </button>
+                    <a href="?route=toma_inventario/index" class="btn btn-default">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

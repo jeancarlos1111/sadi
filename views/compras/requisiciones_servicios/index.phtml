@@ -17,11 +17,7 @@
     <?php endif; ?>
 
     <?php if (isset($error)): ?>
-      <div class="alert alert-danger alert-dismissible">
-        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-        <h5><i class="icon fas fa-ban"></i> Error</h5>
-        <?= htmlspecialchars($error) ?>
-      </div>
+      <?= render_component('alert', ['type' => 'danger', 'message' => $error]) ?>
     <?php endif; ?>
 
     <form method="GET" action="" class="form-inline mb-4">
@@ -65,15 +61,11 @@
                 <a href="?route=documental/requisicionServicios&id=<?= htmlspecialchars((string)$rs['id_requisicion_servicios']) ?>" target="_blank" class="btn btn-sm btn-secondary" title="Imprimir PDF">
                   <i class="fas fa-file-pdf"></i>
                 </a>
-                <a href="?route=requisiciones_servicios/form&id=<?= htmlspecialchars((string)$rs['id_requisicion_servicios']) ?>" class="btn btn-sm btn-info" title="Editar">
-                  <i class="fas fa-edit"></i>
-                </a>
-                <form method="POST" action="?route=requisiciones_servicios/eliminar" onsubmit="return confirm('¿Eliminar?');" style="display:inline;">
-                  <input type="hidden" name="id" value="<?= htmlspecialchars((string)$rs['id_requisicion_servicios']) ?>">
-                  <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </form>
+                <?= render_component('table_actions', [
+                'editUrl' => '?route=requisiciones_servicios/form&id=' . $rs['id_requisicion_servicios'],
+                'deleteUrl' => '?route=requisiciones_servicios/eliminar',
+                'deleteId' => $rs['id_requisicion_servicios']
+            ]) ?>
               </td>
             </tr>
           <?php endforeach; endif; ?>

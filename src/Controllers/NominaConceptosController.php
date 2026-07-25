@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Models\ConceptoNomina;
 use App\Repositories\ConceptoNominaRepository;
 use App\Services\FormulaEvaluator;
@@ -17,7 +19,7 @@ class NominaConceptosController extends BaseController
     {
         $this->repo = $repo;
 
-        if (!isset($_SESSION['usuario'])) {
+        if (!isset($_SESSION['usuario_id'])) {
             header('Location: ?route=auth/login');
             exit;
         }
@@ -25,18 +27,29 @@ class NominaConceptosController extends BaseController
 
     public function index(): void
     {
+        Gate::authorize('nomina.conceptos.ver');
         $page = (int)($_GET['page'] ?? 1);
-        $paginator = $this->repo->paginate('', $page, 15);
-        $conceptos = $paginator['data'];
+        if ($page < 1) $page = 1;
+        $perPage = 10;
+        $offset = ($page - 1) * $perPage;
+        
+        $totalRecords = $this->repo->countAll();
+        $totalPages = max(1, (int)ceil($totalRecords / $perPage));
+
+        $conceptos = $this->repo->all($perPage, $offset);
+
         $this->renderView('nomina/conceptos/index', [
-            'titulo'   => 'Conceptos de Nómina (Asignaciones y Deducciones)',
+            'titulo'    => 'Conceptos de Nómina (Asignaciones y Deducciones)',
             'conceptos' => $conceptos,
-                    'paginator' => $paginator,
+            'page'      => $page,
+            'totalPages'=> $totalPages,
         ]);
     }
 
     public function form(): void
     {
+        $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'nomina.conceptos.editar' : 'nomina.conceptos.crear');
         $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
         $concepto = null;
         $error = null;
@@ -110,6 +123,7 @@ class NominaConceptosController extends BaseController
 
     public function eliminar(): void
     {
+        Gate::authorize('nomina.conceptos.eliminar');
         $id = $_POST['id'] ?? null;
         if ($id) {
             $this->repo->delete((int)$id);

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Models\Ficha;
 use App\Repositories\CargoRepository;
 use App\Repositories\FichaRepository;
@@ -34,7 +36,7 @@ class NominaController extends BaseController
         $this->cargoRepo    = $cargoRepo;
         $this->fichaRepo    = $fichaRepo;
 
-        if (!isset($_SESSION['usuario'])) {
+        if (!isset($_SESSION['usuario_id'])) {
             header('Location: ?route=auth/login');
             exit;
         }
@@ -42,27 +44,42 @@ class NominaController extends BaseController
 
     public function index(): void
     {
-        try {
-            $planillas = $this->planillaRepo->all();
-        } catch (\PDOException $e) {
-            $planillas = [];
-            $error = "Error al obtener histórico de planillas: " . $e->getMessage();
-        }
+        Gate::authorize('nomina.planillas.ver');
+        $page = (int)($_GET['page'] ?? 1);
+        if ($page < 1) $page = 1;
+        $perPage = 10;
+        $offset = ($page - 1) * $perPage;
+        
+        $totalRecords = $this->planillaRepo->countAll();
+        $totalPages = max(1, (int)ceil($totalRecords / $perPage));
+
+        $planillas = $this->planillaRepo->all($perPage, $offset);
 
         $this->renderView('nomina/index', [
-            'titulo' => 'Histórico de Nóminas Procesadas',
+            'titulo' => 'Histórico de Planillas de Nómina',
             'planillas' => $planillas,
-            'error' => $error ?? null,
+            'page' => $page,
+            'totalPages' => $totalPages,
         ]);
     }
 
     public function trabajadores(): void
     {
-        $trabajadores = $this->personalRepo->all();
+        $page = (int)($_GET['page'] ?? 1);
+        if ($page < 1) $page = 1;
+        $perPage = 10;
+        $offset = ($page - 1) * $perPage;
+        
+        $totalRecords = $this->personalRepo->countAll();
+        $totalPages = max(1, (int)ceil($totalRecords / $perPage));
+
+        $trabajadores = $this->personalRepo->all('', $perPage, $offset);
 
         $this->renderView('nomina/trabajadores', [
             'titulo' => 'Catálogo de Personal Activo',
             'trabajadores' => $trabajadores,
+            'page' => $page,
+            'totalPages' => $totalPages,
         ]);
     }
 
@@ -88,8 +105,20 @@ class NominaController extends BaseController
                 $db->beginTransaction();
 
                 // 1. Crear Personal
-                $stmtP = $db->prepare("INSERT INTO personal (cedula, nombres, apellidos, fecha_nacimiento) VALUES (?, ?, ?, ?)");
-                $stmtP->execute([$_POST['cedula'], $_POST['nombres'], $_POST['apellidos'], $_POST['fecha_nacimiento']]);
+                $stmtP = $db->prepare("INSERT INTO personal (cedula, nombres, apellidos, fecha_nacimiento, rif, telefono, direccion, correo, estado_civil, cargas_familiares, nivel_instruccion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmtP->execute([
+                    $_POST['cedula'], 
+                    $_POST['nombres'], 
+                    $_POST['apellidos'], 
+                    $_POST['fecha_nacimiento'],
+                    $_POST['rif'] ?? null,
+                    $_POST['telefono'] ?? null,
+                    $_POST['direccion'] ?? null,
+                    $_POST['correo'] ?? null,
+                    $_POST['estado_civil'] ?? 'SOLTERO',
+                    isset($_POST['cargas_familiares']) ? (int)$_POST['cargas_familiares'] : 0,
+                    $_POST['nivel_instruccion'] ?? null
+                ]);
                 $idPersonal = (int)$db->lastInsertId();
 
                 // 2. Crear Ficha usando repo
@@ -99,7 +128,15 @@ class NominaController extends BaseController
                     (int)$_POST['cod_cargo'],
                     (int)$_POST['cod_nomina'],
                     $_POST['ingreso'],
-                    (float)$_POST['sueldo_basico']
+                    (float)$_POST['sueldo_basico'],
+                    30, // diasUtilidades default
+                    15, // diasBonoVacacional default
+                    (float)($_POST['porcentaje_islr'] ?? 0.0),
+                    false, // eliminado
+                    $_POST['tipo_relacion_laboral'] ?? 'FIJO',
+                    $_POST['banco'] ?? null,
+                    $_POST['numero_cuenta'] ?? null,
+                    $_POST['tipo_cuenta'] ?? 'CORRIENTE'
                 );
                 $this->fichaRepo->save($ficha);
 
@@ -124,7 +161,7 @@ class NominaController extends BaseController
 
         $db = $this->personalRepo->getPdo();
         $stmt = $db->prepare("
-            SELECT f.*, p.cedula, p.nombres, p.apellidos 
+            SELECT f.*, p.cedula, p.nombres, p.apellidos, p.rif, p.telefono, p.direccion, p.correo, p.estado_civil, p.cargas_familiares, p.nivel_instruccion 
             FROM ficha f 
             JOIN personal p ON f.personal_cod_personal = p.cod_personal 
             WHERE f.cod_ficha = ?
@@ -158,10 +195,43 @@ class NominaController extends BaseController
             try {
                 $ficha = $this->fichaRepo->find($codFicha);
                 if ($ficha) {
-                    $ficha->idCargo = (int)$_POST['cod_cargo'];
-                    $ficha->idNomina = (int)$_POST['cod_nomina'];
-                    $ficha->sueldoBasico = (float)$_POST['sueldo_basico'];
-                    $this->fichaRepo->save($ficha);
+                    $nuevaFicha = new \App\Models\Ficha(
+                        $ficha->id,
+                        $ficha->idPersonal,
+                        (int)$_POST['cod_cargo'],
+                        (int)$_POST['cod_nomina'],
+                        $ficha->fechaIngreso,
+                        (float)$_POST['sueldo_basico'],
+                        $ficha->diasUtilidades,
+                        $ficha->diasBonoVacacional,
+                        isset($_POST['porcentaje_islr']) ? (float)$_POST['porcentaje_islr'] : $ficha->porcentajeIslr,
+                        $ficha->eliminado,
+                        $_POST['tipo_relacion_laboral'] ?? $ficha->tipoRelacionLaboral,
+                        $_POST['banco'] ?? $ficha->banco,
+                        $_POST['numero_cuenta'] ?? $ficha->numeroCuenta,
+                        $_POST['tipo_cuenta'] ?? $ficha->tipoCuenta
+                    );
+                    $this->fichaRepo->save($nuevaFicha);
+
+                    // Update Personal as well
+                    $personal = $this->personalRepo->find($ficha->idPersonal);
+                    if ($personal) {
+                        $nuevoPersonal = new \App\Models\Personal(
+                            $personal->codPersonal,
+                            $personal->cedula,
+                            $personal->nombres,
+                            $personal->apellidos,
+                            $personal->fechaNacimiento,
+                            $_POST['rif'] ?? $personal->rif,
+                            $_POST['telefono'] ?? $personal->telefono,
+                            $_POST['direccion'] ?? $personal->direccion,
+                            $_POST['correo'] ?? $personal->correo,
+                            $_POST['estado_civil'] ?? $personal->estadoCivil,
+                            isset($_POST['cargas_familiares']) ? (int)$_POST['cargas_familiares'] : $personal->cargasFamiliares,
+                            $_POST['nivel_instruccion'] ?? $personal->nivelInstruccion
+                        );
+                        $this->personalRepo->save($nuevoPersonal);
+                    }
                 }
 
                 header('Location: ?route=nomina/trabajadores&success=Ficha actualizada exitosamente.');
@@ -176,11 +246,21 @@ class NominaController extends BaseController
 
     public function cargos(): void
     {
-        $cargos = $this->cargoRepo->all();
+        $page = (int)($_GET['page'] ?? 1);
+        if ($page < 1) $page = 1;
+        $perPage = 10;
+        $offset = ($page - 1) * $perPage;
+        
+        $totalRecords = $this->cargoRepo->countAll();
+        $totalPages = max(1, (int)ceil($totalRecords / $perPage));
+
+        $cargos = $this->cargoRepo->all($perPage, $offset);
 
         $this->renderView('nomina/cargos', [
             'titulo' => 'Administración de Cargos',
             'cargos' => $cargos,
+            'page' => $page,
+            'totalPages' => $totalPages,
         ]);
     }
 
@@ -251,7 +331,100 @@ class NominaController extends BaseController
         }
     }
 
-    // --- FIN CRUD CARGOS --- //
+    // --- CRUD TIPOS DE NÓMINA --- //
+
+    public function tiposNomina(): void
+    {
+        Gate::authorize('nomina.planillas.ver');
+        $nominas = $this->nominaRepo->all();
+
+        $this->renderView('nomina/tipos_nomina', [
+            'titulo' => 'Tipos de Nómina',
+            'nominas' => $nominas,
+        ]);
+    }
+
+    public function crearNomina(): void
+    {
+        Gate::authorize('nomina.planillas.ver');
+        $this->renderView('nomina/crear_nomina', [
+            'titulo' => 'Registrar Tipo de Nómina',
+        ]);
+    }
+
+    public function guardarNomina(): void
+    {
+        Gate::authorize('nomina.planillas.ver');
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $denom = trim($_POST['denom'] ?? '');
+            $tipoPeriodo = trim($_POST['tipo_periodo'] ?? '');
+
+            if (empty($denom) || empty($tipoPeriodo)) {
+                header('Location: ?route=nomina/crearNomina&error=' . urlencode('Debe completar todos los campos.'));
+                exit;
+            }
+
+            $nomina = new \App\Models\Nomina(0, $denom, $tipoPeriodo);
+            $id = $this->nominaRepo->save($nomina);
+
+            if ($id) {
+                $this->audit('nomina', 'CREAR', (int)$id, null, ['denom' => $denom, 'tipo_periodo' => $tipoPeriodo]);
+                header('Location: ?route=nomina/tiposNomina&success=' . urlencode('Tipo de nómina creado correctamente.'));
+            } else {
+                header('Location: ?route=nomina/tiposNomina&error=' . urlencode('Error al crear el tipo de nómina.'));
+            }
+            exit;
+        }
+    }
+
+    public function editarNomina(): void
+    {
+        Gate::authorize('nomina.planillas.ver');
+        $id = (int)($_GET['id'] ?? 0);
+        $nomina = $this->nominaRepo->find($id);
+        if (!$nomina) {
+            header('Location: ?route=nomina/tiposNomina&error=' . urlencode('Nómina no encontrada.'));
+            exit;
+        }
+
+        $this->renderView('nomina/editar_nomina', [
+            'titulo' => 'Editar Tipo de Nómina',
+            'nomina' => $nomina,
+        ]);
+    }
+
+    public function actualizarNomina(): void
+    {
+        Gate::authorize('nomina.planillas.ver');
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = (int)($_POST['cod_nomina'] ?? 0);
+            $denom = trim($_POST['denom'] ?? '');
+            $tipoPeriodo = trim($_POST['tipo_periodo'] ?? '');
+
+            $antes = $this->nominaRepo->find($id);
+            $nomina = new \App\Models\Nomina($id, $denom, $tipoPeriodo);
+            $this->nominaRepo->save($nomina);
+
+            $this->audit('nomina', 'EDITAR', $id, $antes?->toArray(), $nomina->toArray());
+            header('Location: ?route=nomina/tiposNomina&success=' . urlencode('Nómina actualizada correctamente.'));
+            exit;
+        }
+    }
+
+    public function eliminarNomina(): void
+    {
+        Gate::authorize('nomina.planillas.ver');
+        $id = (int)($_GET['id'] ?? 0);
+        if ($id) {
+            $antes = $this->nominaRepo->find($id);
+            $this->nominaRepo->delete($id);
+            $this->audit('nomina', 'ELIMINAR', $id, $antes?->toArray(), null);
+        }
+        header('Location: ?route=nomina/tiposNomina&success=' . urlencode('Nómina eliminada correctamente.'));
+        exit;
+    }
+
+    // --- FIN CRUD TIPOS DE NÓMINA --- //
 
     public function emitir(): void
     {
@@ -277,17 +450,19 @@ class NominaController extends BaseController
             $periodo = $_POST['periodo'] ?? '';
 
             if (!$idNomina || empty($periodo)) {
-                die("Debe seleccionar una nómina e ingresar un período válido.");
+                header('Location: ?route=nomina/emitir&error=' . urlencode('Debe seleccionar una nómina e ingresar un período válido.'));
+                exit;
             }
 
             try {
                 $this->planillaRepo->generar($idNomina, $periodo, $fechaEmision);
-
-                header('Location: ?route=nomina/index&success=Nómina generada exitosamente, presupuesto afectado y solicitud de pago creada.');
+                header('Location: ?route=nomina/index&success=' . urlencode('Nómina generada exitosamente. Presupuesto afectado y solicitud de pago creada.'));
                 exit;
             } catch (Exception $e) {
-                die("Error Crítico al Procesar Nómina: " . $e->getMessage());
+                header('Location: ?route=nomina/emitir&error=' . urlencode('Error al procesar nómina: ' . $e->getMessage()));
+                exit;
             }
         }
     }
 }
+

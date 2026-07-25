@@ -60,7 +60,7 @@ class AsientoContableRepository extends Repository
     /**
      * Registra un comprobante de diario y sus movimientos de forma programática.
      */
-    public function registrarDesdeTransaccion(string $fecha, string $concepto, array $movimientos, ?int $idSolicitudPago = null): bool
+    public function registrarDesdeTransaccion(string $fecha, string $concepto, array $movimientos, ?int $idSolicitudPago = null): int
     {
         $db = $this->getPdo();
 
@@ -88,13 +88,13 @@ class AsientoContableRepository extends Repository
             $stmtLast = $db->query("SELECT id_comprobante_diario FROM comprobante_diario ORDER BY id_comprobante_diario DESC LIMIT 1");
             $lastId = (int)$stmtLast->fetchColumn();
             $nextId = $lastId + 1;
-            $numeroComprobante = 'CD-' . date('Y') . '-' . str_pad((string)$nextId, 5, '0', STR_PAD_LEFT);
+            $numeroComprobante = 'CD-' . date('Y-m') . '-' . str_pad((string)$nextId, 4, '0', STR_PAD_LEFT);
 
             $stmtCabecera = $db->prepare("
-                INSERT INTO comprobante_diario (numero_comprobante, fecha_comprobante, concepto, id_solicitud_pago)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO comprobante_diario (numero_comprobante, fecha_comprobante, concepto)
+                VALUES (?, ?, ?)
             ");
-            $stmtCabecera->execute([$numeroComprobante, $fecha, $concepto, $idSolicitudPago]);
+            $stmtCabecera->execute([$numeroComprobante, $fecha, $concepto]);
             $idComprobante = $db->lastInsertId();
 
             $stmtMov = $db->prepare("
@@ -117,7 +117,7 @@ class AsientoContableRepository extends Repository
                 $db->commit();
             }
 
-            return true;
+            return (int)$idComprobante;
         } catch (Exception $e) {
             if (!$inTransaction && $db->inTransaction()) {
                 $db->rollBack();
@@ -125,5 +125,36 @@ class AsientoContableRepository extends Repository
 
             throw $e;
         }
+    }
+
+    public function findById(int $id): ?array
+    {
+        $db = $this->getPdo();
+        $stmt = $db->prepare("SELECT * FROM comprobante_diario WHERE id_comprobante_diario = ? AND eliminado = false");
+        $stmt->execute([$id]);
+        $cd = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$cd) {
+            return null;
+        }
+
+        $stmtMov = $db->prepare("
+            SELECT mc.*, cc.codigo_cuenta, cc.denominacion_cuenta
+            FROM movimiento_contable mc
+            JOIN cuenta_contable cc ON mc.id_cuenta_contable = cc.id_cuenta_contable
+            WHERE mc.id_comprobante_diario = ?
+            ORDER BY mc.tipo_operacion_mc DESC, cc.codigo_cuenta ASC
+        ");
+        $stmtMov->execute([$id]);
+        $cd['movimientos'] = $stmtMov->fetchAll(PDO::FETCH_ASSOC);
+
+        return $cd;
+    }
+
+    public function anular(int $id, int $idUsuario): void
+    {
+        $db = $this->getPdo();
+        $stmt = $db->prepare("UPDATE comprobante_diario SET eliminado = true WHERE id_comprobante_diario = ?");
+        $stmt->execute([$id]);
     }
 }

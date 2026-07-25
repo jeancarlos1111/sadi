@@ -1,0 +1,113 @@
+<?php
+/**
+ * @var string $titulo
+ * @var int $anioActual
+ */
+?>
+<div class="card card-outline card-success">
+    <div class="card-header">
+        <h3 class="card-title"><?= htmlspecialchars($titulo) ?></h3>
+    </div>
+
+    <div class="card-body">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> Complete los parámetros y presione <strong>Calcular</strong> para pre-visualizar la nómina masiva de utilidades según el Art. 131 de la LOTTT.
+        </div>
+
+        <form method="POST" action="?route=utilidad/guardar" id="form_utilidades">
+            <div class="row">
+                <!-- Columna Izquierda: Parámetros -->
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h3 class="card-title">1. Parámetros</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="anio">Año Fiscal:</label>
+                                <select name="anio" id="anio" required class="form-control">
+                                    <option value="<?= $anioActual ?>" selected><?= $anioActual ?></option>
+                                    <option value="<?= $anioActual - 1 ?>"><?= $anioActual - 1 ?></option>
+                                    <option value="<?= $anioActual - 2 ?>"><?= $anioActual - 2 ?></option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="dias_base">Días a Pagar:</label>
+                                <select name="dias_base" id="dias_base" required class="form-control">
+                                    <option value="30">30 Días (Mínimo LOTTT)</option>
+                                    <option value="60">60 Días</option>
+                                    <option value="90">90 Días</option>
+                                    <option value="120" selected>120 Días (Administración Pública)</option>
+                                    <option value="150">150 Días</option>
+                                </select>
+                                <small class="form-text text-muted">La Adm. Pública suele pagar entre 90 y 120 días por decreto.</small>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="?route=utilidad/index" class="btn btn-default">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                            <button type="button" class="btn btn-info float-right" onclick="simularCalculo()">
+                                <i class="fas fa-calculator"></i> Calcular
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna Derecha: Vista Previa AJAX -->
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h3 class="card-title">2. Vista Previa (Cálculo Proporcional por Meses Laborados)</h3>
+                        </div>
+                        <div class="card-body" id="simulacion_container" style="min-height: 250px; display: flex; align-items: center; justify-content: center;">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-users fa-3x mb-3"></i>
+                                <p>Presione <strong>Calcular</strong> para visualizar la nómina antes de confirmar.</p>
+                            </div>
+                        </div>
+                        <div class="card-footer text-right" id="footer_confirmar" style="display: none;">
+                            <button type="submit" id="btn_guardar" class="btn btn-success">
+                                <i class="fas fa-save"></i> Procesar y Guardar Nómina
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function simularCalculo() {
+    const anio = document.getElementById('anio').value;
+    const diasBase = document.getElementById('dias_base').value;
+    const container = document.getElementById('simulacion_container');
+    const footerConfirmar = document.getElementById('footer_confirmar');
+
+    container.style.display = 'block';
+    container.innerHTML = '<div class="text-center w-100 py-5"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i><p class="mt-2">Procesando nómina masiva de utilidades...</p></div>';
+    footerConfirmar.style.display = 'none';
+
+    fetch('?route=utilidad/simular&ajax=1', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: `anio=${anio}&dias_base=${diasBase}`
+    })
+    .then(response => response.text())
+    .then(html => {
+        container.innerHTML = html;
+        container.style.display = 'block';
+        if (html.includes('confirmar_calculo')) {
+            footerConfirmar.style.display = 'block';
+        }
+    })
+    .catch(error => {
+        container.innerHTML = `<div class="alert alert-danger">Error al calcular: ${error}</div>`;
+    });
+}
+</script>

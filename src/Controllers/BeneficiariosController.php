@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Models\Beneficiario;
 use App\Repositories\BeneficiarioRepository;
 use PDOException;
@@ -19,6 +21,7 @@ class BeneficiariosController extends HomeController
 
     public function index(): void
     {
+        Gate::authorize('cxp.beneficiarios.ver');
         $search = $_GET['search'] ?? '';
 
         try {
@@ -40,6 +43,8 @@ class BeneficiariosController extends HomeController
 
     public function form(): void
     {
+        $id = $_GET['id'] ?? null;
+        Gate::authorize($id ? 'cxp.beneficiarios.editar' : 'cxp.beneficiarios.crear');
         $id          = $_GET['id'] ?? null;
         $beneficiario = null;
         $error       = null;
@@ -87,6 +92,7 @@ class BeneficiariosController extends HomeController
 
     public function eliminar(): void
     {
+        Gate::authorize('cxp.beneficiarios.eliminar');
         $id = $_POST['id'] ?? null;
         if ($id) {
             try {

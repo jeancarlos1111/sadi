@@ -45,3 +45,30 @@ default_rootless_network_cmd = "slirp4netns"
 ```
 
 Una vez agregado, vuelve a intentar el despliegue con `podman compose up`.
+
+---
+
+## PHP / Docker: Error de Permisos (mkdir(): Permission denied / move_uploaded_file)
+
+Si al intentar subir un archivo o imagen (como un logo) desde el sistema obtienes una serie de advertencias (*warnings*) similares a:
+
+```text
+Warning: mkdir(): Permission denied in /var/www/html/src/Controllers/AdminController.php
+Warning: move_uploaded_file(...): Failed to open stream: No such file or directory
+Warning: move_uploaded_file(): Unable to move "/tmp/..."
+```
+
+### Causa
+En entornos virtualizados como Docker o Podman, el servidor web (Nginx/PHP) se ejecuta bajo un usuario sin privilegios administrativos (ej. `www-data` o similar). Si el directorio destino de la subida (por ejemplo `public/uploads`) no existe y la carpeta padre no es modificable por este usuario, PHP no podrá crear la ruta ni almacenar el archivo, denegando el permiso.
+
+### Solución
+Debes crear la carpeta requerida manualmente en el sistema anfitrión (host) en la ruta correspondiente y concederle los permisos totales, ya que al usar un volumen compartido (bind mount), el contenedor heredará esta estructura y permisos.
+
+Ejecuta lo siguiente desde la raíz del proyecto en tu terminal:
+
+```bash
+mkdir -p public/uploads
+chmod 777 public/uploads
+```
+
+Al asignar los permisos `777`, le permites al usuario del contenedor web escribir libremente dentro de esa carpeta. Una vez ejecutado, vuelve a intentar la subida del archivo desde la aplicación web.

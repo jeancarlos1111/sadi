@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 // Keep this if the model is still used directly somewhere, though the repo should abstract it.
 use App\Repositories\PresupuestoIngresoRepository;
 use Exception; // Keep this for general exceptions
@@ -16,7 +18,7 @@ class PresupuestoIngresoController extends BaseController // Changed from BaseCo
     public function __construct(PresupuestoIngresoRepository $repo)
     {
         // The original constructor's session check
-        if (!isset($_SESSION['usuario'])) {
+        if (!isset($_SESSION['usuario_id'])) {
             header('Location: ?route=auth/login');
             exit;
         }
@@ -26,6 +28,7 @@ class PresupuestoIngresoController extends BaseController // Changed from BaseCo
 
     public function index(): void
     {
+        Gate::authorize('presupuesto.ingresos.ver');
         try {
             $formulado = $this->repo->allFormulado(); // Use repository
         } catch (PDOException $e) {
@@ -63,6 +66,7 @@ class PresupuestoIngresoController extends BaseController // Changed from BaseCo
 
             try {
                 $this->repo->formular($idRamo, $monto); // Use repository
+                $this->audit('presupuesto_ingreso', 'FORMULAR', $idRamo, null, ['monto' => $monto]);
                 header('Location: ?route=presupuestoIngreso/index&success=Estimación de Ingreso registrada correctamente.'); // Original success message
                 exit;
             } catch (Exception $e) {
@@ -95,6 +99,7 @@ class PresupuestoIngresoController extends BaseController // Changed from BaseCo
 
             try {
                 $this->repo->recaudar($id, $monto, $referencia); // Use repository
+                $this->audit('presupuesto_ingreso', 'RECAUDAR', $id, null, ['monto' => $monto, 'referencia' => $referencia]);
                 header('Location: ?route=presupuestoIngreso/index&success=Recaudación registrada exitosamente y el asiento contable fue generado.'); // Original success message
                 exit;
             } catch (Exception $e) {

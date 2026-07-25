@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Auth\Gate;
+
 use App\Repositories\EstrucPresupuestariaRepository;
 use App\Repositories\MovimientoPresupuestarioRepository;
 use App\Repositories\PlanUnicoCuentasRepository;
@@ -24,6 +26,7 @@ class DisponibilidadPresupuestoController extends HomeController
 
     public function index(): void
     {
+        Gate::authorize('presupuesto.disponibilidad.ver');
         $id_estruc = isset($_GET['id_estruc']) && $_GET['id_estruc'] !== '' ? (int)$_GET['id_estruc'] : null;
         $id_cuenta = isset($_GET['id_cuenta']) && $_GET['id_cuenta'] !== '' ? (int)$_GET['id_cuenta'] : null;
 

@@ -36,7 +36,7 @@ class BeneficiarioRepository extends Repository
         // Por ahora, para mantener la lógica exacta del search con OR:
         if ($search !== '') {
             $db = $this->getPdo();
-            $sql = "SELECT * FROM beneficiario WHERE eliminado = false AND (nombres LIKE :s OR apellidos LIKE :s OR cedula LIKE :s) ORDER BY apellidos, nombres";
+            $sql = "SELECT * FROM beneficiario WHERE eliminado = false AND (nombres ILIKE :s OR apellidos ILIKE :s OR cedula ILIKE :s) ORDER BY apellidos, nombres";
             $stmt = $db->prepare($sql);
             $stmt->bindValue(':s', "%$search%");
             $stmt->execute();
@@ -46,6 +46,34 @@ class BeneficiarioRepository extends Repository
         }
 
         return array_map(fn ($row) => $this->mapRowToEntity($row), $rows);
+    }
+
+    public function paginate(...$args): array
+    {
+        $search = $args[0] ?? '';
+        $page = $args[1] ?? 1;
+        $perPage = $args[2] ?? 15;
+
+        $db = $this->getPdo();
+        $sql = "SELECT * FROM beneficiario WHERE eliminado = false";
+
+        $bindings = [];
+        if ($search !== '') {
+            $sql .= " AND (nombres ILIKE :search OR apellidos ILIKE :search OR cedula ILIKE :search)";
+            $bindings[':search'] = "%$search%";
+        }
+        $sql .= " ORDER BY apellidos ASC, nombres ASC";
+
+        $paginator = \App\Database\Paginator::paginateRaw($db, $sql, $bindings, $page, $perPage);
+
+        $results = [];
+        foreach ($paginator['data'] as $row) {
+            $results[] = $this->mapRowToEntity($row);
+        }
+
+        $paginator['data'] = $results;
+
+        return $paginator;
     }
 
     public function findById(int $id): ?Beneficiario
