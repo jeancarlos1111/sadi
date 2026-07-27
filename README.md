@@ -127,8 +127,11 @@ php cli/sadi db:migrate --fresh --seed --class=MockDatabaseSeeder
 - **Cuentas por Pagar:** Gestión de compromisos de pago pendientes
 - **Solicitudes de Pago:** Generación de órdenes de pago y deducciones
 
-### 🔧 Administración
+### 🔧 Administración y Control Interno
 - **Administrador:** Panel central para gestionar usuarios y matriz de roles/permisos.
+- **Auditoría Global:** Pista de auditoría detallada de creación, modificación y eliminación (borrado lógico) de registros.
+- **Flujos de Aprobación:** Motor de estados dinámico (`ELABORACION`, `REVISION`, `PRE-APROBADO`, `APROBADO`) para documentos críticos, integrado con bloqueo financiero.
+- **Configuración Institucional:** Parametrización de la institución, membretes, logos y firmas dinámicas para reportes PDF.
 
 ---
 
@@ -209,3 +212,5 @@ El proyecto utiliza un **patrón Repositorio** estricto con DTOs inmutables y co
 | Fase 5.1 | Catálogos de Presupuesto (Proyectos, Acc. Cent., PUC) | ✅ Completado |
 | Fase 5.2 | Procesos Presupuestarios (Comprobantes, Períodos, Reformulación) | ✅ Completado |
 | Fase 5.3 | Seguridad y Autenticación RBAC | ✅ Completado |
+| Fase 6 | Control Interno (Auditoría, Flujos de Aprobación, PDF dinámicos) | ✅ Completado |
+| Fase 7 | Pruebas Integrales de Sistema (Compras, Pagos, Contabilidad) | ✅ Completado |
