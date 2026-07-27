@@ -26,7 +26,7 @@ class OrdenCompraRepository extends Repository
             SELECT 
                 O.id_orden_de_compra, O.fecha_odc, O.concepto_odc, O.id_proveedor,
                 O.porcentaje_iva_odc, O.monto_base_odc, O.monto_iva_odc, O.monto_total_odc,
-                O.contabilizada,
+                O.contabilizada, O.estado_aprobacion,
                 P.compania_proveedor
             FROM orden_de_compra AS O
             JOIN proveedor AS P ON O.id_proveedor = P.id_proveedor
@@ -73,6 +73,7 @@ class OrdenCompraRepository extends Repository
                 'entity' => $oc,
                 'proveedor' => $row['compania_proveedor'],
                 'contabilizada' => (bool) $row['contabilizada'],
+                'estado_aprobacion' => $row['estado_aprobacion'] ?? 'ELABORACION',
             ];
         }
 
@@ -191,10 +192,15 @@ class OrdenCompraRepository extends Repository
 
         try {
             // Verificar estado
-            $stmt = $db->prepare("SELECT contabilizada FROM orden_de_compra WHERE id_orden_de_compra = ?");
+            $stmt = $db->prepare("SELECT contabilizada, estado_aprobacion FROM orden_de_compra WHERE id_orden_de_compra = ?");
             $stmt->execute([$id]);
-            if ($stmt->fetchColumn() == 1) {
+            $ordenData = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($ordenData['contabilizada'] == 1) {
                 throw new Exception("La Orden ya está contabilizada.");
+            }
+            if (($ordenData['estado_aprobacion'] ?? 'ELABORACION') !== 'APROBADO') {
+                throw new Exception("Bloqueo Financiero: La Orden de Compra debe estar APROBADA para poder ser contabilizada (generar compromiso presupuestario). Estado actual: " . ($ordenData['estado_aprobacion'] ?? 'ELABORACION'));
             }
 
             // Obtener porcentaje_iva_odc

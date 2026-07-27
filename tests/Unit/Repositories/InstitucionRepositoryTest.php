@@ -12,8 +12,8 @@ test('getConfig devuelve la institución por defecto si no existe', function () 
     
     expect($config)->toBeInstanceOf(Institucion::class);
     expect($config->id_institucion)->toBe(1);
-    expect($config->nombre)->toBe('Institución Pública de Prueba');
-    expect($config->rif)->toBe('G-20000000-0');
+    expect($config->nombre)->toBe('Alcaldía de Prueba');
+    expect($config->rif)->toBe('G-12345678-9');
 });
 
 test('saveConfig guarda y actualiza la información correctamente', function () {

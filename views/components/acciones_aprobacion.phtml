@@ -1,0 +1,150 @@
+<?php
+/**
+ * Componente: acciones_aprobacion
+ * Props esperados:
+ * - string $tipoDocumento (e.g. 'ORDEN_COMPRA', 'SOLICITUD_PAGO')
+ * - int $idDocumento
+ * - string $estadoActual
+ */
+use App\Auth\Auth;
+
+$estadoActual = $props['estadoActual'] ?? 'ELABORACION';
+$tipoDocumento = $props['tipoDocumento'] ?? '';
+$idDocumento = $props['idDocumento'] ?? 0;
+
+$puedeRevisar = Auth::hasPermission('flujo.revisar');
+$puedePreAprobar = Auth::hasPermission('flujo.pre_aprobar');
+$puedeAprobar = Auth::hasPermission('flujo.aprobar');
+$puedeRechazar = Auth::hasPermission('flujo.rechazar');
+
+$badgeClass = match ($estadoActual) {
+    'ELABORACION' => 'bg-secondary',
+    'REVISION' => 'bg-info text-dark',
+    'PRE-APROBADO' => 'bg-primary',
+    'APROBADO' => 'bg-success',
+    'RECHAZADO' => 'bg-danger',
+    default => 'bg-secondary',
+};
+?>
+
+<div class="card mb-3">
+    <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+            <strong>Estado de Aprobación:</strong>
+            <span class="badge <?= $badgeClass ?> ms-2 fs-6"><?= htmlspecialchars($estadoActual) ?></span>
+        </div>
+        <div>
+            <?php if ($estadoActual === 'ELABORACION' && $puedeRevisar): ?>
+                <button class="btn btn-sm btn-info text-dark btn-cambiar-estado" data-estado="REVISION">
+                    <i class="fas fa-search"></i> Enviar a Revisión
+                </button>
+            <?php endif; ?>
+
+            <?php if ($estadoActual === 'REVISION' && $puedePreAprobar): ?>
+                <button class="btn btn-sm btn-primary btn-cambiar-estado" data-estado="PRE-APROBADO">
+                    <i class="fas fa-check"></i> Pre-Aprobar (Coordinador)
+                </button>
+            <?php endif; ?>
+
+            <?php if ($estadoActual === 'PRE-APROBADO' && $puedeAprobar): ?>
+                <button class="btn btn-sm btn-success btn-cambiar-estado" data-estado="APROBADO">
+                    <i class="fas fa-check-double"></i> Aprobar Definitivo (Director)
+                </button>
+            <?php endif; ?>
+
+            <?php if (in_array($estadoActual, ['ELABORACION', 'REVISION', 'PRE-APROBADO']) && $puedeRechazar): ?>
+                <button class="btn btn-sm btn-danger btn-cambiar-estado" data-estado="RECHAZADO">
+                    <i class="fas fa-times"></i> Rechazar
+                </button>
+            <?php endif; ?>
+
+            <?php if ($estadoActual === 'RECHAZADO' && $puedeRevisar): ?>
+                <button class="btn btn-sm btn-secondary btn-cambiar-estado" data-estado="ELABORACION">
+                    <i class="fas fa-undo"></i> Devolver a Elaboración
+                </button>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Cambio de Estado -->
+<div class="modal fade" id="modalCambioEstado" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="formCambioEstado">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Cambio de Estado</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="tipo_documento" value="<?= htmlspecialchars($tipoDocumento) ?>">
+                    <input type="hidden" name="id_documento" value="<?= (int)$idDocumento ?>">
+                    <input type="hidden" name="nuevo_estado" id="inputNuevoEstado">
+                    
+                    <p>¿Estás seguro de cambiar el estado a <strong id="lblNuevoEstado"></strong>?</p>
+                    
+                    <div class="mb-3">
+                        <label for="comentarios" class="form-label">Comentarios / Observaciones</label>
+                        <textarea class="form-control" name="comentarios" id="comentarios" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="btnConfirmarEstado">Confirmar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const botones = document.querySelectorAll('.btn-cambiar-estado');
+    const modalEl = document.getElementById('modalCambioEstado');
+    if (!modalEl) return;
+    
+    // Asumiendo que Bootstrap está cargado globalmente
+    const modal = new bootstrap.Modal(modalEl);
+    const form = document.getElementById('formCambioEstado');
+
+    botones.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const estado = this.getAttribute('data-estado');
+            document.getElementById('inputNuevoEstado').value = estado;
+            document.getElementById('lblNuevoEstado').textContent = estado;
+            form.reset();
+            modal.show();
+        });
+    });
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const btnSubmit = document.getElementById('btnConfirmarEstado');
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+
+        const formData = new FormData(this);
+
+        fetch('?route=flujo_aprobacion/cambiar_estado', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload(); // Recargar la página para ver los cambios
+            } else {
+                alert('Error: ' + data.message);
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = 'Confirmar';
+            }
+        })
+        .catch(err => {
+            alert('Error de conexión o de servidor.');
+            console.error(err);
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = 'Confirmar';
+        });
+    });
+});
+</script>

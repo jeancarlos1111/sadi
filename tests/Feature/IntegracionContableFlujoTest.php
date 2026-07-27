@@ -6,6 +6,7 @@ use App\Repositories\AsientoContableRepository;
 use App\Repositories\CuentaBancariaRepository;
 use App\Repositories\DocumentoRepository;
 use App\Repositories\SolicitudPagoRepository;
+use App\Services\FlujoAprobacionService;
 use App\Services\IntegracionContableService;
 
 test('Flujo completo de integración contable: OC -> Causado -> Pago', function () {
@@ -100,7 +101,12 @@ test('Flujo completo de integración contable: OC -> Causado -> Pago', function 
     ");
     $idSolicitud = (int)$db->lastInsertId();
 
-    // 4. Ejecutar PAGO
+    // 4. Aprobar y Ejecutar PAGO
+    $flujo = new FlujoAprobacionService();
+    $flujo->cambiarEstado('SOLICITUD_PAGO', $idSolicitud, 'REVISION', 'ok', 1);
+    $flujo->cambiarEstado('SOLICITUD_PAGO', $idSolicitud, 'PRE-APROBADO', 'ok', 1);
+    $flujo->cambiarEstado('SOLICITUD_PAGO', $idSolicitud, 'APROBADO', 'ok', 1);
+
     $solRepo = new SolicitudPagoRepository();
     $pagoExitoso = $solRepo->registrarPago($idSolicitud, [
         'id_cta_bancaria' => $idCtaBancaria,

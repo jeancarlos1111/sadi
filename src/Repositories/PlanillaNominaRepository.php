@@ -129,7 +129,48 @@ class PlanillaNominaRepository extends Repository
                 WHERE id_planilla = ?
             ")->execute([$totalAsignacionesGlobal, $totalDeduccionesGlobal, $totalNetoGlobal, $idPlanilla]);
 
-            // 6. Impacto Transaccional 1: PRESUPUESTO
+            // Se removió el impacto presupuestario y de tesorería de aquí
+            // para que se ejecuten solo al CONTABILIZAR una vez APROBADA la nómina.
+
+            $db->commit();
+
+            return true;
+
+        } catch (Exception $e) {
+            $db->rollBack();
+
+            throw $e;
+        }
+    }
+
+    public function contabilizar(int $idPlanilla): bool
+    {
+        $db = $this->getPdo();
+        $db->beginTransaction();
+
+        try {
+            // Verificar estado
+            $stmt = $db->prepare("SELECT contabilizada, estado_aprobacion, fecha_emision, monto_total_asignaciones, monto_total_neto, periodo FROM planilla_nomina WHERE id_planilla = ? FOR UPDATE");
+            $stmt->execute([$idPlanilla]);
+            $planilla = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$planilla) {
+                throw new Exception("Planilla no encontrada.");
+            }
+            if ($planilla['contabilizada'] == 1) {
+                throw new Exception("La Nómina ya está contabilizada.");
+            }
+            if (($planilla['estado_aprobacion'] ?? 'ELABORACION') !== 'APROBADO') {
+                throw new Exception("Bloqueo Financiero: La Nómina debe estar APROBADA para poder ser contabilizada. Estado actual: " . ($planilla['estado_aprobacion'] ?? 'ELABORACION'));
+            }
+
+            $totalAsignacionesGlobal = (float)$planilla['monto_total_asignaciones'];
+            $totalNetoGlobal = (float)$planilla['monto_total_neto'];
+            $fechaEmision = $planilla['fecha_emision'];
+            $periodo = $planilla['periodo'];
+
+            // 1. Impacto Transaccional 1: PRESUPUESTO
+            // (Asumiendo Partida 4 para Personal)
             $db->prepare("
                 UPDATE presupuesto_gastos 
                 SET monto_comprometido = monto_comprometido + ?,
@@ -150,20 +191,20 @@ class PlanillaNominaRepository extends Repository
                 $partidasCausado
             );
 
-            // 7. Impacto Transaccional 2: TESORERÍA
+            // 2. Impacto Transaccional 2: TESORERÍA (Crear Solicitud de Pago)
             $conceptoPago = "Pago de {$periodo}. Planilla N° {$idPlanilla}";
             $db->prepare("
                 INSERT INTO solicitud_pago (fecha_solicitud_pago, concepto_solicitud_pago, monto_pagar_solicitud_pago)
                 VALUES (?, ?, ?)
             ")->execute([$fechaEmision, $conceptoPago, $totalNetoGlobal]);
 
+            // Marcar como contabilizada
+            $db->prepare("UPDATE planilla_nomina SET contabilizada = true WHERE id_planilla = ?")->execute([$idPlanilla]);
+
             $db->commit();
-
             return true;
-
         } catch (Exception $e) {
             $db->rollBack();
-
             throw $e;
         }
     }

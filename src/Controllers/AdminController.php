@@ -313,7 +313,8 @@ class AdminController extends BaseController
                 'cargo_autoridad' => $_POST['cargo_autoridad'] ?? null,
                 'base_legal' => $_POST['base_legal'] ?? null,
                 'codigo_onapre' => $_POST['codigo_onapre'] ?? null,
-                'logo_path' => $logoPath
+                'logo_path' => $logoPath,
+                'marca_agua_activa' => isset($_POST['marca_agua_activa']) ? true : false
             ]);
 
             $this->institucionRepo->saveConfig($nuevaConfig);

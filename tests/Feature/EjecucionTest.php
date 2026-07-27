@@ -2,6 +2,7 @@
 
 use App\Database\Connection;
 use App\Repositories\OrdenCompraRepository;
+use App\Services\FlujoAprobacionService;
 use Tests\Helpers\DatabaseSeeder;
 
 beforeEach(function () {
@@ -11,8 +12,10 @@ beforeEach(function () {
 test('crear orden de compra verifica disponibilidad presupuestaria (bloqueo FOR UPDATE)', function () {
     $db = Connection::getInstance();
 
+    $db->exec("UPDATE articulo SET id_codigo_plan_unico = 1 WHERE id_articulo = 1");
+
     // Partida con solo 1000.00 disponibles
-    $db->exec("INSERT INTO presupuesto_gastos (id_codigo_plan_unico, monto_asignado, monto_comprometido, monto_precomprometido) VALUES (1, 1000.00, 0, 0)");
+    $db->exec("INSERT INTO presupuesto_gastos (id_presupuesto_gastos, id_estruc_presupuestaria, id_fuente_financiamiento, id_codigo_plan_unico, monto_asignado, monto_comprometido, monto_precomprometido) VALUES (999, 1, 1, 1, 1000.00, 0, 0)");
 
     $repo = new OrdenCompraRepository($db);
 
@@ -41,8 +44,11 @@ test('crear orden de compra verifica disponibilidad presupuestaria (bloqueo FOR 
 test('simula dos usuarios intentando comprometer la misma partida secuencialmente', function () {
     $db = Connection::getInstance();
 
+    $db->exec("UPDATE articulo SET id_codigo_plan_unico = 1 WHERE id_articulo = 1");
+    $db->exec("UPDATE articulo SET id_codigo_plan_unico = 1 WHERE id_articulo = 1");
+
     // Partida con exactamente 1000.00 disponibles
-    $db->exec("INSERT INTO presupuesto_gastos (id_codigo_plan_unico, monto_asignado, monto_comprometido, monto_precomprometido) VALUES (1, 1000.00, 0, 0)");
+    $db->exec("INSERT INTO presupuesto_gastos (id_presupuesto_gastos, id_estruc_presupuestaria, id_fuente_financiamiento, id_codigo_plan_unico, monto_asignado, monto_comprometido, monto_precomprometido) VALUES (1000, 1, 1, 1, 1000.00, 0, 0)");
 
     $repo = new OrdenCompraRepository($db);
 
@@ -57,6 +63,12 @@ test('simula dos usuarios intentando comprometer la misma partida secuencialment
     // Usuario 1: gasta 600 → queda 400 disponible
     $idOrden1 = $repo->crearConTransaccion($cabecera, $detalles);
     expect($idOrden1)->toBeGreaterThan(0);
+
+    // Aprobar orden para poder contabilizarla (Debe pasar por REVISION primero)
+    $flujo = new FlujoAprobacionService();
+    $flujo->cambiarEstado('ORDEN_COMPRA', $idOrden1, 'REVISION', 'Test', 1);
+    $flujo->cambiarEstado('ORDEN_COMPRA', $idOrden1, 'PRE-APROBADO', 'Test', 1);
+    $flujo->cambiarEstado('ORDEN_COMPRA', $idOrden1, 'APROBADO', 'Test', 1);
 
     // Para registrar el compromiso, necesitamos contabilizar
     $repo->contabilizar($idOrden1);

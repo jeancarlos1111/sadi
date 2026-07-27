@@ -147,6 +147,10 @@ class DespachoAlmacenRepository extends Repository
                 VALUES (?, ?, ?, 10, NULL)
             ");
 
+            $stmtUpdateArticulo = $db->prepare("
+                UPDATE articulo SET stock_actual = ? WHERE id_articulo = ?
+            ");
+
             $stmtMovimiento = $db->prepare("
                 INSERT INTO inventario_movimiento (id_articulo, fecha, tipo_movimiento, cantidad)
                 VALUES (?, ?, 'SALIDA', ?)
@@ -172,6 +176,9 @@ class DespachoAlmacenRepository extends Repository
                 // Actualizar inventario_insumos (nuevo saldo)
                 $nuevoStock = $stockActual - $cantidadDespachada;
                 $stmtNuevoStock->execute([$idArticulo, date('Y-m-d'), $nuevoStock]);
+                
+                // Actualizar articulo
+                $stmtUpdateArticulo->execute([$nuevoStock, $idArticulo]);
 
                 // Registrar en Kardex (inventario_movimiento)
                 $stmtMovimiento->execute([$idArticulo, $despacho->fechaDespacho, $cantidadDespachada]);

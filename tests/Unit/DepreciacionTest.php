@@ -16,5 +16,5 @@ test('puede calcular depreciacion por linea recta', function () {
     // Cuota = (12000 - 2000) / 60 = 10000 / 60 = 166.666...
     $cuotaMensual = (12000 - 2000) / 60;
 
-    expect($cuotaMensual)->toBeCloseTo(166.66, 2);
+    expect(round($cuotaMensual, 2))->toEqual(166.67);
 });

@@ -32,6 +32,8 @@
             <th class="text-right">Total Deducciones</th>
             <th class="text-right">Neto Total a Pagar</th>
             <th class="text-center">Estado Tesorería</th>
+            <th class="text-center">Estado Aprobación</th>
+            <th class="text-center">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -52,6 +54,72 @@
                     <span class="badge badge-success"><i class="fas fa-check"></i> Pagada</span>
                   <?php else: ?>
                     <span class="badge badge-warning"><i class="fas fa-clock"></i> Pendiente</span>
+                  <?php endif; ?>
+                </td>
+                <td class="text-center align-middle">
+                  <?php 
+                    $estadoF = $p['estado_aprobacion'] ?? 'ELABORACION';
+                    if ($estadoF === 'ELABORACION'): 
+                  ?>
+                    <span class="badge badge-secondary px-2 py-1"><i class="fas fa-edit"></i> Elaboración</span>
+                  <?php elseif ($estadoF === 'REVISION'): ?>
+                    <span class="badge badge-info px-2 py-1"><i class="fas fa-search"></i> En Revisión</span>
+                  <?php elseif ($estadoF === 'PRE-APROBADO'): ?>
+                    <span class="badge badge-primary px-2 py-1"><i class="fas fa-check"></i> Pre-Aprobado</span>
+                  <?php elseif ($estadoF === 'APROBADO'): ?>
+                    <span class="badge badge-success px-2 py-1"><i class="fas fa-check-double"></i> Aprobado</span>
+                  <?php elseif ($estadoF === 'RECHAZADO'): ?>
+                    <span class="badge badge-danger px-2 py-1"><i class="fas fa-times"></i> Rechazado</span>
+                  <?php endif; ?>
+                </td>
+                <td class="text-center text-nowrap align-middle">
+                  <?php if (!$p['contabilizada']): ?>
+                    <?php if ($estadoF === 'ELABORACION' || $estadoF === 'RECHAZADO'): ?>
+                      <form method="POST" action="?route=nomina/cambiar_estado" style="display:inline;">
+                        <input type="hidden" name="id" value="<?= htmlspecialchars((string)$p['id_planilla']) ?>">
+                        <input type="hidden" name="estado" value="REVISION">
+                        <button type="submit" class="btn btn-sm btn-warning" title="Enviar a Revisión">
+                          <i class="fas fa-paper-plane"></i>
+                        </button>
+                      </form>
+                    <?php elseif ($estadoF === 'REVISION'): ?>
+                      <form method="POST" action="?route=nomina/cambiar_estado" style="display:inline;">
+                        <input type="hidden" name="id" value="<?= htmlspecialchars((string)$p['id_planilla']) ?>">
+                        <input type="hidden" name="estado" value="PRE-APROBADO">
+                        <button type="submit" class="btn btn-sm btn-primary" title="Pre-Aprobar (Coordinador)">
+                          <i class="fas fa-check"></i>
+                        </button>
+                      </form>
+                      <form method="POST" action="?route=nomina/cambiar_estado" style="display:inline;">
+                        <input type="hidden" name="id" value="<?= htmlspecialchars((string)$p['id_planilla']) ?>">
+                        <input type="hidden" name="estado" value="RECHAZADO">
+                        <button type="submit" class="btn btn-sm btn-danger" title="Rechazar">
+                          <i class="fas fa-times"></i>
+                        </button>
+                      </form>
+                    <?php elseif ($estadoF === 'PRE-APROBADO'): ?>
+                      <form method="POST" action="?route=nomina/cambiar_estado" style="display:inline;">
+                        <input type="hidden" name="id" value="<?= htmlspecialchars((string)$p['id_planilla']) ?>">
+                        <input type="hidden" name="estado" value="APROBADO">
+                        <button type="submit" class="btn btn-sm btn-success" title="Aprobar Definitivo (Director)">
+                          <i class="fas fa-check-double"></i>
+                        </button>
+                      </form>
+                      <form method="POST" action="?route=nomina/cambiar_estado" style="display:inline;">
+                        <input type="hidden" name="id" value="<?= htmlspecialchars((string)$p['id_planilla']) ?>">
+                        <input type="hidden" name="estado" value="RECHAZADO">
+                        <button type="submit" class="btn btn-sm btn-danger" title="Rechazar">
+                          <i class="fas fa-times"></i>
+                        </button>
+                      </form>
+                    <?php elseif ($estadoF === 'APROBADO'): ?>
+                      <form method="POST" action="?route=nomina/contabilizar" onsubmit="return confirm('¿Contabilizar esta Nómina? (Afecta Presupuesto y Tesorería).');" style="display:inline;">
+                        <input type="hidden" name="id" value="<?= htmlspecialchars((string)$p['id_planilla']) ?>">
+                        <button type="submit" class="btn btn-sm btn-primary" title="Contabilizar">
+                          <i class="fas fa-file-invoice-dollar"></i>
+                        </button>
+                      </form>
+                    <?php endif; ?>
                   <?php endif; ?>
                 </td>
               </tr>

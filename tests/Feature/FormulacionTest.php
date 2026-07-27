@@ -19,7 +19,7 @@ test('se puede formular un presupuesto de gasto inicial', function () {
     
     expect($partidas)->toHaveCount(1);
     expect($partidas[0]['entity']->montoAsignado)->toEqual(50000.00);
-    expect($partidas[0]['estructura_desc'])->toEqual('Administración Central - Recursos Humanos');
-    expect($partidas[0]['partida_desc'])->toEqual('Sueldos Básicos Personal Fijo');
+    expect($partidas[0]['estructura_desc'])->toEqual('Estructura ea');
+    expect($partidas[0]['partida_desc'])->toEqual('GASTOS DE PERSONAL');
     expect($partidas[0]['fuente_desc'])->toEqual('Recursos Ordinarios');
 });

@@ -8,6 +8,9 @@ use Tests\Helpers\DatabaseSeeder;
 beforeEach(function () {
     DatabaseSeeder::seedCatalogs();
     DatabaseSeeder::cleanBudgetTables();
+    $db = Connection::getInstance();
+    $db->exec("INSERT INTO articulo (id_articulo, denominacion_a, id_tipo_de_articulo, id_unidades_de_medida, stock_actual) VALUES (1, 'Computadora Portatil', 1, 1, 0) ON CONFLICT DO NOTHING");
+    $db->exec("INSERT INTO proyecto (id_proyecto, codigo_proyecto, denominacion) VALUES (1, '001', 'Proyecto 1') ON CONFLICT DO NOTHING");
 });
 
 test('se puede guardar un PAC y calcula costo estimado basado en trimestres', function () {
@@ -33,7 +36,7 @@ test('se puede guardar un PAC y calcula costo estimado basado en trimestres', fu
     $todos = $repo->all();
     expect($todos)->toHaveCount(1);
     expect($todos[0]['entity']->costo_estimado)->toEqual(50000.00);
-    expect($todos[0]['articulo_desc'])->toEqual('Lápices Grafito');
+    expect($todos[0]['articulo_desc'])->toEqual('Computadora Portatil');
 });
 
 test('aprobar pac cambia el estado', function () {

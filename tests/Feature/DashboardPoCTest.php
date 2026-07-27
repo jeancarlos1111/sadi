@@ -24,7 +24,7 @@ test('dashboard method runs without exceptions and uses AMPHP Fibers', function 
     $controller->dashboard();
     $output = ob_get_clean();
 
-    expect($output)->toContain('Dashboard Presupuestario (Fibers PoC)');
+    expect($output)->toContain('Panel de Control Presupuestario');
     expect($output)->toContain('Tiempo de carga asíncrona:');
     expect($output)->toContain('Total Asignado');
     expect($output)->toContain('Top 5 Partidas con Mayor Asignación');

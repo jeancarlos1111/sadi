@@ -1,0 +1,110 @@
+<?php
+/**
+ * Componente: historial_aprobacion
+ * Props esperados:
+ * - string $tipoDocumento (e.g. 'ORDEN_COMPRA')
+ * - int $idDocumento
+ */
+$tipoDocumento = $props['tipoDocumento'] ?? '';
+$idDocumento = $props['idDocumento'] ?? 0;
+?>
+
+<div class="card mb-3">
+    <div class="card-header bg-light">
+        <h6 class="mb-0"><i class="fas fa-history text-secondary"></i> Pista de Auditoría (Aprobaciones)</h6>
+    </div>
+    <div class="card-body">
+        <div id="historial-timeline-<?= $idDocumento ?>" class="timeline-container">
+            <div class="text-center text-muted py-3">
+                <i class="fas fa-spinner fa-spin"></i> Cargando historial...
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline-container {
+    max-height: 300px;
+    overflow-y: auto;
+}
+.timeline-item {
+    border-left: 2px solid #dee2e6;
+    padding-left: 15px;
+    position: relative;
+    margin-bottom: 15px;
+}
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -6px;
+    top: 5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #0d6efd;
+}
+.timeline-date {
+    font-size: 0.85em;
+    color: #6c757d;
+}
+.timeline-content {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 5px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('historial-timeline-<?= $idDocumento ?>');
+    
+    fetch('?route=flujo_aprobacion/historial&tipo_documento=<?= htmlspecialchars($tipoDocumento) ?>&id_documento=<?= $idDocumento ?>')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (data.data.length === 0) {
+                    container.innerHTML = '<div class="text-muted text-center">No hay historial de aprobaciones.</div>';
+                    return;
+                }
+
+                let html = '';
+                data.data.forEach(item => {
+                    const badgeClass = getBadgeClass(item.estado_nuevo);
+                    const userName = item.nombre ? (item.nombre + ' ' + (item.apellido || '')) : 'Sistema/Desconocido';
+                    html += `
+                        <div class="timeline-item">
+                            <div class="timeline-date"><i class="far fa-clock"></i> ${item.fecha}</div>
+                            <div class="timeline-content">
+                                <div>
+                                    <strong>${userName}</strong> cambió el estado a 
+                                    <span class="badge ${badgeClass}">${item.estado_nuevo}</span>
+                                </div>
+                                <div class="mt-1 small text-muted">
+                                    <em>"${item.comentarios || 'Sin comentarios'}"</em>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = '<div class="text-danger">Error al cargar historial.</div>';
+            }
+        })
+        .catch(err => {
+            container.innerHTML = '<div class="text-danger">Error de conexión.</div>';
+        });
+
+    function getBadgeClass(estado) {
+        switch(estado) {
+            case 'ELABORACION': return 'bg-secondary';
+            case 'REVISION': return 'bg-info text-dark';
+            case 'PRE-APROBADO': return 'bg-primary';
+            case 'APROBADO': return 'bg-success';
+            case 'RECHAZADO': return 'bg-danger';
+            default: return 'bg-secondary';
+        }
+    }
+});
+</script>

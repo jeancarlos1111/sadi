@@ -26,7 +26,7 @@ class SolicitudPagoRepository extends Repository
         $sql = "
             SELECT 
                 SP.id_solicitud_pago, SP.fecha_solicitud_pago, SP.concepto_solicitud_pago,
-                SP.monto_pagar_solicitud_pago, SP.id_documento, SP.contabilizada
+                SP.monto_pagar_solicitud_pago, SP.id_documento, SP.contabilizada, SP.estado_aprobacion
             FROM solicitud_pago AS SP
             WHERE SP.eliminado = false
         ";
@@ -54,7 +54,7 @@ class SolicitudPagoRepository extends Repository
 
         $results = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-            $estado = ($row['contabilizada'] ?? false) ? 'Aprobada/Contabilizada' : 'Pendiente';
+            $estado = ($row['contabilizada'] ?? false) ? 'Aprobada/Contabilizada' : ($row['estado_aprobacion'] ?? 'ELABORACION');
 
             $sp = new SolicitudPago(
                 $row['fecha_solicitud_pago'],
@@ -66,6 +66,7 @@ class SolicitudPagoRepository extends Repository
             );
             $results[] = [
                 'entity' => $sp,
+                'estado_aprobacion' => $row['estado_aprobacion'] ?? 'ELABORACION',
             ];
         }
 
@@ -131,6 +132,14 @@ class SolicitudPagoRepository extends Repository
             $req = $this->find($idReq);
             if (!$req || $req->estado === 'Aprobada/Contabilizada') {
                 throw new Exception("La solicitud no existe o ya fue pagada.");
+            }
+
+            // Verificar estado_aprobacion
+            $stmtEstado = $db->prepare("SELECT estado_aprobacion FROM solicitud_pago WHERE id_solicitud_pago = ?");
+            $stmtEstado->execute([$idReq]);
+            $estadoAprob = $stmtEstado->fetchColumn();
+            if ($estadoAprob !== 'APROBADO') {
+                throw new Exception("Bloqueo Financiero: La Solicitud de Pago debe estar APROBADA para poder emitir el pago. Estado actual: " . ($estadoAprob ?: 'ELABORACION'));
             }
 
             // 1. Registrar movimiento bancario vinculado

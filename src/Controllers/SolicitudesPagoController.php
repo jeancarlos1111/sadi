@@ -11,6 +11,8 @@ use App\Repositories\BancoRepository;
 use App\Repositories\CuentaBancariaRepository;
 use App\Repositories\MovimientoBancarioRepository;
 use App\Repositories\SolicitudPagoRepository;
+use App\Services\FlujoAprobacionService;
+use App\Database\Connection;
 use Exception;
 use PDOException;
 
@@ -198,5 +200,43 @@ class SolicitudesPagoController extends HomeController
             header('Location: ?route=solicitudes_pago/index&error=' . urlencode('Error al desprogramar: ' . $e->getMessage()));
             exit;
         }
+    }
+
+    public function cambiar_estado(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ?route=solicitudes_pago/index');
+            exit;
+        }
+
+        $id = (int)($_POST['id'] ?? 0);
+        $nuevoEstado = $_POST['estado'] ?? '';
+        $comentarios = $_POST['comentarios'] ?? null;
+
+        if ($id > 0 && $nuevoEstado !== '') {
+            try {
+                // El servicio FlujoAprobacionService ya se encarga de verificar los permisos
+                // utilizando Auth::hasPermission() para cada estado específico.
+
+                $flujoService = new FlujoAprobacionService();
+                $idUsuario = (int)($_SESSION['usuario']['id_usuario'] ?? 1);
+
+                $flujoService->cambiarEstado(
+                    'SOLICITUD_PAGO',
+                    $id,
+                    $nuevoEstado,
+                    $comentarios ?? '',
+                    $idUsuario
+                );
+
+                header('Location: ?route=solicitudes_pago/index&success=Estado+actualizado+correctamente.');
+                exit;
+            } catch (\Exception $e) {
+                header('Location: ?route=solicitudes_pago/index&error=' . urlencode('Error al cambiar estado: ' . $e->getMessage()));
+                exit;
+            }
+        }
+        header('Location: ?route=solicitudes_pago/index');
+        exit;
     }
 }

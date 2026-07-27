@@ -18,6 +18,7 @@ readonly class Institucion
         public ?string $base_legal,
         public ?string $codigo_onapre,
         public ?string $logo_path,
+        public bool $marca_agua_activa = true,
         public ?string $creado_en = null,
         public ?string $actualizado_en = null
     ) {}
@@ -36,6 +37,7 @@ readonly class Institucion
             $data['base_legal'] ?? null,
             $data['codigo_onapre'] ?? null,
             $data['logo_path'] ?? null,
+            isset($data['marca_agua_activa']) ? (bool)$data['marca_agua_activa'] : true,
             $data['creado_en'] ?? null,
             $data['actualizado_en'] ?? null
         );
@@ -55,6 +57,7 @@ readonly class Institucion
             'base_legal' => $this->base_legal,
             'codigo_onapre' => $this->codigo_onapre,
             'logo_path' => $this->logo_path,
+            'marca_agua_activa' => $this->marca_agua_activa,
             'creado_en' => $this->creado_en,
             'actualizado_en' => $this->actualizado_en
         ];

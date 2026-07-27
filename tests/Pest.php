@@ -23,6 +23,9 @@ uses()->beforeEach(function () {
     // Inyectar la conexión de testing
     Connection::setInstance($pdo);
 
+    // FIX: Agregar marca_agua_activa para pruebas de institucion
+    $pdo->exec("ALTER TABLE institucion ADD COLUMN IF NOT EXISTS marca_agua_activa BOOLEAN DEFAULT true;");
+
     // Limpiar todas las tablas de negocio antes de cada test para aislamiento
     $pdo->exec("
         TRUNCATE TABLE

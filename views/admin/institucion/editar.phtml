@@ -98,6 +98,13 @@
                             <img id="logo-preview" src="<?= htmlspecialchars($config->logo_path ?? '') ?>" alt="Logo Institución" class="img-thumbnail" style="max-height: 150px; <?= !$config->logo_path ? 'display: none;' : '' ?>">
                         </div>
                     </div>
+
+                    <div class="form-group mt-4">
+                        <div class="custom-control custom-switch custom-switch-off-danger custom-switch-on-success">
+                            <input type="checkbox" class="custom-control-input" id="marca_agua_activa" name="marca_agua_activa" value="1" <?= $config->marca_agua_activa ? 'checked' : '' ?>>
+                            <label class="custom-control-label" for="marca_agua_activa">Imprimir Marca de Agua Oficial ("SADI") en los reportes PDF</label>
+                        </div>
+                    </div>
                 </div>
             </div>
 

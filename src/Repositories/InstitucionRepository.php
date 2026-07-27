@@ -40,10 +40,10 @@ class InstitucionRepository
         $stmt = $this->pdo->prepare("
             INSERT INTO institucion (
                 id_institucion, nombre, rif, direccion, telefono, correo, 
-                maxima_autoridad, cargo_autoridad, base_legal, codigo_onapre, logo_path
+                maxima_autoridad, cargo_autoridad, base_legal, codigo_onapre, logo_path, marca_agua_activa
             ) VALUES (
                 :id_institucion, :nombre, :rif, :direccion, :telefono, :correo, 
-                :maxima_autoridad, :cargo_autoridad, :base_legal, :codigo_onapre, :logo_path
+                :maxima_autoridad, :cargo_autoridad, :base_legal, :codigo_onapre, :logo_path, :marca_agua_activa
             )
             ON CONFLICT (id_institucion) DO UPDATE SET
                 nombre = EXCLUDED.nombre,
@@ -55,7 +55,8 @@ class InstitucionRepository
                 cargo_autoridad = EXCLUDED.cargo_autoridad,
                 base_legal = EXCLUDED.base_legal,
                 codigo_onapre = EXCLUDED.codigo_onapre,
-                logo_path = EXCLUDED.logo_path
+                logo_path = EXCLUDED.logo_path,
+                marca_agua_activa = EXCLUDED.marca_agua_activa
         ");
 
         $stmt->execute([
@@ -69,7 +70,8 @@ class InstitucionRepository
             'cargo_autoridad' => $institucion->cargo_autoridad,
             'base_legal' => $institucion->base_legal,
             'codigo_onapre' => $institucion->codigo_onapre,
-            'logo_path' => $institucion->logo_path
+            'logo_path' => $institucion->logo_path,
+            'marca_agua_activa' => $institucion->marca_agua_activa ? 1 : 0
         ]);
     }
 }

@@ -9,6 +9,8 @@ use App\Auth\Gate;
 use App\Repositories\ArticuloRepository;
 use App\Repositories\OrdenCompraRepository;
 use App\Repositories\ProveedorRepository;
+use App\Services\FlujoAprobacionService;
+use App\Database\Connection;
 use PDOException;
 
 class OrdenesCompraController extends BaseController
@@ -139,6 +141,44 @@ class OrdenesCompraController extends BaseController
                 exit;
             } catch (\Exception $e) {
                 header('Location: ?route=ordenes_compra/index&error=' . urlencode('Error al reversar: ' . $e->getMessage()));
+                exit;
+            }
+        }
+        header('Location: ?route=ordenes_compra/index');
+        exit;
+    }
+
+    public function cambiar_estado(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ?route=ordenes_compra/index');
+            exit;
+        }
+
+        $id = (int)($_POST['id'] ?? 0);
+        $nuevoEstado = $_POST['estado'] ?? '';
+        $comentarios = $_POST['comentarios'] ?? null;
+
+        if ($id > 0 && $nuevoEstado !== '') {
+            try {
+                // El servicio FlujoAprobacionService ya se encarga de verificar los permisos
+                // utilizando Auth::hasPermission() para cada estado específico.
+
+                $flujoService = new FlujoAprobacionService();
+                $idUsuario = (int)($_SESSION['usuario']['id_usuario'] ?? 1); // Fallback a 1 para tests
+
+                $flujoService->cambiarEstado(
+                    'ORDEN_COMPRA',
+                    $id,
+                    $nuevoEstado,
+                    $comentarios ?? '',
+                    $idUsuario
+                );
+
+                header('Location: ?route=ordenes_compra/index&success=Estado+actualizado+correctamente.');
+                exit;
+            } catch (\Exception $e) {
+                header('Location: ?route=ordenes_compra/index&error=' . urlencode('Error al cambiar estado: ' . $e->getMessage()));
                 exit;
             }
         }

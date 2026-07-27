@@ -58,6 +58,7 @@
               <?php 
                 $oc = $data['entity']; 
                 $proveedor = $data['proveedor'];
+                $estado = $data['estado_aprobacion'] ?? 'ELABORACION';
               ?>
               <tr>
                 <td class="text-center align-middle"><strong><?= htmlspecialchars((string)$oc->id) ?></strong></td>
@@ -65,10 +66,20 @@
                 <td class="align-middle"><?= htmlspecialchars($proveedor) ?></td>
                 <td class="align-middle"><?= htmlspecialchars($oc->concepto ?? '') ?></td>
                 <td class="text-center align-middle">
-                  <?php if (isset($oc->contabilizada) && $oc->contabilizada): ?>
-                    <span class="badge badge-success px-2 py-1"><i class="fas fa-check-circle"></i> Contabilizada</span>
-                  <?php else: ?>
-                    <span class="badge badge-warning px-2 py-1"><i class="fas fa-clock"></i> Pendiente</span>
+                  <?php if ($estado === 'ELABORACION'): ?>
+                    <span class="badge badge-secondary px-2 py-1"><i class="fas fa-edit"></i> Elaboración</span>
+                  <?php elseif ($estado === 'REVISION'): ?>
+                    <span class="badge badge-info px-2 py-1"><i class="fas fa-search"></i> En Revisión</span>
+                  <?php elseif ($estado === 'PRE-APROBADO'): ?>
+                    <span class="badge badge-primary px-2 py-1"><i class="fas fa-check"></i> Pre-Aprobado</span>
+                  <?php elseif ($estado === 'APROBADO'): ?>
+                    <?php if (isset($data['contabilizada']) && $data['contabilizada']): ?>
+                      <span class="badge badge-success px-2 py-1"><i class="fas fa-check-double"></i> Contabilizada</span>
+                    <?php else: ?>
+                      <span class="badge badge-success px-2 py-1"><i class="fas fa-check-circle"></i> Aprobado</span>
+                    <?php endif; ?>
+                  <?php elseif ($estado === 'RECHAZADO'): ?>
+                    <span class="badge badge-danger px-2 py-1"><i class="fas fa-times"></i> Rechazado</span>
                   <?php endif; ?>
                 </td>
                 <td class="text-right align-middle font-weight-bold">
@@ -79,29 +90,71 @@
                     <i class="fas fa-file-pdf"></i>
                   </a>
                   
-                  <?php if (!isset($oc->contabilizada) || !$oc->contabilizada): ?>
+                  <?php if ($estado === 'ELABORACION' || $estado === 'RECHAZADO'): ?>
                     <a href="?route=ordenes_compra/form&id=<?= urlencode((string)$oc->id) ?>" class="btn btn-sm btn-info" title="Editar">
                       <i class="fas fa-edit"></i>
                     </a>
-                    <form method="POST" action="?route=ordenes_compra/contabilizar" onsubmit="return confirm('¿Contabilizar esta orden de compra? (Esto compromete Presupuesto).');" style="display:inline;">
+                    <form method="POST" action="?route=ordenes_compra/cambiar_estado" style="display:inline;">
                       <input type="hidden" name="id" value="<?= htmlspecialchars((string)$oc->id) ?>">
-                      <button type="submit" class="btn btn-sm btn-primary" title="Contabilizar">
+                      <input type="hidden" name="estado" value="REVISION">
+                      <button type="submit" class="btn btn-sm btn-warning" title="Enviar a Revisión">
+                        <i class="fas fa-paper-plane"></i>
+                      </button>
+                    </form>
+                    <?php if ($estado === 'ELABORACION'): ?>
+                      <form method="POST" action="?route=ordenes_compra/eliminar" onsubmit="return confirm('¿Seguro de eliminar esta orden?');" style="display:inline;">
+                        <input type="hidden" name="id" value="<?= htmlspecialchars((string)$oc->id) ?>">
+                        <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </form>
+                    <?php endif; ?>
+                  <?php elseif ($estado === 'REVISION'): ?>
+                    <form method="POST" action="?route=ordenes_compra/cambiar_estado" style="display:inline;">
+                      <input type="hidden" name="id" value="<?= htmlspecialchars((string)$oc->id) ?>">
+                      <input type="hidden" name="estado" value="PRE-APROBADO">
+                      <button type="submit" class="btn btn-sm btn-primary" title="Pre-Aprobar (Coordinador)">
                         <i class="fas fa-check"></i>
                       </button>
                     </form>
-                    <form method="POST" action="?route=ordenes_compra/eliminar" onsubmit="return confirm('¿Seguro de eliminar esta orden?');" style="display:inline;">
+                    <form method="POST" action="?route=ordenes_compra/cambiar_estado" style="display:inline;">
                       <input type="hidden" name="id" value="<?= htmlspecialchars((string)$oc->id) ?>">
-                      <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
-                        <i class="fas fa-trash"></i>
+                      <input type="hidden" name="estado" value="RECHAZADO">
+                      <button type="submit" class="btn btn-sm btn-danger" title="Rechazar">
+                        <i class="fas fa-times"></i>
                       </button>
                     </form>
-                  <?php else: ?>
-                    <form method="POST" action="?route=ordenes_compra/reversar" onsubmit="return confirm('¿Reversar Contabilización de la Orden de Compra? (Esto libera Presupuesto).');" style="display:inline;">
+                  <?php elseif ($estado === 'PRE-APROBADO'): ?>
+                    <form method="POST" action="?route=ordenes_compra/cambiar_estado" style="display:inline;">
                       <input type="hidden" name="id" value="<?= htmlspecialchars((string)$oc->id) ?>">
-                      <button type="submit" class="btn btn-sm btn-warning" title="Reversar">
-                        <i class="fas fa-undo"></i>
+                      <input type="hidden" name="estado" value="APROBADO">
+                      <button type="submit" class="btn btn-sm btn-success" title="Aprobar Definitivo (Director)">
+                        <i class="fas fa-check-double"></i>
                       </button>
                     </form>
+                    <form method="POST" action="?route=ordenes_compra/cambiar_estado" style="display:inline;">
+                      <input type="hidden" name="id" value="<?= htmlspecialchars((string)$oc->id) ?>">
+                      <input type="hidden" name="estado" value="RECHAZADO">
+                      <button type="submit" class="btn btn-sm btn-danger" title="Rechazar">
+                        <i class="fas fa-times"></i>
+                      </button>
+                    </form>
+                  <?php elseif ($estado === 'APROBADO'): ?>
+                    <?php if (empty($data['contabilizada'])): ?>
+                      <form method="POST" action="?route=ordenes_compra/contabilizar" onsubmit="return confirm('¿Contabilizar esta orden de compra? (Esto compromete Presupuesto).');" style="display:inline;">
+                        <input type="hidden" name="id" value="<?= htmlspecialchars((string)$oc->id) ?>">
+                        <button type="submit" class="btn btn-sm btn-primary" title="Contabilizar (Comprometer Presupuesto)">
+                          <i class="fas fa-file-invoice-dollar"></i>
+                        </button>
+                      </form>
+                    <?php else: ?>
+                      <form method="POST" action="?route=ordenes_compra/reversar" onsubmit="return confirm('¿Reversar Contabilización de la Orden de Compra? (Esto libera Presupuesto).');" style="display:inline;">
+                        <input type="hidden" name="id" value="<?= htmlspecialchars((string)$oc->id) ?>">
+                        <button type="submit" class="btn btn-sm btn-warning" title="Reversar">
+                          <i class="fas fa-undo"></i>
+                        </button>
+                      </form>
+                    <?php endif; ?>
                   <?php endif; ?>
                 </td>
               </tr>

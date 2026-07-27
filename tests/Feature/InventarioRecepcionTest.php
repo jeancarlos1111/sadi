@@ -23,6 +23,8 @@ class InventarioRecepcionTest extends TestCase
         $this->db->exec("DELETE FROM inventario_movimiento WHERE id_articulo = 9999");
         $this->db->exec("DELETE FROM acta_recepcion_detalle WHERE id_acta_recepcion IN (SELECT id_acta_recepcion FROM acta_recepcion WHERE numero_acta = 'AR-TEST-001')");
         $this->db->exec("DELETE FROM acta_recepcion WHERE numero_acta = 'AR-TEST-001'");
+        $this->db->exec("DELETE FROM pac WHERE id_articulo = 9999");
+        $this->db->exec("DELETE FROM articulo_orden_de_compra WHERE id_articulo = 9999");
         $this->db->exec("DELETE FROM articulo WHERE id_articulo = 9999");
         
         // Crear artículo de prueba
@@ -38,6 +40,8 @@ class InventarioRecepcionTest extends TestCase
         $this->db->exec("DELETE FROM inventario_movimiento WHERE id_articulo = 9999");
         $this->db->exec("DELETE FROM acta_recepcion_detalle WHERE id_acta_recepcion IN (SELECT id_acta_recepcion FROM acta_recepcion WHERE numero_acta = 'AR-TEST-001')");
         $this->db->exec("DELETE FROM acta_recepcion WHERE numero_acta = 'AR-TEST-001'");
+        $this->db->exec("DELETE FROM pac WHERE id_articulo = 9999");
+        $this->db->exec("DELETE FROM articulo_orden_de_compra WHERE id_articulo = 9999");
         $this->db->exec("DELETE FROM articulo WHERE id_articulo = 9999");
     }
 

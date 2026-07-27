@@ -55,6 +55,7 @@ class DocumentalController extends BaseController
         $pdf = new PdfService();
         $pdf->AliasNbPages();
         $pdf->setTitulo("ORDEN DE COMPRA / SERVICIO NRO: OC-". str_pad((string)$id, 4, '0', STR_PAD_LEFT));
+        $pdf->setFirmas(['COMPRADOR(A)', 'COORD. DE COMPRAS', 'DIRECTOR(A) GENERAL']);
         $pdf->AddPage();
 
         $pdf->SetFont('Arial', '', 11);
@@ -81,7 +82,8 @@ class DocumentalController extends BaseController
             ];
         }
 
-        $pdf->TablaElegante($cabecera, $filasTabla);
+        $anchos = [20, 100, 35, 35]; // Total 190
+        $pdf->TablaElegante($cabecera, $filasTabla, $anchos);
 
         // Totales
         $pdf->Ln(5);
@@ -114,6 +116,7 @@ class DocumentalController extends BaseController
         $pdf = new PdfService();
         $pdf->AliasNbPages();
         $pdf->setTitulo("SOLICITUD DE PAGO / COMPROBANTE NRO: SP-". str_pad((string)$id, 4, '0', STR_PAD_LEFT));
+        $pdf->setFirmas(['ANALISTA DE PAGOS', 'COORD. DE TESORERÍA', 'DIR. DE ADMINISTRACIÓN']);
         $pdf->AddPage();
 
         $pdf->SetFont('Arial', '', 11);
@@ -167,6 +170,7 @@ class DocumentalController extends BaseController
         $pdf = new PdfService();
         $pdf->AliasNbPages();
         $pdf->setTitulo("REQUISICION DE BIENES Y SERVICIOS NRO: RB-". str_pad((string)$id, 4, '0', STR_PAD_LEFT));
+        $pdf->setFirmas(['UNIDAD SOLICITANTE', 'COORD. DE COMPRAS']);
         $pdf->AddPage();
 
         $pdf->SetFont('Arial', '', 11);
@@ -186,7 +190,8 @@ class DocumentalController extends BaseController
             ];
         }
 
-        $pdf->TablaElegante($cabecera, $filasTabla);
+        $anchos = [30, 160];
+        $pdf->TablaElegante($cabecera, $filasTabla, $anchos);
         $pdf->Output('I', "Requisicion_Bienes_$id.pdf");
     }
 
@@ -218,6 +223,7 @@ class DocumentalController extends BaseController
         $pdf = new PdfService();
         $pdf->AliasNbPages();
         $pdf->setTitulo("COMPROBANTE DE DIARIO NRO: ". $cd['numero_comprobante']);
+        $pdf->setFirmas(['ANALISTA CONTABLE', 'JEFE DE CONTABILIDAD', 'DIRECTOR DE ADMINISTRACIÓN']);
         $pdf->AddPage();
 
         $pdf->SetFont('Arial', '', 11);
@@ -246,7 +252,8 @@ class DocumentalController extends BaseController
             ];
         }
 
-        $pdf->TablaElegante($cabecera, $filasTabla);
+        $anchos = [30, 100, 30, 30];
+        $pdf->TablaElegante($cabecera, $filasTabla, $anchos);
 
         $pdf->Ln(5);
         $pdf->SetFont('Arial', 'B', 12);
@@ -284,6 +291,7 @@ class DocumentalController extends BaseController
         $pdf = new PdfService();
         $pdf->AliasNbPages();
         $pdf->setTitulo("RECEPCION DE DOCUMENTO (CxP) NRO: ". $doc['nro_documento_d']);
+        $pdf->setFirmas(['ANALISTA CxP', 'COORD. CTAS POR PAGAR']);
         $pdf->AddPage();
 
         $pdf->SetFont('Arial', '', 11);
@@ -305,7 +313,8 @@ class DocumentalController extends BaseController
             number_format($doc['monto_total_d'], 2, ',', '.'),
         ]];
 
-        $pdf->TablaElegante($cabecera, $filasTabla);
+        $anchos = [63, 63, 64];
+        $pdf->TablaElegante($cabecera, $filasTabla, $anchos);
         $pdf->Output('I', "Documento_CxP_".$doc['id_documento'].".pdf");
     }
 
@@ -342,6 +351,7 @@ class DocumentalController extends BaseController
         $pdf = new PdfService();
         $pdf->AliasNbPages();
         $pdf->setTitulo("ORDEN DE SERVICIO NRO: OS-". str_pad((string)$id, 4, '0', STR_PAD_LEFT));
+        $pdf->setFirmas(['ANALISTA DE CONTRATOS', 'COORD. DE COMPRAS', 'DIRECTOR(A) GENERAL']);
         $pdf->AddPage();
 
         $pdf->SetFont('Arial', '', 11);
@@ -367,7 +377,8 @@ class DocumentalController extends BaseController
             ];
         }
 
-        $pdf->TablaElegante($cabecera, $filasTabla);
+        $anchos = [20, 100, 35, 35];
+        $pdf->TablaElegante($cabecera, $filasTabla, $anchos);
 
         $pdf->Ln(5);
         $pdf->SetFont('Arial', 'B', 12);
@@ -419,6 +430,7 @@ class DocumentalController extends BaseController
         $pdf = new PdfService();
         $pdf->AliasNbPages();
         $pdf->setTitulo("REQUISICION DE SERVICIOS NRO: RS-". str_pad((string)$id, 4, '0', STR_PAD_LEFT));
+        $pdf->setFirmas(['UNIDAD SOLICITANTE', 'COORD. DE COMPRAS']);
         $pdf->AddPage();
 
         $pdf->SetFont('Arial', '', 11);
@@ -438,7 +450,8 @@ class DocumentalController extends BaseController
             ];
         }
 
-        $pdf->TablaElegante($cabecera, $filasTabla);
+        $anchos = [30, 160];
+        $pdf->TablaElegante($cabecera, $filasTabla, $anchos);
         $pdf->Output('I', "Requisicion_Servicios_$id.pdf");
     }
 
@@ -470,6 +483,7 @@ class DocumentalController extends BaseController
         $pdf = new PdfService();
         $pdf->AliasNbPages();
         $pdf->setTitulo("COMPROBANTE DE RETENCION DE " . $comp['tipo_retencion'] . " NRO: " . $comp['numero_comprobante']);
+        $pdf->setFirmas(['ANALISTA DE IMPUESTOS', 'COORD. DE CONTABILIDAD', 'DIR. DE ADMINISTRACIÓN']);
         $pdf->AddPage();
 
         $pdf->SetFont('Arial', '', 11);
@@ -505,7 +519,8 @@ class DocumentalController extends BaseController
             $montoRet,
         ]];
 
-        $pdf->TablaElegante($cabecera, $filasTabla);
+        $anchos = [25, 25, 35, 35, 35, 35];
+        $pdf->TablaElegante($cabecera, $filasTabla, $anchos);
 
         $pdf->Ln(30);
         $pdf->Cell(0, 6, '_____________________________________', 0, 1, 'C');
